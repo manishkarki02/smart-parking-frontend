@@ -1,4 +1,5 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate, redirect } from "@tanstack/react-router";
+import { useAuthStore } from "@/store/auth-store";
 import { useQuery } from "@tanstack/react-query";
 import { getAllSlots } from "@/features/parking/services/parking.service";
 import { ParkingList } from "@/features/parking/components/ParkingList";
@@ -8,6 +9,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { ParkingLocation } from "@/features/parking/types/parking.types";
 
 export const Route = createFileRoute("/_app/parking")({
+  beforeLoad: () => {
+    if (useAuthStore.getState().user?.role !== "DRIVER") {
+      throw redirect({ to: "/" });
+    }
+  },
   component: ParkingPage,
 });
 

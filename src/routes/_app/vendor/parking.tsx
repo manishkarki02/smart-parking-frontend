@@ -1,4 +1,5 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, redirect } from "@tanstack/react-router";
+import { useAuthStore } from "@/store/auth-store";
 import { useQuery } from "@tanstack/react-query";
 import { getMyParkingLocations } from "@/features/vendor/services/vendor.service";
 import { VendorParkingCard } from "@/features/vendor/components/VendorParkingCard";
@@ -9,7 +10,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export const Route = createFileRoute("/_app/vendor/parking")({
   beforeLoad: () => {
-    // Role guard disabled for UI testing
+    if (useAuthStore.getState().user?.role !== "VENDOR") {
+      throw redirect({ to: "/" });
+    }
   },
   component: VendorParkingPage,
 });

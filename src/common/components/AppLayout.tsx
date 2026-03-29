@@ -73,7 +73,9 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  const filteredNavItems = navItems; // Show all for UI testing
+  const filteredNavItems = user 
+    ? navItems.filter((item) => item.roles.includes(user.role))
+    : [];
 
   const handleLogout = () => {
     logout();
@@ -152,21 +154,21 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
       {/* Main content */}
       <div className="flex flex-1 flex-col overflow-hidden">
         {/* Mobile header */}
-        <header className="flex h-16 items-center border-b px-4 lg:hidden">
+        <header className="flex h-16 items-center border-b border-border bg-card px-4 lg:hidden shadow-sm">
           <Button
             variant="ghost"
             size="icon"
             onClick={() => setSidebarOpen(!sidebarOpen)}
           >
             {sidebarOpen ? (
-              <X className="h-5 w-5" />
+              <X className="h-5 w-5 text-muted-foreground" />
             ) : (
-              <Menu className="h-5 w-5" />
+              <Menu className="h-5 w-5 text-muted-foreground" />
             )}
           </Button>
           <div className="ml-3 flex items-center gap-2">
-            <Car className="h-5 w-5 text-primary" />
-            <span className="font-semibold">Smart Parking</span>
+            <Car className="h-6 w-6 text-primary" />
+            <span className="text-lg font-semibold text-foreground">Smart Parking</span>
           </div>
         </header>
 

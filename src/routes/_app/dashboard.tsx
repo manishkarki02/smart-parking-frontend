@@ -1,4 +1,5 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, redirect } from "@tanstack/react-router";
+import { useAuthStore } from "@/store/auth-store";
 import { useQuery } from "@tanstack/react-query";
 import { getDashboard } from "@/features/admin/services/admin.service";
 import { StatsCard } from "@/features/admin/components/StatsCard";
@@ -8,7 +9,9 @@ import { CalendarCheck, Building2, Users } from "lucide-react";
 
 export const Route = createFileRoute("/_app/dashboard")({
   beforeLoad: () => {
-    // Role guard disabled for UI testing
+    if (useAuthStore.getState().user?.role !== "ADMIN") {
+      throw redirect({ to: "/" });
+    }
   },
   component: AdminDashboardPage,
 });

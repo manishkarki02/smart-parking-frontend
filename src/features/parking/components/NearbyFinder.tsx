@@ -27,7 +27,7 @@ export function NearbyFinder() {
       coords?.lng ?? 0,
       5
     ),
-    queryFn: () => getThamelNearby(), // Mocked to zero args
+    queryFn: () => getThamelNearby(coords!.lat, coords!.lng),
     enabled: !!coords,
   });
 

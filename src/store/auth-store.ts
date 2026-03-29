@@ -18,12 +18,8 @@ interface AuthState {
 export const useAuthStore = create<AuthState>()(
   persist(
     (set, get) => ({
-      token: "mock-token",
-      user: {
-        name: "Admin User",
-        email: "admin@smartparking.com",
-        role: "ADMIN"
-      },
+      token: null,
+      user: null,
 
       setAuth: (token, user) => set({ token, user }),
 

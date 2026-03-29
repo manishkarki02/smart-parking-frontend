@@ -1,20 +1,15 @@
-import { mockBookings } from "@/mocks/data";
+import { api } from "@/lib/api";
+import type { ApiResponse } from "@/common/types/api.types";
 import type { BookingRequest, BookingResponse } from "../types/booking.types";
 
 export async function createBooking(
-  _data: BookingRequest
+  data: BookingRequest
 ): Promise<BookingResponse> {
-  return {
-    bookingId: Date.now(),
-    parkingName: "Mock Location",
-    startTime: _data.startTime,
-    endTime: _data.endTime,
-    status: "CONFIRMED",
-    totalAmount: 150,
-    message: "Booking successful",
-  };
+  const response = await api.post<ApiResponse<BookingResponse>>("/booking/create", data);
+  return response.data.data;
 }
 
 export async function getMyBookings(): Promise<BookingResponse[]> {
-  return mockBookings;
+  const response = await api.get<ApiResponse<BookingResponse[]>>("/booking/my");
+  return response.data.data ?? [];
 }

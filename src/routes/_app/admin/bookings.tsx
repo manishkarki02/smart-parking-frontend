@@ -1,4 +1,5 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, redirect } from "@tanstack/react-router";
+import { useAuthStore } from "@/store/auth-store";
 import { useQuery } from "@tanstack/react-query";
 import { getAllBookings } from "@/features/admin/services/admin.service";
 import { BookingsTable } from "@/features/admin/components/BookingsTable";
@@ -7,7 +8,9 @@ import { queryKeys } from "@/config/query-keys";
 
 export const Route = createFileRoute("/_app/admin/bookings")({
   beforeLoad: () => {
-    // Role guard disabled for UI testing
+    if (useAuthStore.getState().user?.role !== "ADMIN") {
+      throw redirect({ to: "/" });
+    }
   },
   component: AdminBookingsPage,
 });

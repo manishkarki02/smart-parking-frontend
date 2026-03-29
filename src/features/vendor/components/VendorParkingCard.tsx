@@ -41,9 +41,8 @@ export function VendorParkingCard({ location }: VendorParkingCardProps) {
           </div>
 
           <Button
-            variant="outline"
             size="sm"
-            className="w-full"
+            className="w-full mt-4"
             onClick={() => setDialogOpen(true)}
           >
             <Settings2 className="mr-2 h-4 w-4" />
