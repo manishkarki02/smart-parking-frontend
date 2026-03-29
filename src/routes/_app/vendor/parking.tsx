@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { createFileRoute, redirect } from "@tanstack/react-router";
 import { useAuthStore } from "@/store/auth-store";
 import { useQuery } from "@tanstack/react-query";
@@ -6,7 +7,18 @@ import { VendorParkingCard } from "@/features/vendor/components/VendorParkingCar
 import { AddParkingForm } from "@/features/vendor/components/AddParkingForm";
 import { LoadingSpinner } from "@/common/components/LoadingSpinner";
 import { queryKeys } from "@/config/query-keys";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
+import { Plus } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { PageHeader } from "@/common/components/PageHeader";
+import { Card } from "@/components/ui/card";
 
 export const Route = createFileRoute("/_app/vendor/parking")({
   beforeLoad: () => {
@@ -18,6 +30,8 @@ export const Route = createFileRoute("/_app/vendor/parking")({
 });
 
 function VendorParkingPage() {
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+
   const { data: locations = [], isLoading } = useQuery({
     queryKey: queryKeys.vendor.myLocations,
     queryFn: getMyParkingLocations,
@@ -25,42 +39,50 @@ function VendorParkingPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold">My Parking Locations</h1>
-        <p className="text-muted-foreground mt-1">
-          Manage your parking locations and available slots
-        </p>
-      </div>
+      <PageHeader
+        title="My Parking Locations"
+        description="Manage your parking locations and available slots"
+        action={
+          <Dialog open={isAddModalOpen} onOpenChange={setIsAddModalOpen}>
+            <DialogTrigger asChild>
+              <Button>
+                <Plus className="mr-2 h-4 w-4" />
+                Add New Location
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[425px]">
+              <DialogHeader>
+                <DialogTitle>Add New Parking Location</DialogTitle>
+                <DialogDescription>
+                  Register a new parking spot in the system
+                </DialogDescription>
+              </DialogHeader>
+              <div className="py-4">
+                <AddParkingForm onSuccess={() => setIsAddModalOpen(false)} />
+              </div>
+            </DialogContent>
+          </Dialog>
+        }
+      />
 
-      <Tabs defaultValue="locations" className="w-full">
-        <TabsList>
-          <TabsTrigger value="locations">My Locations</TabsTrigger>
-          <TabsTrigger value="add">Add New</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="locations" className="mt-4">
-          {isLoading ? (
-            <LoadingSpinner />
-          ) : locations.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
-              <p className="text-lg font-medium">No parking locations yet</p>
-              <p className="text-sm">
-                Add your first parking location to get started
-              </p>
-            </div>
-          ) : (
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {locations.map((location) => (
-                <VendorParkingCard key={location.id} location={location} />
-              ))}
-            </div>
-          )}
-        </TabsContent>
-
-        <TabsContent value="add" className="mt-4">
-          <AddParkingForm />
-        </TabsContent>
-      </Tabs>
+      <Card className="rounded-none sm:rounded-lg p-6 overflow-hidden">
+        {isLoading ? (
+          <LoadingSpinner />
+        ) : locations.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
+            <p className="text-lg font-medium">No parking locations yet</p>
+            <p className="text-sm">
+              Add your first parking location to get started
+            </p>
+          </div>
+        ) : (
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {locations.map((location) => (
+              <VendorParkingCard key={location.id} location={location} />
+            ))}
+          </div>
+        )}
+      </Card>
     </div>
   );
 }

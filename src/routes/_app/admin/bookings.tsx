@@ -5,6 +5,8 @@ import { getAllBookings } from "@/features/admin/services/admin.service";
 import { BookingsTable } from "@/features/admin/components/BookingsTable";
 import { LoadingSpinner } from "@/common/components/LoadingSpinner";
 import { queryKeys } from "@/config/query-keys";
+import { PageHeader } from "@/common/components/PageHeader";
+import { Card } from "@/components/ui/card";
 
 export const Route = createFileRoute("/_app/admin/bookings")({
   beforeLoad: () => {
@@ -23,14 +25,14 @@ function AdminBookingsPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold">All Bookings</h1>
-        <p className="text-muted-foreground mt-1">
-          View all bookings across the system
-        </p>
-      </div>
+      <PageHeader
+        title="All Bookings"
+        description="View all bookings across the system"
+      />
 
-      {isLoading ? <LoadingSpinner /> : <BookingsTable bookings={bookings} />}
+      <Card className="rounded-none sm:rounded-lg overflow-hidden">
+        {isLoading ? <LoadingSpinner /> : <BookingsTable bookings={bookings} />}
+      </Card>
     </div>
   );
 }

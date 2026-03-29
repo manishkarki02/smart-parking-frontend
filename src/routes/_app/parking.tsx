@@ -7,6 +7,8 @@ import { NearbyFinder } from "@/features/parking/components/NearbyFinder";
 import { queryKeys } from "@/config/query-keys";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { ParkingLocation } from "@/features/parking/types/parking.types";
+import { PageHeader } from "@/common/components/PageHeader";
+import { Card } from "@/components/ui/card";
 
 export const Route = createFileRoute("/_app/parking")({
   beforeLoad: () => {
@@ -34,31 +36,31 @@ function ParkingPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold">Find Parking</h1>
-        <p className="text-muted-foreground mt-1">
-          Browse available parking spots or find the nearest one to you
-        </p>
-      </div>
+      <PageHeader
+        title="Find Parking"
+        description="Browse available parking spots or find the nearest one to you"
+      />
 
-      <Tabs defaultValue="all" className="w-full">
-        <TabsList>
-          <TabsTrigger value="all">All Available</TabsTrigger>
-          <TabsTrigger value="nearby">Nearby</TabsTrigger>
-        </TabsList>
+      <Card className="rounded-none sm:rounded-lg p-6 overflow-hidden">
+        <Tabs defaultValue="all" className="w-full">
+          <TabsList>
+            <TabsTrigger value="all">All Available</TabsTrigger>
+            <TabsTrigger value="nearby">Nearby</TabsTrigger>
+          </TabsList>
 
-        <TabsContent value="all" className="mt-4">
-          <ParkingList
-            locations={allSlots}
-            isLoading={isLoading}
-            onBook={handleBook}
-          />
-        </TabsContent>
+          <TabsContent value="all" className="mt-4">
+            <ParkingList
+              locations={allSlots}
+              isLoading={isLoading}
+              onBook={handleBook}
+            />
+          </TabsContent>
 
-        <TabsContent value="nearby" className="mt-4">
-          <NearbyFinder />
-        </TabsContent>
-      </Tabs>
+          <TabsContent value="nearby" className="mt-4">
+            <NearbyFinder />
+          </TabsContent>
+        </Tabs>
+      </Card>
     </div>
   );
 }
