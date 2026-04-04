@@ -57,7 +57,7 @@ export function LoginForm() {
           navigate({ to: "/vendor/parking" });
           break;
         default:
-          navigate({ to: "/parking" });
+          navigate({ to: "/" });
       }
     } catch (error) {
       const message =

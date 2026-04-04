@@ -27,7 +27,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Loader2 } from "lucide-react";
+import { Loader2, Car } from "lucide-react";
 import { AxiosError } from "axios";
 
 interface BookingFormProps {
@@ -83,10 +83,15 @@ export function BookingForm({ preselectedParkingId }: BookingFormProps) {
   };
 
   return (
-    <Card className="max-w-lg mx-auto">
-      <CardHeader>
-        <CardTitle>Book a Parking Spot</CardTitle>
-        <CardDescription>
+    <Card className="max-w-lg mx-auto w-full bg-card/60 backdrop-blur-sm border shadow-xl sm:rounded-2xl">
+      <CardHeader className="text-center pb-8 border-b bg-muted/20 mb-6">
+        <div className="flex justify-center mb-4">
+          <div className="bg-primary/10 p-3 rounded-full text-primary shadow-inner">
+             <Car className="w-8 h-8" />
+          </div>
+        </div>
+        <CardTitle className="text-2xl font-bold bg-gradient-to-r from-primary to-green-600 bg-clip-text text-transparent">Book Your Parking</CardTitle>
+        <CardDescription className="text-base mt-2">
           Select a location and choose your parking time
         </CardDescription>
       </CardHeader>
