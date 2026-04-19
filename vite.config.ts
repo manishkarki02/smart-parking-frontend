@@ -24,11 +24,20 @@ export default defineConfig({
     },
   },
   server: {
+    // Bind to all interfaces so the container port is reachable from the host
+    host: "0.0.0.0",
+    port: 5173,
+    // When running inside Docker the backend is at the service name, not localhost
     proxy: {
       "/api": {
-        target: "http://localhost:8080",
+        target: process.env.VITE_API_TARGET ?? "http://localhost:8080",
         changeOrigin: true,
       },
+    },
+    // Polling-based file watching — required for bind-mounted volumes on macOS / Windows
+    watch: {
+      usePolling: true,
+      interval: 300,
     },
   },
 });

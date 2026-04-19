@@ -5,3 +5,4 @@ dist/
 .vscode/
 .tanstack/
 *.md
+Dockerfile.dev
