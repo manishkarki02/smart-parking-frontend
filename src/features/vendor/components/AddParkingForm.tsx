@@ -11,9 +11,10 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-
 import { Loader2 } from "lucide-react";
 import { AxiosError } from "axios";
+import { useState } from "react";
+import { LocationPickerMap, type PickerLocation } from "./LocationPickerMap";
 
 interface AddParkingFormProps {
   onSuccess?: () => void;
@@ -22,10 +23,13 @@ interface AddParkingFormProps {
 export function AddParkingForm({ onSuccess }: AddParkingFormProps) {
   const queryClient = useQueryClient();
 
+  const [pickedLocation, setPickedLocation] = useState<PickerLocation | null>(null);
+
   const {
     register,
     handleSubmit,
     reset,
+    setValue,
     formState: { errors },
   } = useForm<AddParkingFormValues>({
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -45,6 +49,7 @@ export function AddParkingForm({ onSuccess }: AddParkingFormProps) {
       toast.success("Parking location added successfully!");
       queryClient.invalidateQueries({ queryKey: queryKeys.vendor.myLocations });
       reset();
+      setPickedLocation(null);
       onSuccess?.();
     },
     onError: (error) => {
@@ -56,12 +61,22 @@ export function AddParkingForm({ onSuccess }: AddParkingFormProps) {
     },
   });
 
+  const handleMapPick = (coords: PickerLocation) => {
+    setPickedLocation(coords);
+    setValue("latitude", coords.lat, { shouldValidate: true });
+    setValue("longitude", coords.lng, { shouldValidate: true });
+    if (coords.address) {
+      setValue("address", coords.address, { shouldValidate: true });
+    }
+  };
+
   const onSubmit = (data: AddParkingFormValues) => {
     mutation.mutate(data);
   };
 
   return (
     <form onSubmit={handleSubmit(onSubmit as any)} className="space-y-4">
+      {/* Name */}
       <div className="space-y-2">
         <Label htmlFor="name">Location Name</Label>
         <Input
@@ -74,54 +89,19 @@ export function AddParkingForm({ onSuccess }: AddParkingFormProps) {
         )}
       </div>
 
+      {/* Map Location Picker */}
       <div className="space-y-2">
-        <Label htmlFor="address">Address</Label>
-        <Input
-          id="address"
-          placeholder="e.g. Thamel, Kathmandu"
-          {...register("address")}
-        />
-        {errors.address && (
+        <Label>Pick Location on Map</Label>
+        <LocationPickerMap value={pickedLocation} onChange={handleMapPick} />
+        {/* Show error if lat/lng/address not picked */}
+        {(errors.latitude || errors.longitude || errors.address) && !pickedLocation && (
           <p className="text-sm text-destructive">
-            {errors.address.message}
+            Please click on the map to automatically set the location and address.
           </p>
         )}
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Label htmlFor="latitude">Latitude</Label>
-          <Input
-            id="latitude"
-            type="number"
-            step="any"
-            placeholder="27.7172"
-            {...register("latitude")}
-          />
-          {errors.latitude && (
-            <p className="text-sm text-destructive">
-              {errors.latitude.message}
-            </p>
-          )}
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="longitude">Longitude</Label>
-          <Input
-            id="longitude"
-            type="number"
-            step="any"
-            placeholder="85.3240"
-            {...register("longitude")}
-          />
-          {errors.longitude && (
-            <p className="text-sm text-destructive">
-              {errors.longitude.message}
-            </p>
-          )}
-        </div>
-      </div>
-
+      {/* Total Slots */}
       <div className="space-y-2">
         <Label htmlFor="totalSlots">Total Slots</Label>
         <Input
@@ -137,11 +117,7 @@ export function AddParkingForm({ onSuccess }: AddParkingFormProps) {
         )}
       </div>
 
-      <Button
-        type="submit"
-        className="w-full"
-        disabled={mutation.isPending}
-      >
+      <Button type="submit" className="w-full" disabled={mutation.isPending}>
         {mutation.isPending && (
           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
         )}

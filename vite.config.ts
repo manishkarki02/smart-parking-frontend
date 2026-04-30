@@ -3,7 +3,9 @@ import react from "@vitejs/plugin-react";
 import path from "path";
 import tailwindcss from "@tailwindcss/vite";
 import { tanstackRouter } from "@tanstack/router-plugin/vite";
+import dns from "dns";
 
+dns.setDefaultResultOrder("ipv4first");
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [
@@ -30,7 +32,7 @@ export default defineConfig({
     // When running inside Docker the backend is at the service name, not localhost
     proxy: {
       "/api": {
-        target: process.env.VITE_API_TARGET ?? "http://localhost:8080",
+        target: process.env.VITE_API_TARGET || "http://localhost:8080",
         changeOrigin: true,
       },
     },

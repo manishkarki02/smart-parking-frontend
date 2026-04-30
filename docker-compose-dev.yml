@@ -1,0 +1,19 @@
+services:
+  frontend-app:
+    env_file: ".env"
+    build:
+      context: .
+      target: development
+      dockerfile: Dockerfile
+    ports:
+      - "5173:5173"
+    volumes:
+      - ".:/app"
+      - "/app/node_modules"
+    networks:
+      - smart-parking-dev-network
+
+networks:
+  smart-parking-dev-network:
+    external: true
+

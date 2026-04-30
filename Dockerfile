@@ -1,35 +1,41 @@
-# ─── Stage 1: Build ──────────────────────────────────────────────────────────
-FROM node:22-alpine AS builder
-
-# Enable corepack so pnpm is available
-RUN corepack enable && corepack prepare pnpm@latest --activate
-
+FROM node:24-slim AS base
 WORKDIR /app
 
-# Copy dependency manifests first for layer caching
-COPY package.json pnpm-lock.yaml ./
+RUN corepack enable
 
-# Install all dependencies (including devDeps for the build)
+# --- Dependencies Stage ---
+FROM base AS deps
+COPY package.json  pnpm-lock.yaml ./
 RUN pnpm install --frozen-lockfile
 
-# Copy the rest of the source code
+# -- Build the app --
+FROM deps AS build
+COPY . .
+RUN \
+  if [ -f yarn.lock ]; then yarn build; \
+  elif [ -f package-lock.json ]; then npm run build; \
+  elif [ -f pnpm-lock.yaml ]; then pnpm build; \
+  else pnpm build; \
+  fi
+
+# --- Development Stage ---
+FROM base AS development
+COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-# Build the Vite production bundle
-RUN pnpm build
+EXPOSE 5173
+CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"]
 
-# ─── Stage 2: Serve ──────────────────────────────────────────────────────────
-FROM nginx:1.27-alpine AS runtime
+# --- Production Stage ---
+FROM nginx:alpine-slim AS production
+COPY ./infra/nginx.conf /etc/nginx/nginx.conf
+COPY --from=build /app/dist /usr/share/nginx/html
 
-# Remove default nginx content
-RUN rm -rf /usr/share/nginx/html/*
+COPY ./entrypoint.sh .
+RUN chmod +x entrypoint.sh
 
-# Copy built assets from builder stage
-COPY --from=builder /app/dist /usr/share/nginx/html
-
-# Copy nginx config (handles SPA routing + /api proxy)
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+ENTRYPOINT ["./entrypoint.sh"]
 
 EXPOSE 80
-
 CMD ["nginx", "-g", "daemon off;"]
+
