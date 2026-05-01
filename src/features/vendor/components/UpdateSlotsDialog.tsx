@@ -1,8 +1,7 @@
 import { useState } from "react";
 import { updateAvailableSlots } from "../services/vendor.service";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { queryKeys } from "@/config/query-keys";
-import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -15,6 +14,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Loader2 } from "lucide-react";
+import useCustomMutation from "@/common/hooks/useCustomMutation";
 
 interface UpdateSlotsDialogProps {
   open: boolean;
@@ -34,15 +34,14 @@ export function UpdateSlotsDialog({
   const [newSlots, setNewSlots] = useState(currentSlots);
   const queryClient = useQueryClient();
 
-  const mutation = useMutation({
-    mutationFn: () => updateAvailableSlots(parkingId, newSlots),
+  const mutation = useCustomMutation({
+    api: ({ parkingId, newSlots }: { parkingId: number; newSlots: number }) =>
+      updateAvailableSlots(parkingId, newSlots),
+    success: "Slots updated successfully!",
+    error: "Failed to update slots",
     onSuccess: () => {
-      toast.success("Slots updated successfully!");
       queryClient.invalidateQueries({ queryKey: queryKeys.vendor.myLocations });
       onOpenChange(false);
-    },
-    onError: () => {
-      toast.error("Failed to update slots");
     },
   });
 
@@ -73,7 +72,7 @@ export function UpdateSlotsDialog({
             Cancel
           </Button>
           <Button
-            onClick={() => mutation.mutate()}
+            onClick={() => mutation.mutateAsync({ parkingId, newSlots })}
             disabled={mutation.isPending}
           >
             {mutation.isPending && (

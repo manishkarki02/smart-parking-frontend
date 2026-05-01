@@ -5,7 +5,7 @@ import {
   type AddParkingFormValues,
 } from "../validation/vendor.schema";
 import { addParkingLocation } from "../services/vendor.service";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { queryKeys } from "@/config/query-keys";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -15,6 +15,7 @@ import { Loader2 } from "lucide-react";
 import { AxiosError } from "axios";
 import { useState } from "react";
 import { LocationPickerMap, type PickerLocation } from "./LocationPickerMap";
+import useCustomMutation from "@/common/hooks/useCustomMutation";
 
 interface AddParkingFormProps {
   onSuccess?: () => void;
@@ -23,7 +24,9 @@ interface AddParkingFormProps {
 export function AddParkingForm({ onSuccess }: AddParkingFormProps) {
   const queryClient = useQueryClient();
 
-  const [pickedLocation, setPickedLocation] = useState<PickerLocation | null>(null);
+  const [pickedLocation, setPickedLocation] = useState<PickerLocation | null>(
+    null,
+  );
 
   const {
     register,
@@ -32,7 +35,6 @@ export function AddParkingForm({ onSuccess }: AddParkingFormProps) {
     setValue,
     formState: { errors },
   } = useForm<AddParkingFormValues>({
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     resolver: zodResolver(addParkingSchema as any),
     defaultValues: {
       name: "",
@@ -43,21 +45,20 @@ export function AddParkingForm({ onSuccess }: AddParkingFormProps) {
     },
   });
 
-  const mutation = useMutation({
-    mutationFn: addParkingLocation,
+  const mutation = useCustomMutation({
+    api: addParkingLocation,
+    success: "Parking location added successfully!",
+    error: "Failed to add parking location. Please try again.",
     onSuccess: () => {
-      toast.success("Parking location added successfully!");
       queryClient.invalidateQueries({ queryKey: queryKeys.vendor.myLocations });
       reset();
       setPickedLocation(null);
       onSuccess?.();
     },
     onError: (error) => {
-      const message =
-        error instanceof AxiosError
-          ? error.response?.data?.message || "Failed to add parking location"
-          : "Failed to add parking location";
-      toast.error(message);
+      if (error instanceof AxiosError) {
+        toast.error(error.response?.data?.message);
+      }
     },
   });
 
@@ -70,8 +71,8 @@ export function AddParkingForm({ onSuccess }: AddParkingFormProps) {
     }
   };
 
-  const onSubmit = (data: AddParkingFormValues) => {
-    mutation.mutate(data);
+  const onSubmit = async (data: AddParkingFormValues) => {
+    await mutation.mutateAsync(data);
   };
 
   return (
@@ -94,11 +95,13 @@ export function AddParkingForm({ onSuccess }: AddParkingFormProps) {
         <Label>Pick Location on Map</Label>
         <LocationPickerMap value={pickedLocation} onChange={handleMapPick} />
         {/* Show error if lat/lng/address not picked */}
-        {(errors.latitude || errors.longitude || errors.address) && !pickedLocation && (
-          <p className="text-sm text-destructive">
-            Please click on the map to automatically set the location and address.
-          </p>
-        )}
+        {(errors.latitude || errors.longitude || errors.address) &&
+          !pickedLocation && (
+            <p className="text-sm text-destructive">
+              Please click on the map to automatically set the location and
+              address.
+            </p>
+          )}
       </div>
 
       {/* Total Slots */}
