@@ -6,7 +6,7 @@ import type { ParkingLocationRequest } from "../types/vendor.types";
 export async function addParkingLocation(
   data: ParkingLocationRequest
 ): Promise<ParkingLocation> {
-  const response = await api.post<ApiResponse<ParkingLocation>>("/vendor/parking", data);
+  const response = await api.post<ApiResponse<ParkingLocation>>("/vendor/addparking", data);
   return response.data.data;
 }
 
