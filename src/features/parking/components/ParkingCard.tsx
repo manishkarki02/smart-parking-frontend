@@ -15,7 +15,6 @@ interface ParkingCardProps {
 
 export function ParkingCard({ location, onBook }: ParkingCardProps) {
   const isAvailable = location.availableSlots > 0;
-
   return (
     <Card 
       className={`relative overflow-hidden hover:-translate-y-1 hover:shadow-lg transition-all duration-300 bg-white border-border`}
@@ -49,12 +48,12 @@ export function ParkingCard({ location, onBook }: ParkingCardProps) {
       <CardContent className="space-y-4 px-5 pb-5">
         <div className="space-y-2.5">
           <div className="flex items-start gap-3 text-sm text-muted-foreground">
-            <MapPin className="h-4 w-4 mt-0.5 flex-shrink-0 text-muted-foreground/70" />
+            <MapPin className="h-4 w-4 mt-0.5 shrink-0 text-muted-foreground/70" />
             <span className="leading-snug">{location.address}</span>
           </div>
 
           <div className="flex items-center gap-3 text-sm text-muted-foreground">
-            <Car className="h-4 w-4 flex-shrink-0 text-muted-foreground/70" />
+            <Car className="h-4 w-4 shrink-0 text-muted-foreground/70" />
             <span>Managed by <span className="font-medium text-foreground">{location.vendorName}</span></span>
           </div>
 

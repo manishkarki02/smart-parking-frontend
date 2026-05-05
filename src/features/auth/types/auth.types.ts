@@ -1,3 +1,7 @@
+import type { Roles } from "@/config/enums";
+
+export type ROLES = (typeof Roles)[keyof typeof Roles];
+export type USER_ROLES = ROLES | "ADMIN";
 export interface LoginRequest {
   email: string;
   password: string;
@@ -8,18 +12,18 @@ export interface RegisterRequest {
   email: string;
   password: string;
   phone: string;
-  role: "DRIVER" | "VENDOR";
+  role: ROLES;
 }
 
 export interface AuthUser {
   name: string;
   email: string;
-  role: "DRIVER" | "VENDOR" | "ADMIN";
+  role: USER_ROLES;
 }
 
 export interface AuthResponse {
   token: string;
   name: string;
   email: string;
-  role: "DRIVER" | "VENDOR" | "ADMIN";
+  role: USER_ROLES;
 }

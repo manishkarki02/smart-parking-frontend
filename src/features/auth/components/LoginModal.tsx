@@ -12,13 +12,13 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Loader2, Car } from "lucide-react";
-import { toast } from "sonner";
-import { AxiosError } from "axios";
-import { loginSchema, type LoginFormValues } from "@/features/auth/validation/auth.schema";
-import { loginUser } from "@/features/auth/services/auth.service";
-import { useAuthStore } from "@/store/auth-store";
-import { Link, useNavigate } from "@tanstack/react-router";
+import { Loader2, Car, Eye, EyeOff } from "lucide-react";
+import {
+  loginSchema,
+  type LoginFormValues,
+} from "@/features/auth/validation/auth.schema";
+import { Link } from "@tanstack/react-router";
+import useLoginMutation from "../hooks/useLoginMutation";
 
 interface LoginModalProps {
   children?: React.ReactNode;
@@ -27,19 +27,21 @@ interface LoginModalProps {
   onSuccess?: () => void;
 }
 
-export function LoginModal({ children, open, onOpenChange, onSuccess }: LoginModalProps) {
-  const [isLoading, setIsLoading] = useState(false);
-  const { setAuth } = useAuthStore();
-  const navigate = useNavigate();
+export function LoginModal({
+  children,
+  open,
+  onOpenChange,
+  onSuccess,
+}: LoginModalProps) {
+  const [showPassword, setShowPassword] = useState(false);
+  const loginMutation = useLoginMutation({ onSuccess, onOpenChange });
 
   const {
     register,
     handleSubmit,
     formState: { errors },
-    reset,
   } = useForm<LoginFormValues>({
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    resolver: zodResolver(loginSchema as any),
+    resolver: zodResolver(loginSchema),
     defaultValues: {
       email: "",
       password: "",
@@ -47,35 +49,7 @@ export function LoginModal({ children, open, onOpenChange, onSuccess }: LoginMod
   });
 
   const onSubmit = async (data: LoginFormValues) => {
-    setIsLoading(true);
-    try {
-      const response = await loginUser(data);
-      setAuth(response.token, {
-        name: response.name,
-        email: response.email,
-        role: response.role,
-      });
-      toast.success("Login successful!");
-      reset();
-      
-      if (response.role === "ADMIN") {
-        navigate({ to: "/dashboard" });
-      } else if (response.role === "VENDOR") {
-        navigate({ to: "/vendor/parking" });
-      } else {
-        // Driver stays on current page and triggers onSuccess
-        onSuccess?.();
-        onOpenChange(false);
-      }
-    } catch (error) {
-      const message =
-        error instanceof AxiosError
-          ? error.response?.data?.message || "Login failed"
-          : "Login failed";
-      toast.error(message);
-    } finally {
-      setIsLoading(false);
-    }
+    await loginMutation.mutateAsync(data);
   };
 
   return (
@@ -86,13 +60,15 @@ export function LoginModal({ children, open, onOpenChange, onSuccess }: LoginMod
           <div className="flex justify-center mb-2">
             <Car className="h-10 w-10 text-primary" />
           </div>
-          <DialogTitle className="text-2xl text-center">Welcome Back</DialogTitle>
+          <DialogTitle className="text-2xl text-center">
+            Welcome Back
+          </DialogTitle>
           <DialogDescription className="text-center">
             Sign in to your Smart Parking account
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit(onSubmit as any)} className="space-y-4 py-4">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 py-4">
           <div className="space-y-2">
             <Label htmlFor="modal-email">Email</Label>
             <Input
@@ -108,19 +84,41 @@ export function LoginModal({ children, open, onOpenChange, onSuccess }: LoginMod
 
           <div className="space-y-2">
             <Label htmlFor="modal-password">Password</Label>
-            <Input
-              id="modal-password"
-              type="password"
-              placeholder="••••••••"
-              {...register("password")}
-            />
+            <div className="relative">
+              <Input
+                id="modal-password"
+                type={showPassword ? "text" : "password"}
+                placeholder="••••••••"
+                className="pr-8"
+                {...register("password")}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+              >
+                {showPassword ? (
+                  <EyeOff className="h-4 w-4" />
+                ) : (
+                  <Eye className="h-4 w-4" />
+                )}
+              </button>
+            </div>
             {errors.password && (
-              <p className="text-sm text-destructive">{errors.password.message}</p>
+              <p className="text-sm text-destructive">
+                {errors.password.message}
+              </p>
             )}
           </div>
 
-          <Button type="submit" className="w-full" disabled={isLoading}>
-            {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+          <Button
+            type="submit"
+            className="w-full"
+            disabled={loginMutation.isPending}
+          >
+            {loginMutation.isPending && (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            )}
             Sign In
           </Button>
 

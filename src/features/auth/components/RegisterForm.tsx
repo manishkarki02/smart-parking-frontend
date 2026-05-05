@@ -1,13 +1,12 @@
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
+import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   registerSchema,
   type RegisterFormValues,
 } from "../validation/auth.schema";
-import { registerUser } from "../services/auth.service";
-import { useNavigate, Link } from "@tanstack/react-router";
-import { toast } from "sonner";
-import { useState } from "react";
+import { Link } from "@tanstack/react-router";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -25,45 +24,33 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Loader2, Car } from "lucide-react";
-import { AxiosError } from "axios";
+
+import { Loader2, Car, Eye, EyeOff } from "lucide-react";
+import { Roles } from "@/config/enums";
+import useRegisterMutation from "../hooks/useRegisterMutation";
 
 export function RegisterForm() {
-  const [isLoading, setIsLoading] = useState(false);
-  const navigate = useNavigate();
+  const [showPassword, setShowPassword] = useState(false);
+  const registerMutation = useRegisterMutation();
 
   const {
     register,
     handleSubmit,
-    setValue,
+    control,
     formState: { errors },
   } = useForm<RegisterFormValues>({
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    resolver: zodResolver(registerSchema as any),
+    resolver: zodResolver(registerSchema),
     defaultValues: {
       name: "",
       email: "",
       password: "",
       phone: "",
-      role: undefined,
+      role: Roles.DRIVER,
     },
   });
 
   const onSubmit = async (data: RegisterFormValues) => {
-    setIsLoading(true);
-    try {
-      await registerUser(data);
-      toast.success("Registration successful! Please login.");
-      navigate({ to: "/login" });
-    } catch (error) {
-      const message =
-        error instanceof AxiosError
-          ? error.response?.data?.message || "Registration failed"
-          : "Registration failed";
-      toast.error(message);
-    } finally {
-      setIsLoading(false);
-    }
+    await registerMutation.mutateAsync(data);
   };
 
   return (
@@ -76,18 +63,13 @@ export function RegisterForm() {
           <CardTitle className="text-2xl">Create an Account</CardTitle>
           <CardDescription>Register for Smart Parking</CardDescription>
         </CardHeader>
+
         <CardContent>
-          <form
-            onSubmit={handleSubmit(onSubmit as any)}
-            className="space-y-4"
-          >
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            {/* Name */}
             <div className="space-y-2">
-              <Label htmlFor="name">Full Name</Label>
-              <Input
-                id="name"
-                placeholder="John Doe"
-                {...register("name")}
-              />
+              <Label>Full Name</Label>
+              <Input placeholder="John Doe" {...register("name")} />
               {errors.name && (
                 <p className="text-sm text-destructive">
                   {errors.name.message}
@@ -95,10 +77,10 @@ export function RegisterForm() {
               )}
             </div>
 
+            {/* Email */}
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label>Email</Label>
               <Input
-                id="email"
                 type="email"
                 placeholder="you@example.com"
                 {...register("email")}
@@ -110,14 +92,28 @@ export function RegisterForm() {
               )}
             </div>
 
+            {/* Password */}
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                placeholder="••••••••"
-                {...register("password")}
-              />
+              <Label>Password</Label>
+              <div className="relative">
+                <Input
+                  type={showPassword ? "text" : "password"}
+                  placeholder="••••••••"
+                  className="pr-8"
+                  {...register("password")}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                >
+                  {showPassword ? (
+                    <EyeOff className="h-4 w-4" />
+                  ) : (
+                    <Eye className="h-4 w-4" />
+                  )}
+                </button>
+              </div>
               {errors.password && (
                 <p className="text-sm text-destructive">
                   {errors.password.message}
@@ -125,13 +121,10 @@ export function RegisterForm() {
               )}
             </div>
 
+            {/* Phone */}
             <div className="space-y-2">
-              <Label htmlFor="phone">Phone</Label>
-              <Input
-                id="phone"
-                placeholder="9800000000"
-                {...register("phone")}
-              />
+              <Label>Phone</Label>
+              <Input placeholder="9800000000" {...register("phone")} />
               {errors.phone && (
                 <p className="text-sm text-destructive">
                   {errors.phone.message}
@@ -139,23 +132,27 @@ export function RegisterForm() {
               )}
             </div>
 
+            {/* Role (FIXED) */}
             <div className="space-y-2">
               <Label>Role</Label>
-              <Select
-                onValueChange={(value) =>
-                  setValue("role", value as "DRIVER" | "VENDOR", {
-                    shouldValidate: true,
-                  })
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select your role" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="DRIVER">Driver</SelectItem>
-                  <SelectItem value="VENDOR">Vendor</SelectItem>
-                </SelectContent>
-              </Select>
+
+              <Controller
+                name="role"
+                control={control}
+                render={({ field }) => (
+                  <Select value={field.value} onValueChange={field.onChange}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select your role" />
+                    </SelectTrigger>
+
+                    <SelectContent>
+                      <SelectItem value={Roles.DRIVER}>Driver</SelectItem>
+                      <SelectItem value={Roles.VENDOR}>Vendor</SelectItem>
+                    </SelectContent>
+                  </Select>
+                )}
+              />
+
               {errors.role && (
                 <p className="text-sm text-destructive">
                   {errors.role.message}
@@ -163,8 +160,13 @@ export function RegisterForm() {
               )}
             </div>
 
-            <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading && (
+            {/* Submit */}
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={registerMutation.isPending}
+            >
+              {registerMutation.isPending && (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               )}
               Create Account
