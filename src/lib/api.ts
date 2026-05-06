@@ -15,6 +15,10 @@ const createApi = (path: string) => {
   });
 
   api.interceptors.request.use(async (config: InternalAxiosRequestConfig) => {
+    const token = useAuthStore.getState().token;
+    if (token && config.headers) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
     return config;
   });
 

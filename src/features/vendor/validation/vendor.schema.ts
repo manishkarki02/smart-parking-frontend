@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from "zod/v4";
 
 export const addParkingSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -10,4 +10,5 @@ export const addParkingSchema = z.object({
     .positive("Total slots must be a positive number"),
 });
 
-export type AddParkingFormValues = z.infer<typeof addParkingSchema>;
+export type AddParkingFormValues = z.input<typeof addParkingSchema>;
+export type AddParkingPayload = z.output<typeof addParkingSchema>;
