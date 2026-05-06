@@ -15,7 +15,7 @@ import { Label } from "@/components/ui/label";
 import { Loader2, Car, Eye, EyeOff } from "lucide-react";
 import {
   loginSchema,
-  type LoginFormValues,
+  type LoginSchema,
 } from "@/features/auth/validation/auth.schema";
 import { Link } from "@tanstack/react-router";
 import useLoginMutation from "../hooks/useLoginMutation";
@@ -40,7 +40,7 @@ export function LoginModal({
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<LoginFormValues>({
+  } = useForm<LoginSchema>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
       email: "",
@@ -48,7 +48,7 @@ export function LoginModal({
     },
   });
 
-  const onSubmit = async (data: LoginFormValues) => {
+  const onSubmit = async (data: LoginSchema) => {
     await loginMutation.mutateAsync(data);
   };
 

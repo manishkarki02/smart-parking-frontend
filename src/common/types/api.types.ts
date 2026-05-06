@@ -1,4 +1,6 @@
 export interface ApiResponse<T = unknown> {
-  message: string;
+  responseMessage: string;
+  responseCode: number;
+  timestamp: string;
   data: T;
 }

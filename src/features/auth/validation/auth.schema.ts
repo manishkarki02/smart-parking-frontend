@@ -5,8 +5,7 @@ export const loginSchema = z.object({
   email: z.email("Please enter a valid email address"),
   password: z.string().min(6, "Password must be at least 6 characters"),
 });
-
-export type LoginFormValues = z.infer<typeof loginSchema>;
+export type LoginSchema = z.infer<typeof loginSchema>;
 
 export const registerSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -17,7 +16,7 @@ export const registerSchema = z.object({
     .enum(Object.values(Roles), {
       error: "Please select a role",
     })
-    .default(Roles.DRIVER),
+    // .default(Roles.DRIVER),
 });
 
-export type RegisterFormValues = z.infer<typeof registerSchema>;
+export type RegisterSchema = z.infer<typeof registerSchema>;

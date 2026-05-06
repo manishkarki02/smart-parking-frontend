@@ -1,20 +1,6 @@
-import type { Roles } from "@/config/enums";
+import { Roles } from "@/config/enums";
 
-export type ROLES = (typeof Roles)[keyof typeof Roles];
-export type USER_ROLES = ROLES | "ADMIN";
-export interface LoginRequest {
-  email: string;
-  password: string;
-}
-
-export interface RegisterRequest {
-  name: string;
-  email: string;
-  password: string;
-  phone: string;
-  role: ROLES;
-}
-
+export type USER_ROLES = (typeof Roles)[keyof typeof Roles] | "ADMIN";
 export interface AuthUser {
   name: string;
   email: string;

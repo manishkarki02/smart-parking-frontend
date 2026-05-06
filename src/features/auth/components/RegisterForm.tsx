@@ -3,7 +3,7 @@ import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   registerSchema,
-  type RegisterFormValues,
+  type RegisterSchema,
 } from "../validation/auth.schema";
 import { Link } from "@tanstack/react-router";
 
@@ -38,7 +38,7 @@ export function RegisterForm() {
     handleSubmit,
     control,
     formState: { errors },
-  } = useForm<RegisterFormValues>({
+  } = useForm<RegisterSchema>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
       name: "",
@@ -49,7 +49,7 @@ export function RegisterForm() {
     },
   });
 
-  const onSubmit = async (data: RegisterFormValues) => {
+  const onSubmit = async (data: RegisterSchema) => {
     await registerMutation.mutateAsync(data);
   };
 
