@@ -1,31 +1,47 @@
-export const API_BASE_URL = (() => {
-  const raw = import.meta.env.VITE_API_BASE_URL as string | undefined;
-  const cleaned = (raw ?? "").trim();
-  if (!cleaned) return "";
+import { z } from "zod/v4";
 
-  // Support protocol-relative input (e.g., //host:port)
-  let candidate = /^\/\//.test(cleaned) ? `http:${cleaned}` : cleaned;
-  // Ensure protocol if missing
-  if (!/^https?:\/\//i.test(candidate)) candidate = `http://${candidate}`;
-  // Remove trailing slashes
-  candidate = candidate.replace(/\/+$/, "");
+const schema = z.object({
+  VITE_PUBLIC_URL: z.url().optional(),
+  VITE_PORT: z.coerce.number().default(5173),
+  VITE_API_BASE_URL: z.url(),
+  VITE_GOOGLE_MAPS_API_KEY: z.string(),
+  VITE_NODE_ENV: z
+    .enum(["development", "test", "production"])
+    .default("development"),
+  VITE_APP_NAME: z.string().default("Smart Parking"),
+});
 
-  // Validate URL format; fallback to empty if invalid
-  try {
-    new URL(candidate);
-    return candidate;
-  } catch {
-    if (import.meta.env.DEV) {
-      console.warn(
-        `Invalid VITE_API_BASE_URL: "${cleaned}". Falling back to relative /api.`
+type EnvConfig = z.infer<typeof schema>;
+
+class Environment {
+  private static instance: Environment;
+  private env: EnvConfig;
+  private constructor() {
+    console.log("Loading environment variables...", import.meta.env);
+    const result = schema.safeParse({
+      ...import.meta.env,
+      ...(window.env || {}),
+    });
+    if (!result.success) {
+      console.error(
+        "Environment variable validation failed:",
+        result.error.issues,
       );
+      throw new Error("Invalid environment variables");
     }
-    return "";
+    this.env = result.data;
   }
-})();
 
-export async function envChecker() {
-  if (!API_BASE_URL) {
-    throw new Error("VITE_API_BASE_URL is not defined");
+  public static getInstance(): Environment {
+    if (!Environment.instance) {
+      Environment.instance = new Environment();
+    }
+    return Environment.instance;
+  }
+
+  public get config(): EnvConfig {
+    return this.env;
   }
 }
+
+export const ENV = Environment.getInstance().config;

@@ -1,13 +1,18 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { addParkingSchema, type AddParkingFormValues } from "../validation/vendor.schema";
+import {
+  addParkingSchema,
+  type AddParkingFormValues,
+} from "../validation/vendor.schema";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Loader2 } from "lucide-react";
 import { useState } from "react";
 import { LocationPickerMap, type PickerLocation } from "./LocationPickerMap";
+import { ENV } from "@/config/env-constant";
 import useAddParkingMutation from "../hooks/useAddParkingMutation";
+import { LocationPickerMap2 } from "./LocationPickerMap2";
 
 interface AddParkingFormProps {
   onSuccess?: () => void;
@@ -72,6 +77,11 @@ export function AddParkingForm({ onSuccess }: AddParkingFormProps) {
       {/* Map Location Picker */}
       <div className="space-y-2">
         <Label>Pick Location on Map</Label>
+        <LocationPickerMap2
+          apiKey={ENV.VITE_GOOGLE_MAPS_API_KEY}
+          value={pickedLocation}
+          onChange={handleMapPick}
+        />
         <LocationPickerMap value={pickedLocation} onChange={handleMapPick} />
         {/* Show error if lat/lng/address not picked */}
         {(errors.latitude || errors.longitude || errors.address) &&
@@ -100,9 +110,7 @@ export function AddParkingForm({ onSuccess }: AddParkingFormProps) {
       </div>
 
       <Button type="submit" className="w-full" disabled={isPending}>
-        {isPending && (
-          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-        )}
+        {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
         Add Parking Location
       </Button>
     </form>
