@@ -9,9 +9,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Loader2 } from "lucide-react";
 import { useState } from "react";
-import { LocationPickerMap } from "@/features/parking/maps/components/LocationPickerMap"; // ← new
-import { MapProvider } from "@/features/parking/maps/components/MapProvider";             // ← new
-import type { PickerLocation } from "@/features/parking/maps/types/map.types";            // ← new
+import { LocationPickerMap } from "@/features/parking/maps/components/LocationPickerMap";
+import { MapProvider } from "@/features/parking/maps/components/MapProvider";
+import type { PickerLocation } from "@/features/parking/maps/types/map.types";
 import useAddParkingMutation from "../hooks/useAddParkingMutation";
 
 interface AddParkingFormProps {
@@ -54,6 +54,7 @@ export function AddParkingForm({ onSuccess }: AddParkingFormProps) {
   };
 
   const onSubmit = async (data: AddParkingFormValues) => {
+    console.log("Form data:", data);
     await mutateAsync(addParkingSchema.parse(data));
   };
 

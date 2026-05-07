@@ -1,96 +1,58 @@
 /**
  * Central API Route Constants
- * Base URL is handled by the Axios instance / Vite proxy — do NOT hardcode it here.
- * Usage:  import { API_ROUTES } from '@/common/constants/api-routes';
- *         axios.post(API_ROUTES.AUTH.LOGIN, body)
  */
 
-// ─── Auth ─────────────────────────────────────────────────────────────────────
-const AUTH_BASE = "/auth";
+// ─── API Base Paths ───────────────────────────────────────────────────────────
+export const API_BASE = {
+  AUTH: "/auth",
+  PARKING: "/parking",
+  BOOKINGS: "/bookings",
+  VENDORS: "/vendors",
+  ADMIN: "/admin",
+  PAYMENT: "/payment",
+} as const;
 
+// ─── Auth ─────────────────────────────────────────────────────────────────────
 export const AUTH_ROUTES = {
-  REGISTER: `${AUTH_BASE}/register`,
-  LOGIN: `${AUTH_BASE}/login`,
+  REGISTER: "/register",
+  LOGIN: "/login",
 } as const;
 
 // ─── Parking ──────────────────────────────────────────────────────────────────
-const PARKING_BASE = "/parking";
-
 export const PARKING_ROUTES = {
-  /** GET all available Thamel parking locations */
-  ALL_SLOTS: `${PARKING_BASE}/slots`,
-
-  /** GET nearest single parking spot
-   *  Query params: latitude, longitude  */
-  NEAREST: `${PARKING_BASE}/nearby`,
-
-  /** GET top-N nearest spots via Dijkstra
-   *  Query params: latitude, longitude, maxSpots (default 5) */
-  THAMEL_NEARBY: `${PARKING_BASE}/thamel-nearby`,
+  AVAILABLE_SLOTS: "/areas/thamel/available-slots",
+  NEAREST: "/areas/thamel/nearest",
+  THAMEL_NEARBY: "/areas/thamel-nearby",
 } as const;
 
 // ─── Booking ──────────────────────────────────────────────────────────────────
-const BOOKING_BASE = "/booking";
-
 export const BOOKING_ROUTES = {
-  /** POST  — create a new booking (requires JWT) */
-  CREATE: `${BOOKING_BASE}/create`,
-
-  /** GET   — fetch logged-in user's bookings (requires JWT) */
-  MY_BOOKINGS: `${BOOKING_BASE}/mybookings`,
+  CREATE: "/create",
+  MY_BOOKINGS: "/mybookings",
 } as const;
 
 // ─── Vendor ───────────────────────────────────────────────────────────────────
-
 export const VENDOR_ROUTES = {
-  /** POST  — add a new parking location (VENDOR role) */
-  ADD_PARKING: "addparking",
+  ADD_PARKING: "/addparking",
+  MY_PARKING: "/view/parking-locations",
 
-  /** GET   — get vendor's own parking locations (VENDOR role) */
-  MY_PARKING: "myparkinglocation",
+  UPDATE_SLOTS: (id: number | string) =>
+    `/parking-locations/${id}/available-slots`,
 
-  /** PUT   — update available slots (VENDOR role)
-   *  Path param :id  |  Query param: newAvailableSlots
-   *  Usage: VENDOR_ROUTES.UPDATE_PARKING(id) */
-  UPDATE_PARKING: (id: number | string) => `updateparking/${id}`,
+  DASHBOARD: "/dashboard",
+  DASHBOARD_SUMMARY: "/dashboard/summary",
 } as const;
 
 // ─── Admin ────────────────────────────────────────────────────────────────────
-const ADMIN_BASE = "/admin";
-
 export const ADMIN_ROUTES = {
-  /** GET — system-wide stats: totalBookings, totalVendors, totalDrivers */
-  DASHBOARD: `${ADMIN_BASE}/dashboard`,
-
-  /** GET — all bookings in the system */
-  BOOKINGS: `${ADMIN_BASE}/bookings`,
-
-  /** GET — all registered vendors */
-  VENDORS: `${ADMIN_BASE}/vendors`,
-
-  /** GET — all registered drivers */
-  DRIVERS: `${ADMIN_BASE}/drivers`,
+  DASHBOARD: "/dashboard",
+  BOOKINGS: "/bookings",
+  VENDORS: "/vendors",
+  DRIVERS: "/drivers",
 } as const;
 
 // ─── Payment ──────────────────────────────────────────────────────────────────
-const PAYMENT_BASE = "/payment";
-
 export const PAYMENT_ROUTES = {
-  /** POST — initiate a Khalti payment
-   *  Body: { bookingId: number, paymentMethod: "KHALTI" | "CASH" } */
-  KHALTI_INITIATE: `${PAYMENT_BASE}/khalti/initiate`,
-
-  /** GET  — verify Khalti callback
-   *  Query param: pidx */
-  KHALTI_VERIFY: `${PAYMENT_BASE}/khalti/verify`,
-} as const;
-
-// ─── Aggregated export (optional convenience) ─────────────────────────────────
-export const API_ROUTES = {
-  AUTH: AUTH_ROUTES,
-  PARKING: PARKING_ROUTES,
-  BOOKING: BOOKING_ROUTES,
-  VENDOR: VENDOR_ROUTES,
-  ADMIN: ADMIN_ROUTES,
-  PAYMENT: PAYMENT_ROUTES,
+  KHALTI_INITIATE: "/khalti/initiate",
+  KHALTI_VERIFY: "/khalti/verify",
 } as const;
