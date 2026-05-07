@@ -82,7 +82,7 @@ export function AddParkingForm({ onSuccess }: AddParkingFormProps) {
           value={pickedLocation}
           onChange={handleMapPick}
         />
-        <LocationPickerMap value={pickedLocation} onChange={handleMapPick} />
+        {/* <LocationPickerMap value={pickedLocation} onChange={handleMapPick} /> */}
         {/* Show error if lat/lng/address not picked */}
         {(errors.latitude || errors.longitude || errors.address) &&
           !pickedLocation && (
