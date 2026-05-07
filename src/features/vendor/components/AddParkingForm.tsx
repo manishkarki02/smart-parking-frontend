@@ -9,19 +9,17 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Loader2 } from "lucide-react";
 import { useState } from "react";
-import { LocationPickerMap, type PickerLocation } from "./LocationPickerMap";
-import { ENV } from "@/config/env-constant";
+import { LocationPickerMap } from "@/features/parking/maps/components/LocationPickerMap"; // ← new
+import { MapProvider } from "@/features/parking/maps/components/MapProvider";             // ← new
+import type { PickerLocation } from "@/features/parking/maps/types/map.types";            // ← new
 import useAddParkingMutation from "../hooks/useAddParkingMutation";
-import { LocationPickerMap2 } from "./LocationPickerMap2";
 
 interface AddParkingFormProps {
   onSuccess?: () => void;
 }
 
 export function AddParkingForm({ onSuccess }: AddParkingFormProps) {
-  const [pickedLocation, setPickedLocation] = useState<PickerLocation | null>(
-    null,
-  );
+  const [pickedLocation, setPickedLocation] = useState<PickerLocation | null>(null);
 
   const {
     register,
@@ -77,20 +75,17 @@ export function AddParkingForm({ onSuccess }: AddParkingFormProps) {
       {/* Map Location Picker */}
       <div className="space-y-2">
         <Label>Pick Location on Map</Label>
-        <LocationPickerMap2
-          apiKey={ENV.VITE_GOOGLE_MAPS_API_KEY}
-          value={pickedLocation}
-          onChange={handleMapPick}
-        />
-        {/* <LocationPickerMap value={pickedLocation} onChange={handleMapPick} /> */}
-        {/* Show error if lat/lng/address not picked */}
-        {(errors.latitude || errors.longitude || errors.address) &&
-          !pickedLocation && (
-            <p className="text-sm text-destructive">
-              Please click on the map to automatically set the location and
-              address.
-            </p>
-          )}
+
+        {/* ↓ wrap with MapProvider here — no apiKey prop needed on the map itself */}
+        <MapProvider>
+          <LocationPickerMap value={pickedLocation} onChange={handleMapPick} />
+        </MapProvider>
+
+        {(errors.latitude || errors.longitude || errors.address) && !pickedLocation && (
+          <p className="text-sm text-destructive">
+            Please click on the map to automatically set the location and address.
+          </p>
+        )}
       </div>
 
       {/* Total Slots */}
@@ -103,9 +98,7 @@ export function AddParkingForm({ onSuccess }: AddParkingFormProps) {
           {...register("totalSlots")}
         />
         {errors.totalSlots && (
-          <p className="text-sm text-destructive">
-            {errors.totalSlots.message}
-          </p>
+          <p className="text-sm text-destructive">{errors.totalSlots.message}</p>
         )}
       </div>
 
