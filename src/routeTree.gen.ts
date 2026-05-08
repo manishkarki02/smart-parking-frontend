@@ -14,6 +14,7 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as AppRouteImport } from './routes/_app'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as BookingsIndexRouteImport } from './routes/bookings.index'
+import { Route as ParkingMapRouteImport } from './routes/parking.map'
 import { Route as ParkingIdRouteImport } from './routes/parking.$id'
 import { Route as BookingsNewRouteImport } from './routes/bookings.new'
 import { Route as AppDashboardRouteImport } from './routes/_app/dashboard'
@@ -44,6 +45,11 @@ const IndexRoute = IndexRouteImport.update({
 const BookingsIndexRoute = BookingsIndexRouteImport.update({
   id: '/bookings/',
   path: '/bookings/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ParkingMapRoute = ParkingMapRouteImport.update({
+  id: '/parking/map',
+  path: '/parking/map',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ParkingIdRoute = ParkingIdRouteImport.update({
@@ -89,6 +95,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof AppDashboardRoute
   '/bookings/new': typeof BookingsNewRoute
   '/parking/$id': typeof ParkingIdRoute
+  '/parking/map': typeof ParkingMapRoute
   '/bookings/': typeof BookingsIndexRoute
   '/admin/bookings': typeof AppAdminBookingsRoute
   '/admin/drivers': typeof AppAdminDriversRoute
@@ -102,6 +109,7 @@ export interface FileRoutesByTo {
   '/dashboard': typeof AppDashboardRoute
   '/bookings/new': typeof BookingsNewRoute
   '/parking/$id': typeof ParkingIdRoute
+  '/parking/map': typeof ParkingMapRoute
   '/bookings': typeof BookingsIndexRoute
   '/admin/bookings': typeof AppAdminBookingsRoute
   '/admin/drivers': typeof AppAdminDriversRoute
@@ -117,6 +125,7 @@ export interface FileRoutesById {
   '/_app/dashboard': typeof AppDashboardRoute
   '/bookings/new': typeof BookingsNewRoute
   '/parking/$id': typeof ParkingIdRoute
+  '/parking/map': typeof ParkingMapRoute
   '/bookings/': typeof BookingsIndexRoute
   '/_app/admin/bookings': typeof AppAdminBookingsRoute
   '/_app/admin/drivers': typeof AppAdminDriversRoute
@@ -132,6 +141,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/bookings/new'
     | '/parking/$id'
+    | '/parking/map'
     | '/bookings/'
     | '/admin/bookings'
     | '/admin/drivers'
@@ -145,6 +155,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/bookings/new'
     | '/parking/$id'
+    | '/parking/map'
     | '/bookings'
     | '/admin/bookings'
     | '/admin/drivers'
@@ -159,6 +170,7 @@ export interface FileRouteTypes {
     | '/_app/dashboard'
     | '/bookings/new'
     | '/parking/$id'
+    | '/parking/map'
     | '/bookings/'
     | '/_app/admin/bookings'
     | '/_app/admin/drivers'
@@ -173,6 +185,7 @@ export interface RootRouteChildren {
   RegisterRoute: typeof RegisterRoute
   BookingsNewRoute: typeof BookingsNewRoute
   ParkingIdRoute: typeof ParkingIdRoute
+  ParkingMapRoute: typeof ParkingMapRoute
   BookingsIndexRoute: typeof BookingsIndexRoute
 }
 
@@ -211,6 +224,13 @@ declare module '@tanstack/react-router' {
       path: '/bookings'
       fullPath: '/bookings/'
       preLoaderRoute: typeof BookingsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/parking/map': {
+      id: '/parking/map'
+      path: '/parking/map'
+      fullPath: '/parking/map'
+      preLoaderRoute: typeof ParkingMapRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/parking/$id': {
@@ -290,6 +310,7 @@ const rootRouteChildren: RootRouteChildren = {
   RegisterRoute: RegisterRoute,
   BookingsNewRoute: BookingsNewRoute,
   ParkingIdRoute: ParkingIdRoute,
+  ParkingMapRoute: ParkingMapRoute,
   BookingsIndexRoute: BookingsIndexRoute,
 }
 export const routeTree = rootRouteImport

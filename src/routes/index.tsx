@@ -8,7 +8,7 @@ import {
   CardFooter,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { MapPin, Navigation, ArrowRight, Loader2 } from "lucide-react";
+import { MapPin, Navigation, ArrowRight, Loader2, Map } from "lucide-react";
 import { useAuthStore } from "@/store/auth-store";
 import useParkingSlots from "@/features/parking/hooks/useParkingSlots";
 
@@ -52,7 +52,15 @@ function HomePage() {
 
       {/* Parking Spaces Grid */}
       <section className="container mx-auto px-4 py-12">
-        <h2 className="text-3xl font-bold mb-8">Parking Spaces</h2>
+        <div className="flex items-center justify-between mb-8">
+          <h2 className="text-3xl font-bold">Parking Spaces</h2>
+          <Button asChild variant="outline" className="gap-2">
+            <Link to="/parking/map">
+              <Map className="w-4 h-4" />
+              View on Map
+            </Link>
+          </Button>
+        </div>
 
         {isLoading ? (
           <div className="flex justify-center items-center h-40">

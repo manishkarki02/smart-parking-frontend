@@ -79,7 +79,7 @@ function ParkingInfoWindow({
       onCloseClick={onClose}
       pixelOffset={[0, -40]}
     >
-      <div style={{ minWidth: "180px", fontFamily: "sans-serif" }}>
+      <div style={{ width: "200px", fontFamily: "sans-serif" }}>
         <p style={{ fontWeight: 700, fontSize: "14px", margin: "0 0 2px" }}>
           {spot.name}
         </p>
