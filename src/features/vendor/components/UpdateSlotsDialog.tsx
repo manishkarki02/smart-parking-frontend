@@ -1,7 +1,4 @@
 import { useState } from "react";
-import { updateAvailableSlots } from "../services/vendor.service";
-import { useQueryClient } from "@tanstack/react-query";
-import { queryKeys } from "@/config/query-keys";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -14,7 +11,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Loader2 } from "lucide-react";
-import useCustomMutation from "@/common/hooks/useCustomMutation";
+import useUpdateSlotsMutation from "../hooks/useUpdateSlotsMutation";
 
 interface UpdateSlotsDialogProps {
   open: boolean;
@@ -32,17 +29,9 @@ export function UpdateSlotsDialog({
   currentSlots,
 }: UpdateSlotsDialogProps) {
   const [newSlots, setNewSlots] = useState(currentSlots);
-  const queryClient = useQueryClient();
 
-  const mutation = useCustomMutation({
-    api: ({ parkingId, newSlots }: { parkingId: number; newSlots: number }) =>
-      updateAvailableSlots(parkingId, newSlots),
-    success: "Slots updated successfully!",
-    error: "Failed to update slots",
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.vendor.myLocations });
-      onOpenChange(false);
-    },
+  const { mutateAsync, isPending } = useUpdateSlotsMutation({
+    onOpenChange,
   });
 
   return (
@@ -51,7 +40,7 @@ export function UpdateSlotsDialog({
         <DialogHeader>
           <DialogTitle>Update Available Slots</DialogTitle>
           <DialogDescription>
-            Update the number of available slots for{" "}
+            Update the number of available slots for
             <span className="font-medium">{parkingName}</span>
           </DialogDescription>
         </DialogHeader>
@@ -72,12 +61,10 @@ export function UpdateSlotsDialog({
             Cancel
           </Button>
           <Button
-            onClick={() => mutation.mutateAsync({ parkingId, newSlots })}
-            disabled={mutation.isPending}
+            onClick={() => mutateAsync({ parkingId, newSlots })}
+            disabled={isPending}
           >
-            {mutation.isPending && (
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            )}
+            {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             Update
           </Button>
         </DialogFooter>

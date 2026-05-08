@@ -4,12 +4,9 @@ import {
   bookingSchema,
   type BookingFormValues,
 } from "../validation/booking.schema";
-import { createBooking } from "../services/booking.service";
 import { getAllSlots } from "@/features/parking/services/parking.service";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { queryKeys } from "@/config/query-keys";
-import { toast } from "sonner";
-import { useNavigate } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -28,18 +25,15 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Loader2, Car } from "lucide-react";
-import { AxiosError } from "axios";
+import useBookingMutation from "../hooks/useBookingMutation";
 
 interface BookingFormProps {
   preselectedParkingId?: number;
 }
 
 export function BookingForm({ preselectedParkingId }: BookingFormProps) {
-  const navigate = useNavigate();
-  const queryClient = useQueryClient();
-
   const { data: parkingSlots = [], isLoading: slotsLoading } = useQuery({
-    queryKey: queryKeys.parking.all,
+    queryKey: queryKeys.parking.availableSlots(),
     queryFn: getAllSlots,
   });
 
@@ -58,24 +52,10 @@ export function BookingForm({ preselectedParkingId }: BookingFormProps) {
     },
   });
 
-  const mutation = useMutation({
-    mutationFn: createBooking,
-    onSuccess: () => {
-      toast.success("Booking created successfully!");
-      queryClient.invalidateQueries({ queryKey: queryKeys.booking.my });
-      navigate({ to: "/bookings" as string });
-    },
-    onError: (error) => {
-      const message =
-        error instanceof AxiosError
-          ? error.response?.data?.message || "Failed to create booking"
-          : "Failed to create booking";
-      toast.error(message);
-    },
-  });
+  const bookingMutation = useBookingMutation();
 
   const onSubmit = (data: BookingFormValues) => {
-    mutation.mutate({
+    bookingMutation.mutateAsync({
       parkingLocationId: data.parkingLocationId,
       startTime: new Date(data.startTime).toISOString(),
       endTime: new Date(data.endTime).toISOString(),
@@ -87,16 +67,18 @@ export function BookingForm({ preselectedParkingId }: BookingFormProps) {
       <CardHeader className="text-center pb-8 border-b bg-muted/20 mb-6">
         <div className="flex justify-center mb-4">
           <div className="bg-primary/10 p-3 rounded-full text-primary shadow-inner">
-             <Car className="w-8 h-8" />
+            <Car className="w-8 h-8" />
           </div>
         </div>
-        <CardTitle className="text-2xl font-bold bg-gradient-to-r from-primary to-green-600 bg-clip-text text-transparent">Book Your Parking</CardTitle>
+        <CardTitle className="text-2xl font-bold bg-linear-to-r from-primary to-green-600 bg-clip-text text-transparent">
+          Book Your Parking
+        </CardTitle>
         <CardDescription className="text-base mt-2">
           Select a location and choose your parking time
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit(onSubmit as any)} className="space-y-4">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-2">
             <Label>Parking Location</Label>
             {slotsLoading ? (
@@ -166,9 +148,9 @@ export function BookingForm({ preselectedParkingId }: BookingFormProps) {
           <Button
             type="submit"
             className="w-full"
-            disabled={mutation.isPending}
+            disabled={bookingMutation.isPending}
           >
-            {mutation.isPending && (
+            {bookingMutation.isPending && (
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
             )}
             Create Booking

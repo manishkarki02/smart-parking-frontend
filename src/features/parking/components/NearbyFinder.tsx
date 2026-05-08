@@ -9,10 +9,8 @@ import {
 } from "@/components/ui/card";
 import { toast } from "sonner";
 import { Loader2, Navigation } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
-import { getThamelNearby } from "../services/parking.service";
-import { queryKeys } from "@/config/query-keys";
 import { ParkingList } from "./ParkingList";
+import useNearbyParkings from "../hooks/useNearbyParkings";
 
 export function NearbyFinder() {
   const [coords, setCoords] = useState<{
@@ -21,14 +19,9 @@ export function NearbyFinder() {
   } | null>(null);
   const [isLocating, setIsLocating] = useState(false);
 
-  const { data: nearbySpots = [], isLoading } = useQuery({
-    queryKey: queryKeys.parking.thamelNearby(
-      coords?.lat ?? 0,
-      coords?.lng ?? 0,
-      5
-    ),
-    queryFn: () => getThamelNearby(coords!.lat, coords!.lng),
-    enabled: !!coords,
+  const { data: nearbySpots, isLoading } = useNearbyParkings({
+    lat: coords?.lat ?? 0,
+    lng: coords?.lng ?? 0,
   });
 
   const handleFindNearby = () => {
@@ -51,7 +44,7 @@ export function NearbyFinder() {
         setIsLocating(false);
         toast.error(`Location error: ${error.message}`);
       },
-      { enableHighAccuracy: true, timeout: 10000 }
+      { enableHighAccuracy: true, timeout: 10000 },
     );
   };
 

@@ -54,7 +54,6 @@ export function AddParkingForm({ onSuccess }: AddParkingFormProps) {
   };
 
   const onSubmit = async (data: AddParkingFormValues) => {
-    console.log("Form data:", data);
     await mutateAsync(addParkingSchema.parse(data));
   };
 
