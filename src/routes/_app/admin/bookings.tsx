@@ -19,7 +19,7 @@ export const Route = createFileRoute("/_app/admin/bookings")({
 
 function AdminBookingsPage() {
   const { data: bookings = [], isLoading } = useQuery({
-    queryKey: queryKeys.admin.bookings,
+    queryKey: queryKeys.admin.bookings(),
     queryFn: getAllBookings,
   });
 

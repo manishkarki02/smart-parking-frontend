@@ -9,7 +9,7 @@ import {
 } from "@vis.gl/react-google-maps";
 import { Loader2, LocateFixed, Navigation } from "lucide-react";
 import type { ParkingLocation } from "@/features/parking/types/parking.types";
-import { useGeolocation } from "../hooks/useGeoLocation";
+import { useGeolocation } from "../hooks/useGeolocation";
 
 const DEFAULT_CENTER = { lat: 27.7172, lng: 85.324 };
 

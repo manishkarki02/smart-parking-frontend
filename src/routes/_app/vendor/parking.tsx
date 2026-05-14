@@ -33,7 +33,7 @@ function VendorParkingPage() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
   const { data: locations = [], isLoading } = useQuery({
-    queryKey: queryKeys.vendor.myLocations,
+    queryKey: queryKeys.vendor.myParking(),
     queryFn: getMyParkingLocations,
   });
 

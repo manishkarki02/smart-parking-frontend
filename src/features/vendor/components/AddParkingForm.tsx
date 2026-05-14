@@ -9,8 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Loader2 } from "lucide-react";
 import { useState } from "react";
-import { LocationPickerMap } from "@/features/parking/maps/components/LocationPickerMap";
-import { MapProvider } from "@/features/parking/maps/components/MapProvider";
+import { LeafletLocationPickerMap } from "@/features/parking/maps/components/LeafletLocationPickerMap";
 import type { PickerLocation } from "@/features/parking/maps/types/map.types";
 import useAddParkingMutation from "../hooks/useAddParkingMutation";
 
@@ -76,10 +75,7 @@ export function AddParkingForm({ onSuccess }: AddParkingFormProps) {
       <div className="space-y-2">
         <Label>Pick Location on Map</Label>
 
-        {/* ↓ wrap with MapProvider here — no apiKey prop needed on the map itself */}
-        <MapProvider>
-          <LocationPickerMap value={pickedLocation} onChange={handleMapPick} />
-        </MapProvider>
+        <LeafletLocationPickerMap value={pickedLocation} onChange={handleMapPick} />
 
         {(errors.latitude || errors.longitude || errors.address) && !pickedLocation && (
           <p className="text-sm text-destructive">

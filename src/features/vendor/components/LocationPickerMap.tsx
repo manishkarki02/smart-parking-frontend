@@ -23,7 +23,7 @@ import axios from "axios";
 import useDebounce from "@/common/hooks/useDebounce";
 
 // ─── Fix Leaflet default icon paths broken by bundlers ───────────────────────
-delete L.Icon.Default.prototype._getIconUrl;
+delete (L.Icon.Default.prototype as unknown as { _getIconUrl?: unknown })._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: markerIcon2x,
   iconUrl: markerIcon,

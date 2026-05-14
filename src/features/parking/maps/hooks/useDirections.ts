@@ -40,7 +40,10 @@ export function useDirections(origin: LatLng | null, destination: LatLng | null)
         destination,
         travelMode: routesLib.TravelMode.DRIVING,
       },
-      (result, status) => {
+      (
+        result: { routes: Array<{ legs: Array<{ distance?: { text: string }; duration?: { text: string } }> }> } | null,
+        status: string,
+      ) => {
         if (cancelled) return; // stale response — ignore
 
         if (status === "OK" && result) {

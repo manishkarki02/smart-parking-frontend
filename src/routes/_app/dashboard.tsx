@@ -20,7 +20,7 @@ export const Route = createFileRoute("/_app/dashboard")({
 
 function AdminDashboardPage() {
   const { data: stats, isLoading } = useQuery({
-    queryKey: queryKeys.admin.dashboard,
+    queryKey: queryKeys.admin.dashboard(),
     queryFn: getDashboard,
   });
 

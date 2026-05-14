@@ -24,7 +24,7 @@ export const Route = createFileRoute("/bookings/")({
 
 function BookingsPage() {
   const { data: bookings = [], isLoading } = useQuery({
-    queryKey: queryKeys.booking.my,
+    queryKey: queryKeys.bookings.myBookings(),
     queryFn: getMyBookings,
   });
 

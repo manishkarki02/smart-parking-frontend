@@ -3,3 +3,8 @@ export interface PickerLocation {
   lng: number;
   address?: string;
 }
+
+export interface LatLng {
+  lat: number;
+  lng: number;
+}

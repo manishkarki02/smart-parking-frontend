@@ -21,7 +21,7 @@ import {
 import { useReverseGeocode } from "../hooks/useReverseGeocode";
 import type { PickerLocation } from "../types/map.types";
 import { ENV } from "@/config/env-constant";
-import { useGeolocation } from "../hooks/useGeoLocation";
+import { useGeolocation } from "../hooks/useGeolocation";
 
 const DEFAULT_CENTER = { lat: 27.7172, lng: 85.324 };
 

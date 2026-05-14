@@ -19,7 +19,7 @@ export const Route = createFileRoute("/_app/admin/drivers")({
 
 function AdminDriversPage() {
   const { data: drivers = [], isLoading } = useQuery({
-    queryKey: queryKeys.admin.drivers,
+    queryKey: queryKeys.admin.drivers(),
     queryFn: getDrivers,
   });
 

@@ -19,7 +19,7 @@ export const Route = createFileRoute("/_app/admin/vendors")({
 
 function AdminVendorsPage() {
   const { data: vendors = [], isLoading } = useQuery({
-    queryKey: queryKeys.admin.vendors,
+    queryKey: queryKeys.admin.vendors(),
     queryFn: getVendors,
   });
 
