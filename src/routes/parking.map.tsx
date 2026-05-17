@@ -12,8 +12,11 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import useParkingSlots from "@/features/parking/hooks/useParkingSlots";
-import { LeafletParkingOverviewMap } from "@/features/parking/maps/components/LeafletParkingOverviewMap";
-import { LeafletDirectionsMap } from "@/features/parking/maps/components/LeafletDirectionsMap";
+// import { LeafletParkingOverviewMap } from "@/features/parking/maps/components/LeafletParkingOverviewMap";
+// import { LeafletDirectionsMap } from "@/features/parking/maps/components/LeafletDirectionsMap";
+import { ParkingOverviewMap } from "@/features/parking/maps/components/ParkingOverviewMap";
+import { DirectionsMap } from "@/features/parking/maps/components/DirectionsMap";
+import { MapProvider } from "@/features/parking/maps/components/MapProvider";
 import type { ParkingLocation } from "@/features/parking/types/parking.types";
 import { useGeolocation } from "@/features/parking/maps/hooks/useGeolocation";
 
@@ -92,32 +95,36 @@ function ParkingMapPage() {
                 }
               `}</style>
               <div className="lp-map-fullscreen h-full">
-                {!directionsTarget ? (
-                  <LeafletParkingOverviewMap
-                    spots={locations ?? []}
-                    onGetDirections={handleGetDirections}
-                  />
-                ) : (
-                  <div className="h-full flex flex-col">
-                    <div className="flex-1 min-h-0">
-                      {userCoords ? (
-                        <LeafletDirectionsMap
-                          origin={userCoords}
-                          destination={{
-                            lat: directionsTarget.latitude,
-                            lng: directionsTarget.longitude,
-                          }}
-                          destinationName={directionsTarget.name}
-                        />
-                      ) : (
-                        <div className="h-full flex flex-col items-center justify-center gap-3 text-muted-foreground bg-muted/20">
-                          <Loader2 className="w-8 h-8 animate-spin text-primary" />
-                          <p className="text-sm">Waiting for your location...</p>
-                        </div>
-                      )}
+                <MapProvider>
+                  {!directionsTarget ? (
+                    <ParkingOverviewMap
+                      spots={locations ?? []}
+                      onBook={(spot) =>
+                        navigate({ to: "/parking/$id", params: { id: spot.id.toString() } })
+                      }
+                    />
+                  ) : (
+                    <div className="h-full flex flex-col">
+                      <div className="flex-1 min-h-0">
+                        {userCoords ? (
+                          <DirectionsMap
+                            origin={userCoords}
+                            destination={{
+                              lat: directionsTarget.latitude,
+                              lng: directionsTarget.longitude,
+                            }}
+                            destinationName={directionsTarget.name}
+                          />
+                        ) : (
+                          <div className="h-full flex flex-col items-center justify-center gap-3 text-muted-foreground bg-muted/20">
+                            <Loader2 className="w-8 h-8 animate-spin text-primary" />
+                            <p className="text-sm">Waiting for your location...</p>
+                          </div>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                )}
+                  )}
+                </MapProvider>
               </div>
             </div>
           )}

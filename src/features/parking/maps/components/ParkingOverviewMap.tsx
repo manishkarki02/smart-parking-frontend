@@ -7,7 +7,7 @@ import {
   ControlPosition,
   MapControl,
 } from "@vis.gl/react-google-maps";
-import { Loader2, LocateFixed, Navigation } from "lucide-react";
+import { CalendarPlus, Loader2, LocateFixed } from "lucide-react";
 import type { ParkingLocation } from "@/features/parking/types/parking.types";
 import { useGeolocation } from "../hooks/useGeolocation";
 
@@ -65,11 +65,11 @@ function ParkingPin({ spot }: { spot: ParkingLocation }) {
 function ParkingInfoWindow({
   spot,
   onClose,
-  onGetDirections,
+  onBook,
 }: {
   spot: ParkingLocation;
   onClose: () => void;
-  onGetDirections: (spot: ParkingLocation) => void;
+  onBook: (spot: ParkingLocation) => void;
 }) {
   const isFull = spot.availableSlots === 0;
 
@@ -111,7 +111,7 @@ function ParkingInfoWindow({
         </div>
 
         <button
-          onClick={() => onGetDirections(spot)}
+          onClick={() => onBook(spot)}
           disabled={isFull}
           style={{
             marginTop: "10px",
@@ -130,8 +130,8 @@ function ParkingInfoWindow({
             gap: "4px",
           }}
         >
-          <Navigation size={12} />
-          {isFull ? "Parking Full" : "Get Directions"}
+          <CalendarPlus size={12} />
+          {isFull ? "Parking Full" : "Book a Space"}
         </button>
       </div>
     </InfoWindow>
@@ -157,14 +157,14 @@ function UserMarker({ lat, lng }: { lat: number; lng: number }) {
 
 interface ParkingOverviewMapProps {
   spots: ParkingLocation[];
-  onGetDirections: (spot: ParkingLocation) => void;
+  onBook: (spot: ParkingLocation) => void;
   defaultCenter?: { lat: number; lng: number };
   radiusKm?: number;
 }
 
 export function ParkingOverviewMap({
   spots,
-  onGetDirections,
+  onBook,
   defaultCenter = DEFAULT_CENTER,
   radiusKm,
 }: ParkingOverviewMapProps) {
@@ -246,9 +246,9 @@ export function ParkingOverviewMap({
             <ParkingInfoWindow
               spot={selectedSpot}
               onClose={() => setSelectedSpot(null)}
-              onGetDirections={(spot) => {
+              onBook={(spot) => {
                 setSelectedSpot(null);
-                onGetDirections(spot);
+                onBook(spot);
               }}
             />
           )}

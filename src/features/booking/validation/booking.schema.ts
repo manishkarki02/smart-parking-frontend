@@ -11,25 +11,13 @@ export const bookingSchema = z
   .refine(
     (data) => {
       if (data.startTime && data.endTime) {
-        return new Date(data.endTime) > new Date(data.startTime);
+        return data.endTime > data.startTime;
       }
       return true;
     },
     {
       message: "End time must be after start time",
       path: ["endTime"],
-    }
-  )
-  .refine(
-    (data) => {
-      if (data.startTime) {
-        return new Date(data.startTime) > new Date();
-      }
-      return true;
-    },
-    {
-      message: "Start time must be in the future",
-      path: ["startTime"],
     }
   );
 

@@ -28,14 +28,8 @@ CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"]
 
 # --- Production Stage ---
 FROM nginx:alpine-slim AS production
-COPY ./infra/nginx.conf /etc/nginx/nginx.conf
+COPY ./nginx.conf /etc/nginx/conf.d/default.conf
 COPY --from=build /app/dist /usr/share/nginx/html
-
-COPY ./entrypoint.sh .
-RUN chmod +x entrypoint.sh
-
-ENTRYPOINT ["./entrypoint.sh"]
 
 EXPOSE 80
 CMD ["nginx", "-g", "daemon off;"]
-

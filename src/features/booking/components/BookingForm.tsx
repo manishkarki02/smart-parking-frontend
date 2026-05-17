@@ -55,10 +55,11 @@ export function BookingForm({ preselectedParkingId }: BookingFormProps) {
   const bookingMutation = useBookingMutation();
 
   const onSubmit = (data: BookingFormValues) => {
+    const today = new Date().toISOString().split("T")[0];
     bookingMutation.mutateAsync({
       parkingLocationId: data.parkingLocationId,
-      startTime: new Date(data.startTime).toISOString(),
-      endTime: new Date(data.endTime).toISOString(),
+      startTime: new Date(`${today}T${data.startTime}:00`).toISOString(),
+      endTime: new Date(`${today}T${data.endTime}:00`).toISOString(),
     });
   };
 
@@ -121,7 +122,7 @@ export function BookingForm({ preselectedParkingId }: BookingFormProps) {
             <Label htmlFor="startTime">Start Time</Label>
             <Input
               id="startTime"
-              type="datetime-local"
+              type="time"
               {...register("startTime")}
             />
             {errors.startTime && (
@@ -135,7 +136,7 @@ export function BookingForm({ preselectedParkingId }: BookingFormProps) {
             <Label htmlFor="endTime">End Time</Label>
             <Input
               id="endTime"
-              type="datetime-local"
+              type="time"
               {...register("endTime")}
             />
             {errors.endTime && (
