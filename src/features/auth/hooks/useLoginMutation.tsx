@@ -39,7 +39,7 @@ function useLoginMutation({
           navigate({ to: "/dashboard" });
           break;
         case "VENDOR":
-          navigate({ to: "/vendor/parking" });
+          navigate({ to: "/vendor/dashboard" });
           break;
         default:
           if (onSuccess || onOpenChange) {

@@ -19,6 +19,7 @@ import { Route as ParkingIdRouteImport } from './routes/parking.$id'
 import { Route as BookingsNewRouteImport } from './routes/bookings.new'
 import { Route as AppDashboardRouteImport } from './routes/_app/dashboard'
 import { Route as AppVendorParkingRouteImport } from './routes/_app/vendor/parking'
+import { Route as AppVendorDashboardRouteImport } from './routes/_app/vendor/dashboard'
 import { Route as AppAdminVendorsRouteImport } from './routes/_app/admin/vendors'
 import { Route as AppAdminDriversRouteImport } from './routes/_app/admin/drivers'
 import { Route as AppAdminBookingsRouteImport } from './routes/_app/admin/bookings'
@@ -72,6 +73,11 @@ const AppVendorParkingRoute = AppVendorParkingRouteImport.update({
   path: '/vendor/parking',
   getParentRoute: () => AppRoute,
 } as any)
+const AppVendorDashboardRoute = AppVendorDashboardRouteImport.update({
+  id: '/vendor/dashboard',
+  path: '/vendor/dashboard',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppAdminVendorsRoute = AppAdminVendorsRouteImport.update({
   id: '/admin/vendors',
   path: '/admin/vendors',
@@ -100,6 +106,7 @@ export interface FileRoutesByFullPath {
   '/admin/bookings': typeof AppAdminBookingsRoute
   '/admin/drivers': typeof AppAdminDriversRoute
   '/admin/vendors': typeof AppAdminVendorsRoute
+  '/vendor/dashboard': typeof AppVendorDashboardRoute
   '/vendor/parking': typeof AppVendorParkingRoute
 }
 export interface FileRoutesByTo {
@@ -114,6 +121,7 @@ export interface FileRoutesByTo {
   '/admin/bookings': typeof AppAdminBookingsRoute
   '/admin/drivers': typeof AppAdminDriversRoute
   '/admin/vendors': typeof AppAdminVendorsRoute
+  '/vendor/dashboard': typeof AppVendorDashboardRoute
   '/vendor/parking': typeof AppVendorParkingRoute
 }
 export interface FileRoutesById {
@@ -130,6 +138,7 @@ export interface FileRoutesById {
   '/_app/admin/bookings': typeof AppAdminBookingsRoute
   '/_app/admin/drivers': typeof AppAdminDriversRoute
   '/_app/admin/vendors': typeof AppAdminVendorsRoute
+  '/_app/vendor/dashboard': typeof AppVendorDashboardRoute
   '/_app/vendor/parking': typeof AppVendorParkingRoute
 }
 export interface FileRouteTypes {
@@ -146,6 +155,7 @@ export interface FileRouteTypes {
     | '/admin/bookings'
     | '/admin/drivers'
     | '/admin/vendors'
+    | '/vendor/dashboard'
     | '/vendor/parking'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -160,6 +170,7 @@ export interface FileRouteTypes {
     | '/admin/bookings'
     | '/admin/drivers'
     | '/admin/vendors'
+    | '/vendor/dashboard'
     | '/vendor/parking'
   id:
     | '__root__'
@@ -175,6 +186,7 @@ export interface FileRouteTypes {
     | '/_app/admin/bookings'
     | '/_app/admin/drivers'
     | '/_app/admin/vendors'
+    | '/_app/vendor/dashboard'
     | '/_app/vendor/parking'
   fileRoutesById: FileRoutesById
 }
@@ -261,6 +273,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppVendorParkingRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/vendor/dashboard': {
+      id: '/_app/vendor/dashboard'
+      path: '/vendor/dashboard'
+      fullPath: '/vendor/dashboard'
+      preLoaderRoute: typeof AppVendorDashboardRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/admin/vendors': {
       id: '/_app/admin/vendors'
       path: '/admin/vendors'
@@ -290,6 +309,7 @@ interface AppRouteChildren {
   AppAdminBookingsRoute: typeof AppAdminBookingsRoute
   AppAdminDriversRoute: typeof AppAdminDriversRoute
   AppAdminVendorsRoute: typeof AppAdminVendorsRoute
+  AppVendorDashboardRoute: typeof AppVendorDashboardRoute
   AppVendorParkingRoute: typeof AppVendorParkingRoute
 }
 
@@ -298,6 +318,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppAdminBookingsRoute: AppAdminBookingsRoute,
   AppAdminDriversRoute: AppAdminDriversRoute,
   AppAdminVendorsRoute: AppAdminVendorsRoute,
+  AppVendorDashboardRoute: AppVendorDashboardRoute,
   AppVendorParkingRoute: AppVendorParkingRoute,
 }
 

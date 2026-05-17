@@ -1,6 +1,9 @@
 import type { ApiResponse } from "@/common/types/api.types";
 import type { ParkingLocation } from "@/features/parking/types/parking.types";
-import type { ParkingLocationRequest } from "../types/vendor.types";
+import type {
+  ParkingLocationRequest,
+  VendorDashboardData,
+} from "../types/vendor.types";
 import { API_BASE, VENDOR_ROUTES } from "@/common/constants/api-routes";
 import createApi from "@/lib/api";
 
@@ -35,4 +38,11 @@ export async function updateAvailableSlots(
       },
     },
   );
+}
+
+export async function getVendorDashboard(): Promise<VendorDashboardData> {
+  const response = await parkingApi.get<ApiResponse<VendorDashboardData>>(
+    VENDOR_ROUTES.DASHBOARD,
+  );
+  return response.data.data;
 }

@@ -43,6 +43,12 @@ const navItems: NavItem[] = [
     roles: ["DRIVER"],
   },
   {
+    label: "Dashboard",
+    to: "/vendor/dashboard",
+    icon: <LayoutDashboard className="h-4 w-4" />,
+    roles: ["VENDOR"],
+  },
+  {
     label: "My Parking Locations",
     to: "/vendor/parking",
     icon: <ParkingCircle className="h-4 w-4" />,
