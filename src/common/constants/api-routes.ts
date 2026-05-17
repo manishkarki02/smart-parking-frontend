@@ -39,6 +39,8 @@ export const VENDOR_ROUTES = {
   UPDATE_SLOTS: (id: number | string) =>
     `/parking-locations/${id}/available-slots`,
 
+  UPDATE_PARKING: (id: number | string) => `/updateparking/${id}`,
+
   DASHBOARD: "/dashboard",
   DASHBOARD_SUMMARY: "/dashboard/summary",
 } as const;

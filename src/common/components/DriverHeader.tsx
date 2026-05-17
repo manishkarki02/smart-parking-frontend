@@ -24,12 +24,12 @@ export function DriverHeader() {
   };
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/80 backdrop-blur-md supports-[backdrop-filter]:bg-background/60">
+    <header className="sticky top-0 z-50 w-full border-b bg-background/80 backdrop-blur-md supports-backdrop-filter:bg-background/60">
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
         {/* Logo Section */}
         <Link to="/" className="flex items-center gap-2">
           <Car className="h-6 w-6 text-primary" />
-          <span className="text-xl font-bold bg-gradient-to-r from-primary to-green-500 bg-clip-text text-transparent">
+          <span className="text-xl font-bold bg-linear-to-r from-primary to-green-500 bg-clip-text text-transparent">
             Smart Parking
           </span>
         </Link>
