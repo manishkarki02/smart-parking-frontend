@@ -9,7 +9,7 @@ export const API_BASE = {
   BOOKINGS: "/bookings",
   VENDORS: "/vendors",
   ADMIN: "/admin",
-  PAYMENT: "/payment",
+  PAYMENT: "/payments",
 } as const;
 
 // ─── Auth ─────────────────────────────────────────────────────────────────────
@@ -20,37 +20,31 @@ export const AUTH_ROUTES = {
 
 // ─── Parking ──────────────────────────────────────────────────────────────────
 export const PARKING_ROUTES = {
-  AVAILABLE_SLOTS: "/areas/thamel/available-slots",
-  NEAREST: "/areas/thamel/nearest",
-  THAMEL_NEARBY: "/areas/thamel-nearby",
+  LIST: "",
+  MINE: "/mine",
+  NEAREST: "/nearest",
+  NEARBY: "/nearby",
+  BY_ID: (id: number | string) => `/${id}`,
+  SLOTS: (id: number | string) => `/${id}/slots`,
 } as const;
 
 // ─── Booking ──────────────────────────────────────────────────────────────────
 export const BOOKING_ROUTES = {
-  CREATE: "/create",
-  MY_BOOKINGS: "/mybookings",
+  CREATE: "",
+  ME: "/me",
+  BY_ID: (id: number | string) => `/${id}`,
 } as const;
 
 // ─── Vendor ───────────────────────────────────────────────────────────────────
 export const VENDOR_ROUTES = {
-  ADD_PARKING: "/addparking",
-  MY_PARKING: "/view/parking-locations",
-
-  UPDATE_SLOTS: (id: number | string) =>
-    `/parking-locations/${id}/available-slots`,
-
-  UPDATE_PARKING: (id: number | string) => `/updateparking/${id}`,
-
   DASHBOARD: "/dashboard",
-  DASHBOARD_SUMMARY: "/dashboard/summary",
 } as const;
 
 // ─── Admin ────────────────────────────────────────────────────────────────────
 export const ADMIN_ROUTES = {
   DASHBOARD: "/dashboard",
   BOOKINGS: "/bookings",
-  VENDORS: "/vendors",
-  DRIVERS: "/drivers",
+  USERS: "/users",
 } as const;
 
 // ─── Payment ──────────────────────────────────────────────────────────────────

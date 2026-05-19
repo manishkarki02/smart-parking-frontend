@@ -13,6 +13,6 @@ export async function createBooking(
 }
 
 export async function getMyBookings(): Promise<BookingResponse[]> {
-  const response = await bookingApi.get<ApiResponse<BookingResponse[]>>(BOOKING_ROUTES.MY_BOOKINGS);
+  const response = await bookingApi.get<ApiResponse<BookingResponse[]>>(BOOKING_ROUTES.ME);
   return response.data.data ?? [];
 }

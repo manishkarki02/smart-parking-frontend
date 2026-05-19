@@ -15,7 +15,7 @@ function useBookingMutation() {
     error: "Failed to create booking",
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: queryKeys.bookings.myBookings(),
+        queryKey: queryKeys.bookings.me(),
       });
       navigate({ to: "/bookings" as string });
     },

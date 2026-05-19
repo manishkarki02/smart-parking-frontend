@@ -12,7 +12,8 @@ function useAddParkingMutation(onSuccess?: () => void) {
     success: "Parking location added successfully!",
     error: "Failed to add parking location. Please try again.",
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.vendor.myParking() });
+      queryClient.invalidateQueries({ queryKey: queryKeys.parking.mine() });
+      queryClient.invalidateQueries({ queryKey: queryKeys.vendor.dashboard() });
       onSuccess?.();
     },
     onError: (error) => {

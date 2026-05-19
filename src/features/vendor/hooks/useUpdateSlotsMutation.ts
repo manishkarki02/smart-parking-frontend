@@ -16,7 +16,8 @@ function useUpdateSlotsMutation({
     success: "Slots updated successfully!",
     error: "Failed to update slots",
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.vendor.myParking() });
+      queryClient.invalidateQueries({ queryKey: queryKeys.parking.mine() });
+      queryClient.invalidateQueries({ queryKey: queryKeys.vendor.dashboard() });
       onOpenChange(false);
     },
   });

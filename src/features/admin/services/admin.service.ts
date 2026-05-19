@@ -21,14 +21,24 @@ export async function getAllBookings(): Promise<AdminBooking[]> {
 
 export async function getVendors(): Promise<AdminUser[]> {
   const response = await adminApi.get<ApiResponse<AdminUser[]>>(
-    ADMIN_ROUTES.VENDORS,
+    ADMIN_ROUTES.USERS,
+    {
+      params: {
+        role: "VENDOR",
+      },
+    },
   );
   return response.data.data ?? [];
 }
 
 export async function getDrivers(): Promise<AdminUser[]> {
   const response = await adminApi.get<ApiResponse<AdminUser[]>>(
-    ADMIN_ROUTES.DRIVERS,
+    ADMIN_ROUTES.USERS,
+    {
+      params: {
+        role: "DRIVER",
+      },
+    },
   );
   return response.data.data ?? [];
 }

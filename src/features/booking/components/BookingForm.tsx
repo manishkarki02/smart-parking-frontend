@@ -33,7 +33,7 @@ interface BookingFormProps {
 
 export function BookingForm({ preselectedParkingId }: BookingFormProps) {
   const { data: parkingSlots = [], isLoading: slotsLoading } = useQuery({
-    queryKey: queryKeys.parking.availableSlots(),
+    queryKey: queryKeys.parking.available(),
     queryFn: getAllSlots,
   });
 

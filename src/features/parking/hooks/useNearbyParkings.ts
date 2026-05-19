@@ -13,7 +13,7 @@ function useNearbyParkings({
 }) {
   const { data = [], isLoading } = useCustomQuery({
     key: queryKeys.parking.nearby(lat ?? 0, lng ?? 0, radius),
-    queryFn: () => getThamelNearby(lat ?? 0, lng ?? 0),
+    queryFn: () => getThamelNearby(lat ?? 0, lng ?? 0, radius),
     options: {
       enabled: lat !== null && lng !== null,
     },

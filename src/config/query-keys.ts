@@ -7,30 +7,29 @@ export const queryKeys = {
 
   // ─── Parking ────────────────────────────────────────────────────────────────
   parking: {
-    all: () => ["PARKING"] as const,
-    availableSlots: () => ["PARKING", "AVAILABLE_SLOTS"] as const,
+    all: (filters?: { area?: string; available?: boolean }) =>
+      ["PARKING", "LIST", filters ?? {}] as const,
+    available: (area = "thamel") =>
+      ["PARKING", "LIST", { area, available: true }] as const,
     nearest: (lat: number, lng: number) =>
       ["PARKING", "NEAREST", { lat, lng }] as const,
-    nearby: (lat: number, lng: number, radius?: number) =>
-      ["PARKING", "NEARBY", { lat, lng, radius }] as const,
+    nearby: (lat: number, lng: number, limit = 5) =>
+      ["PARKING", "NEARBY", { lat, lng, limit }] as const,
+    mine: () => ["PARKING", "MINE"] as const,
+    detail: (id: number | string) => ["PARKING", "DETAIL", id] as const,
   },
 
   // ─── Bookings ────────────────────────────────────────────────────────────────
   bookings: {
     all: () => ["BOOKINGS"] as const,
-    myBookings: () => ["BOOKINGS", "MY_BOOKINGS"] as const,
+    me: () => ["BOOKINGS", "ME"] as const,
     byId: (id: number | string) => ["BOOKINGS", "DETAIL", id] as const,
   },
 
   // ─── Vendor ──────────────────────────────────────────────────────────────────
   vendor: {
     all: () => ["VENDOR"] as const,
-    myParking: () => ["VENDOR", "MY_PARKING"] as const,
-    addParking: () => ["VENDOR", "ADD_PARKING"] as const,
-    parkingSlots: (id: number | string) =>
-      ["VENDOR", "PARKING_SLOTS", id] as const,
     dashboard: () => ["VENDOR", "DASHBOARD"] as const,
-    dashboardSummary: () => ["VENDOR", "DASHBOARD_SUMMARY"] as const,
   },
 
   // ─── Admin ───────────────────────────────────────────────────────────────────
@@ -38,8 +37,9 @@ export const queryKeys = {
     all: () => ["ADMIN"] as const,
     dashboard: () => ["ADMIN", "DASHBOARD"] as const,
     bookings: () => ["ADMIN", "BOOKINGS"] as const,
-    vendors: () => ["ADMIN", "VENDORS"] as const,
-    drivers: () => ["ADMIN", "DRIVERS"] as const,
+    users: (role?: "VENDOR" | "DRIVER") => ["ADMIN", "USERS", { role }] as const,
+    vendors: () => ["ADMIN", "USERS", { role: "VENDOR" }] as const,
+    drivers: () => ["ADMIN", "USERS", { role: "DRIVER" }] as const,
   },
 
   // ─── Payment ─────────────────────────────────────────────────────────────────

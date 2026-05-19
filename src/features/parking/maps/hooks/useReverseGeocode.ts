@@ -1,31 +1,34 @@
 import { useQuery } from "@tanstack/react-query";
-import axios from "axios";
+import { useMapsLibrary } from "@vis.gl/react-google-maps";
 
-const geocodingClient = axios.create({
-  baseURL: "https://maps.googleapis.com/maps/api",
-});
-
+type Location = {
+  lat: number;
+  lng: number;
+};
 async function reverseGeocode(
-  lat: number,
-  lng: number,
-  apiKey: string
+  geocodingLib: google.maps.GeocodingLibrary,
+  location: Location,
 ): Promise<string> {
-  const { data } = await geocodingClient.get("/geocode/json", {
-    params: { latlng: `${lat},${lng}`, key: apiKey },
-  });
-  if (data.status !== "OK") throw new Error(`Geocoding failed: ${data.status}`);
-  return data.results[0]?.formatted_address ?? "Unknown location";
+  const geocoder = new geocodingLib.Geocoder();
+  const response = await geocoder.geocode({ location });
+
+  if (response.results.length === 0) {
+    throw new Error("No address found for the given location.");
+  }
+
+  return response.results[0].formatted_address ?? "Unknown location";
 }
 
 export function useReverseGeocode(
   lat: number | undefined,
   lng: number | undefined,
-  apiKey: string,
-  enabled = true
+  enabled = true,
 ) {
+  const geocodingLib = useMapsLibrary("geocoding");
+
   return useQuery({
     queryKey: ["reverse-geocode", lat, lng],
-    queryFn: () => reverseGeocode(lat!, lng!, apiKey),
+    queryFn: () => reverseGeocode(geocodingLib!, { lat: lat!, lng: lng! }),
     enabled: enabled && lat != null && lng != null,
     staleTime: Infinity,
   });

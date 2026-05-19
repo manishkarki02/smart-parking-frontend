@@ -4,7 +4,7 @@ import useCustomQuery from "@/common/hooks/useCustomQuery";
 
 function useParkingSlots() {
   const { data: locations, isLoading } = useCustomQuery({
-    key: queryKeys.parking.availableSlots(),
+    key: queryKeys.parking.available(),
     queryFn: getAllSlots,
   });
   return { locations, isLoading };
