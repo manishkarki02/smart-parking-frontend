@@ -5,7 +5,7 @@
 // ─── API Base Paths ───────────────────────────────────────────────────────────
 export const API_BASE = {
   AUTH: "/auth",
-  PARKING: "/parking",
+  PARKING: "/parking-locations",
   BOOKINGS: "/bookings",
   VENDORS: "/vendors",
   ADMIN: "/admin",
@@ -16,6 +16,9 @@ export const API_BASE = {
 export const AUTH_ROUTES = {
   REGISTER: "/register",
   LOGIN: "/login",
+  REFRESH: "/refresh",
+  LOGOUT: "/logout",
+  LOGOUT_ALL: "/logout-all",
 } as const;
 
 // ─── Parking ──────────────────────────────────────────────────────────────────
@@ -45,6 +48,7 @@ export const ADMIN_ROUTES = {
   DASHBOARD: "/dashboard",
   BOOKINGS: "/bookings",
   USERS: "/users",
+  VENDORS: "/vendors",
 } as const;
 
 // ─── Payment ──────────────────────────────────────────────────────────────────
