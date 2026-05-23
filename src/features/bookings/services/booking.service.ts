@@ -1,7 +1,7 @@
 import type { ApiResponse } from "@/common/types/api.types";
 import type { BookingRequest, BookingResponse } from "../types/booking.types";
-import createApi from "@/lib/api";
-import { API_BASE, BOOKING_ROUTES } from "@/common/constants/api-routes";
+import createApi from "@/common/utils/api";
+import { API_BASE, BOOKING_ROUTES } from "@/config/api-routes";
 
 const bookingApi = createApi(API_BASE.BOOKINGS)
 

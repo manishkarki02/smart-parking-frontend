@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { getDashboard } from "@/features/admin/services/admin.service";
-import { StatsCard } from "@/features/admin/components/StatsCard";
+import { StatsCard } from "@/common/components/StatsCard";
 import { LoadingSpinner } from "@/common/components/LoadingSpinner";
 import { queryKeys } from "@/config/query-keys";
 import {
@@ -31,8 +31,8 @@ import {
 } from "@/components/ui/empty";
 import { Button } from "@/components/ui/button";
 import { useAuthGuard } from "@/common/hooks/use-auth-guard";
-import useParkingSlots from "@/features/parking/hooks/useParkingSlots";
-import type { ParkingLocation } from "@/features/parking/types/parking.types";
+import useParkingSlots from "@/features/parkings/hooks/useParkingSlots";
+import type { ParkingLocation } from "@/features/parkings/types/parking.types";
 import { useEffect } from "react";
 
 export const Route = createFileRoute("/_app/dashboard")({

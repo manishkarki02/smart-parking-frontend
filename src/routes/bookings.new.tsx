@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { BookingForm } from "@/features/booking/components/BookingForm";
+import { BookingForm } from "@/features/bookings/components/BookingForm";
 import { z } from "zod";
 import { AppLayout } from "@/common/components/AppLayout";
 import { useAuthGuard } from "@/common/hooks/use-auth-guard";

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import type { ParkingLocation } from "@/features/parking/types/parking.types";
+import type { ParkingLocation } from "@/features/parkings/types/parking.types";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {

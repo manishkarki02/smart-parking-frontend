@@ -1,11 +1,11 @@
 import type { ApiResponse } from "@/common/types/api.types";
-import type { ParkingLocation } from "@/features/parking/types/parking.types";
+import type { ParkingLocation } from "@/features/parkings/types/parking.types";
 import type {
   ParkingLocationRequest,
   VendorDashboardData,
 } from "../types/vendor.types";
-import { API_BASE, PARKING_ROUTES, VENDOR_ROUTES } from "@/common/constants/api-routes";
-import createApi from "@/lib/api";
+import { API_BASE, PARKING_ROUTES, VENDOR_ROUTES } from "@/config/api-routes";
+import createApi from "@/common/utils/api";
 
 const parkingApi = createApi(API_BASE.PARKING);
 const vendorApi = createApi(API_BASE.VENDORS);

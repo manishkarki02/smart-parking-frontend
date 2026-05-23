@@ -3,8 +3,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import {
   bookingSchema,
   type BookingFormValues,
-} from "../validation/booking.schema";
-import { getAllSlots } from "@/features/parking/services/parking.service";
+} from "../validations/booking.schema";
+import { getAllSlots } from "@/features/parkings/services/parking.service";
 import { useQuery } from "@tanstack/react-query";
 import { queryKeys } from "@/config/query-keys";
 import { Button } from "@/components/ui/button";

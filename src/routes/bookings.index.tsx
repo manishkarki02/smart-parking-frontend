@@ -1,13 +1,13 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { getMyBookings } from "@/features/booking/services/booking.service";
-import { BookingCard } from "@/features/booking/components/BookingCard";
+import { getMyBookings } from "@/features/bookings/services/booking.service";
+import { BookingCard } from "@/features/bookings/components/BookingCard";
 import { LoadingSpinner } from "@/common/components/LoadingSpinner";
 import { queryKeys } from "@/config/query-keys";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
-import { initiatePayment } from "@/features/payment/services/payment.service";
-import type { BookingResponse } from "@/features/booking/types/booking.types";
+import { initiatePayment } from "@/features/payments/services/payment.service";
+import type { BookingResponse } from "@/features/bookings/types/booking.types";
 import { toast } from "sonner";
 import { AppLayout } from "@/common/components/AppLayout";
 import { useAuthGuard } from "@/common/hooks/use-auth-guard";

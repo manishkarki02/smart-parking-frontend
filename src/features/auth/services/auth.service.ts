@@ -1,8 +1,8 @@
-import createApi from "@/lib/api";
+import createApi from "@/common/utils/api";
 import type { ApiResponse } from "@/common/types/api.types";
 import type { AuthResponse } from "../types/auth.types";
-import type { LoginSchema, RegisterSchema } from "../validation/auth.schema";
-import { API_BASE, AUTH_ROUTES } from "@/common/constants/api-routes";
+import type { LoginSchema, RegisterSchema } from "../validations/auth.schema";
+import { API_BASE, AUTH_ROUTES } from "@/config/api-routes";
 
 const authApi = createApi(API_BASE.AUTH);
 

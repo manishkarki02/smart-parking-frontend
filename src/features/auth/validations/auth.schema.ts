@@ -12,11 +12,9 @@ export const registerSchema = z.object({
   email: z.email("Please enter a valid email address"),
   password: z.string().min(6, "Password must be at least 6 characters"),
   phone: z.string().min(1, "Phone number is required"),
-  role: z
-    .enum(Object.values(Roles), {
-      error: "Please select a role",
-    })
-    // .default(Roles.DRIVER),
+  role: z.enum(Object.values(Roles), {
+    error: "Please select a role",
+  }),
 });
 
 export type RegisterSchema = z.infer<typeof registerSchema>;

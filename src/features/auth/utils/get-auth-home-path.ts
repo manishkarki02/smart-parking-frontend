@@ -1,4 +1,4 @@
-import type { AuthUser } from "@/store/auth-store";
+import type { AuthUser } from "@/stores/auth-store";
 
 export type AuthHomePath = "/dashboard" | "/vendor/dashboard";
 

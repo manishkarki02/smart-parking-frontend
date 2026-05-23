@@ -1,7 +1,7 @@
-import createApi from "@/lib/api";
+import createApi from "@/common/utils/api";
 import type { ApiResponse } from "@/common/types/api.types";
 import type { ParkingLocation } from "../types/parking.types";
-import { API_BASE, PARKING_ROUTES } from "@/common/constants/api-routes";
+import { API_BASE, PARKING_ROUTES } from "@/config/api-routes";
 
 const parkingApi = createApi(API_BASE.PARKING);
 

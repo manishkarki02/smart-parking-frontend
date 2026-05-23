@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import {
   registerSchema,
   type RegisterSchema,
-} from "../validation/auth.schema";
+} from "../validations/auth.schema";
 import { Link } from "@tanstack/react-router";
 
 import { Button } from "@/components/ui/button";

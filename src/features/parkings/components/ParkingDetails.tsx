@@ -5,8 +5,8 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { LoginModal } from "@/features/auth/components/LoginModal";
-import { useAuthStore } from "@/store/auth-store";
-import useParkingSlots from "@/features/parking/hooks/useParkingSlots";
+import { useAuthStore } from "@/stores/auth-store";
+import useParkingSlots from "@/features/parkings/hooks/useParkingSlots";
 import { SlotGrid } from "./SlotGrid";
 
 type ParkingDetailsProps = {

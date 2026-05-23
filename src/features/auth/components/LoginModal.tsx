@@ -16,7 +16,7 @@ import { Loader2, Car, Eye, EyeOff } from "lucide-react";
 import {
   loginSchema,
   type LoginSchema,
-} from "@/features/auth/validation/auth.schema";
+} from "@/features/auth/validations/auth.schema";
 import { Link } from "@tanstack/react-router";
 import useLoginMutation from "../hooks/useLoginMutation";
 

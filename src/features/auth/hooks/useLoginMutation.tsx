@@ -1,6 +1,6 @@
 import useCustomMutation from "@/common/hooks/useCustomMutation";
 import { loginUser } from "../services/auth.service";
-import { useAuthStore } from "@/store/auth-store";
+import { useAuthStore } from "@/stores/auth-store";
 import { toast } from "sonner";
 import { useNavigate } from "@tanstack/react-router";
 
