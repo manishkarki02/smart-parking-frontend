@@ -18,12 +18,12 @@ import {
   Plus,
   Search,
 } from "lucide-react";
-import { useReverseGeocode } from "../hooks/useReverseGeocode";
+import { useReverseGeocode } from "../../hooks/maps/useReverseGeocode";
 import {
   useGeolocation,
   type GeolocationStatus,
-} from "../hooks/useGeolocation";
-import type { PickerLocation } from "../types/map.types";
+} from "../../hooks/maps/useGeolocation";
+import type { PickerLocation } from "../../types/map.types";
 
 const DEFAULT_CENTER = { lat: 27.7172, lng: 85.324 };
 

@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
-import type { LatLng } from "../types/map.types";
+import type { LatLng } from "../../types/map.types";
 
 interface OsrmRouteResponse {
   routes?: Array<{

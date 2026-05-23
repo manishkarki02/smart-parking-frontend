@@ -3,16 +3,16 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import {
   addParkingSchema,
   type AddParkingFormValues,
-} from "../validation/vendor.schema";
+} from "../validations/vendor.schema";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Loader2 } from "lucide-react";
 import { useState } from "react";
-// import { LeafletLocationPickerMap } from "@/features/parking/maps/components/LeafletLocationPickerMap";
-import { LocationPickerMap } from "@/features/parking/maps/components/LocationPickerMap";
-import { MapProvider } from "@/features/parking/maps/components/MapProvider";
-import type { PickerLocation } from "@/features/parking/maps/types/map.types";
+// import { LeafletLocationPickerMap } from "@/common/components/maps/LeafletLocationPickerMap";
+import { LocationPickerMap } from "@/common/components/maps/LocationPickerMap";
+import { MapProvider } from "@/common/components/maps/MapProvider";
+import type { PickerLocation } from "@/common/types/map.types";
 import useAddParkingMutation from "../hooks/useAddParkingMutation";
 
 interface AddParkingFormProps {

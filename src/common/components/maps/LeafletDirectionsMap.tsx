@@ -9,8 +9,8 @@ import {
 } from "react-leaflet";
 import L from "leaflet";
 import { AlertCircle, Loader2 } from "lucide-react";
-import { useLeafletDirections } from "../hooks/useLeafletDirections";
-import type { LatLng } from "../types/map.types";
+import { useLeafletDirections } from "../../hooks/maps/useLeafletDirections";
+import type { LatLng } from "../../types/map.types";
 
 const originIcon = L.divIcon({
   className: "leaflet-route-origin",

@@ -1,5 +1,5 @@
 import { Building2, ParkingCircle, CheckCircle, XCircle } from "lucide-react";
-import { StatsCard } from "@/features/admin/components/StatsCard";
+import { StatsCard } from "@/common/components/StatsCard";
 import type { VendorDashboardData } from "../types/vendor.types";
 
 interface VendorDashboardStatsProps {

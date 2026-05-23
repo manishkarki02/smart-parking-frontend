@@ -18,12 +18,12 @@ import {
   X,
 } from "lucide-react";
 import useDebounce from "@/common/hooks/useDebounce";
-import type { LatLng, PickerLocation } from "../types/map.types";
+import type { LatLng, PickerLocation } from "../../types/map.types";
 import {
   type LeafletSearchResult,
   useLeafletLocationSearch,
   useLeafletReverseGeocode,
-} from "../hooks/useLeafletGeocode";
+} from "../../hooks/maps/useLeafletGeocode";
 
 const DEFAULT_CENTER: LatLng = { lat: 27.7172, lng: 85.324 };
 

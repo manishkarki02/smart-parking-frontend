@@ -9,9 +9,9 @@ import {
 } from "react-leaflet";
 import L from "leaflet";
 import { Loader2, LocateFixed, Navigation } from "lucide-react";
-import type { ParkingLocation } from "@/features/parking/types/parking.types";
-import { useGeolocation } from "../hooks/useGeolocation";
-import type { LatLng } from "../types/map.types";
+import type { ParkingLocation } from "@/features/parkings/types/parking.types";
+import { useGeolocation } from "../../hooks/maps/useGeolocation";
+import type { LatLng } from "../../types/map.types";
 
 const DEFAULT_CENTER: LatLng = { lat: 27.7172, lng: 85.324 };
 

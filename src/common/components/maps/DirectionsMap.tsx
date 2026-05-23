@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import { Map, useMap, useMapsLibrary } from "@vis.gl/react-google-maps";
 import { Loader2, AlertCircle } from "lucide-react";
-import { useDirections } from "../hooks/useDirections";
+import { useDirections } from "../../hooks/maps/useDirections";
 
 const DEFAULT_CENTER = { lat: 27.7172, lng: 85.324 };
 

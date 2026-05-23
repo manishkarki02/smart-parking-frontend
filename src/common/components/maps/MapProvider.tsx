@@ -1,5 +1,5 @@
 import { APIProvider } from "@vis.gl/react-google-maps";
-import { ENV } from "@/config/env-constant";
+import { ENV } from "@/config/env-constants";
 
 interface MapProviderProps {
   children: React.ReactNode;

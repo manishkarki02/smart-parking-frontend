@@ -11,14 +11,14 @@ import {
   X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import useParkingSlots from "@/features/parking/hooks/useParkingSlots";
-// import { LeafletParkingOverviewMap } from "@/features/parking/maps/components/LeafletParkingOverviewMap";
-// import { LeafletDirectionsMap } from "@/features/parking/maps/components/LeafletDirectionsMap";
-import { ParkingOverviewMap } from "@/features/parking/maps/components/ParkingOverviewMap";
-import { DirectionsMap } from "@/features/parking/maps/components/DirectionsMap";
-import { MapProvider } from "@/features/parking/maps/components/MapProvider";
-import type { ParkingLocation } from "@/features/parking/types/parking.types";
-import { useGeolocation } from "@/features/parking/maps/hooks/useGeolocation";
+import useParkingSlots from "@/features/parkings/hooks/useParkingSlots";
+// import { LeafletParkingOverviewMap } from "@/common/components/maps/LeafletParkingOverviewMap";
+// import { LeafletDirectionsMap } from "@/common/components/maps/LeafletDirectionsMap";
+import { ParkingOverviewMap } from "@/common/components/maps/ParkingOverviewMap";
+import { DirectionsMap } from "@/common/components/maps/DirectionsMap";
+import { MapProvider } from "@/common/components/maps/MapProvider";
+import type { ParkingLocation } from "@/features/parkings/types/parking.types";
+import { useGeolocation } from "@/common/hooks/maps/useGeolocation";
 import { useAuthGuard } from "@/common/hooks/use-auth-guard";
 
 export const Route = createFileRoute("/parking/map")({
