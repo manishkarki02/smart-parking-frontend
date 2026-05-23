@@ -1,7 +1,7 @@
-import createApi from "@/lib/api";
+import createApi from "@/common/utils/api";
 import type { ApiResponse } from "@/common/types/api.types";
-import type { AdminStats, AdminUser, AdminBooking } from "../types/admin.types";
-import { ADMIN_ROUTES, API_BASE } from "@/common/constants/api-routes";
+import type { AdminStats } from "../types/admin.types";
+import { ADMIN_ROUTES, API_BASE } from "@/config/api-routes";
 
 const adminApi = createApi(API_BASE.ADMIN);
 
@@ -10,35 +10,4 @@ export async function getDashboard(): Promise<AdminStats> {
     ADMIN_ROUTES.DASHBOARD,
   );
   return response.data.data;
-}
-
-export async function getAllBookings(): Promise<AdminBooking[]> {
-  const response = await adminApi.get<ApiResponse<AdminBooking[]>>(
-    ADMIN_ROUTES.BOOKINGS,
-  );
-  return response.data.data ?? [];
-}
-
-export async function getVendors(): Promise<AdminUser[]> {
-  const response = await adminApi.get<ApiResponse<AdminUser[]>>(
-    ADMIN_ROUTES.USERS,
-    {
-      params: {
-        role: "VENDOR",
-      },
-    },
-  );
-  return response.data.data ?? [];
-}
-
-export async function getDrivers(): Promise<AdminUser[]> {
-  const response = await adminApi.get<ApiResponse<AdminUser[]>>(
-    ADMIN_ROUTES.USERS,
-    {
-      params: {
-        role: "DRIVER",
-      },
-    },
-  );
-  return response.data.data ?? [];
 }

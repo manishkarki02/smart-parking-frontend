@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { getVendors } from "@/features/admin/services/admin.service";
-import { UserTable } from "@/features/admin/components/UserTable";
+import { getVendors } from "@/features/users/services/user.service";
+import { UserTable } from "@/features/users/components/UserTable";
 import { LoadingSpinner } from "@/common/components/LoadingSpinner";
 import { queryKeys } from "@/config/query-keys";
 import { PageHeader } from "@/common/components/PageHeader";

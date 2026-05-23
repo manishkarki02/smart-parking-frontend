@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { getAllBookings } from "@/features/admin/services/admin.service";
-import { BookingsTable } from "@/features/admin/components/BookingsTable";
+import { getAllBookings } from "@/features/bookings/services/admin-bookings.service";
+import { BookingsTable } from "@/features/bookings/components/BookingsTable";
 import { LoadingSpinner } from "@/common/components/LoadingSpinner";
 import { queryKeys } from "@/config/query-keys";
 import { PageHeader } from "@/common/components/PageHeader";

@@ -1,4 +1,4 @@
-import type { AdminUser } from "../types/admin.types";
+import type { User } from "../types/user.types";
 import {
   Table,
   TableBody,
@@ -10,7 +10,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 
 interface UserTableProps {
-  users: AdminUser[];
+  users: User[];
 }
 
 export function UserTable({ users }: UserTableProps) {
