@@ -17,15 +17,6 @@ export function PublicNavbar() {
         {/* Navigation */}
         <nav className="flex items-center gap-3">
           <Button variant="ghost" asChild>
-            <Link
-              to="/"
-              className="text-sm font-medium text-muted-foreground hover:text-foreground"
-            >
-              Home
-            </Link>
-          </Button>
-
-          <Button variant="ghost" asChild>
             <Link to="/login">Sign In</Link>
           </Button>
 

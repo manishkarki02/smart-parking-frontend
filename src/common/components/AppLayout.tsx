@@ -99,11 +99,13 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
     <SidebarProvider>
       <AppSidebar />
       <SidebarInset>
-        <header className="sticky top-0 z-30 flex h-14 shrink-0 items-center gap-3 border-b bg-background/95 px-4 backdrop-blur supports-[backdrop-filter]:bg-background/80">
+        <header className="sticky top-0 z-30 flex h-14 shrink-0 items-center gap-3 border-b bg-background/95 px-4 backdrop-blur supports-backdrop-filter:bg-background/80">
           <SidebarTrigger />
           <div className="flex min-w-0 items-center gap-2 md:hidden">
             <Car className="size-5 shrink-0 text-primary" />
-            <span className="truncate text-sm font-semibold">Smart Parking</span>
+            <span className="truncate text-sm font-semibold">
+              Smart Parking
+            </span>
           </div>
         </header>
         <main className="flex-1 overflow-y-auto p-4 md:p-6">{children}</main>
@@ -139,9 +141,13 @@ function AppSidebar() {
                 <Car className="size-4" />
               </span>
               <span className="flex min-w-0 flex-col">
-                <span className="truncate text-sm font-semibold">Smart Parking</span>
+                <span className="truncate text-sm font-semibold">
+                  Smart Parking
+                </span>
                 <span className="truncate text-xs text-sidebar-foreground/60">
-                  {user?.role ? `${user.role.toLowerCase()} panel` : "Parking panel"}
+                  {user?.role
+                    ? `${user.role.toLowerCase()} panel`
+                    : "Parking panel"}
                 </span>
               </span>
             </SidebarMenuButton>
@@ -194,7 +200,9 @@ function AppSidebar() {
                 {user?.name?.slice(0, 1).toUpperCase() || "U"}
               </span>
               <span className="flex min-w-0 flex-col">
-                <span className="truncate text-sm font-medium">{user?.name}</span>
+                <span className="truncate text-sm font-medium">
+                  {user?.name}
+                </span>
                 <span className="truncate text-xs text-sidebar-foreground/60">
                   {user?.email}
                 </span>
