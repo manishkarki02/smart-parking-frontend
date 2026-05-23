@@ -1,5 +1,4 @@
-import { createFileRoute, redirect, Link } from "@tanstack/react-router";
-import { useAuthStore } from "@/store/auth-store";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { getMyBookings } from "@/features/booking/services/booking.service";
 import { BookingCard } from "@/features/booking/components/BookingCard";
@@ -11,22 +10,23 @@ import { initiatePayment } from "@/features/payment/services/payment.service";
 import type { BookingResponse } from "@/features/booking/types/booking.types";
 import { toast } from "sonner";
 import { DriverLayout } from "@/common/components/DriverLayout";
+import { useAuthGuard } from "@/common/hooks/use-auth-guard";
 
 export const Route = createFileRoute("/bookings/")({
-  beforeLoad: () => {
-    const user = useAuthStore.getState().user;
-    if (!user || user.role !== "DRIVER") {
-      throw redirect({ to: "/" });
-    }
-  },
   component: BookingsPage,
 });
 
 function BookingsPage() {
+  const { isAuthorized } = useAuthGuard({ allowedRoles: ["DRIVER"] });
   const { data: bookings = [], isLoading } = useQuery({
     queryKey: queryKeys.bookings.me(),
     queryFn: getMyBookings,
+    enabled: isAuthorized,
   });
+
+  if (!isAuthorized) {
+    return null;
+  }
 
   const handlePay = async (booking: BookingResponse) => {
     try {

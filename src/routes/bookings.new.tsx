@@ -1,8 +1,8 @@
-import { createFileRoute, redirect } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { BookingForm } from "@/features/booking/components/BookingForm";
 import { z } from "zod";
 import { DriverLayout } from "@/common/components/DriverLayout";
-import { useAuthStore } from "@/store/auth-store";
+import { useAuthGuard } from "@/common/hooks/use-auth-guard";
 
 const searchSchema = z.object({
   parkingLocationId: z.coerce.number().optional(),
@@ -10,17 +10,16 @@ const searchSchema = z.object({
 
 export const Route = createFileRoute("/bookings/new")({
   validateSearch: searchSchema,
-  beforeLoad: () => {
-    const user = useAuthStore.getState().user;
-    if (!user || user.role !== "DRIVER") {
-      throw redirect({ to: "/" });
-    }
-  },
   component: NewBookingPage,
 });
 
 function NewBookingPage() {
+  const { isAuthorized } = useAuthGuard({ allowedRoles: ["DRIVER"] });
   const { parkingLocationId } = Route.useSearch();
+
+  if (!isAuthorized) {
+    return null;
+  }
 
   return (
     <DriverLayout>

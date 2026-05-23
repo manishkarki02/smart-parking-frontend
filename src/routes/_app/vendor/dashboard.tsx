@@ -1,12 +1,17 @@
-import { createFileRoute, redirect } from "@tanstack/react-router";
-import { useAuthStore } from "@/store/auth-store";
+import { createFileRoute } from "@tanstack/react-router";
+import { useAuthGuard } from "@/common/hooks/use-auth-guard";
 import { VendorDashboardPage } from "@/features/vendor/components/VendorDashboardPage";
 
 export const Route = createFileRoute("/_app/vendor/dashboard")({
-  beforeLoad: () => {
-    if (useAuthStore.getState().user?.role !== "VENDOR") {
-      throw redirect({ to: "/" });
-    }
-  },
-  component: VendorDashboardPage,
+  component: VendorDashboardRoute,
 });
+
+function VendorDashboardRoute() {
+  const { isAuthorized } = useAuthGuard({ allowedRoles: ["VENDOR"] });
+
+  if (!isAuthorized) {
+    return null;
+  }
+
+  return <VendorDashboardPage />;
+}

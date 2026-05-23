@@ -1,6 +1,5 @@
 import { useState } from "react";
-import { createFileRoute, redirect } from "@tanstack/react-router";
-import { useAuthStore } from "@/store/auth-store";
+import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { getMyParkingLocations } from "@/features/vendor/services/vendor.service";
 import { VendorParkingCard } from "@/features/vendor/components/VendorParkingCard";
@@ -19,23 +18,25 @@ import {
 } from "@/components/ui/dialog";
 import { PageHeader } from "@/common/components/PageHeader";
 import { Card } from "@/components/ui/card";
+import { useAuthGuard } from "@/common/hooks/use-auth-guard";
 
 export const Route = createFileRoute("/_app/vendor/parking")({
-  beforeLoad: () => {
-    if (useAuthStore.getState().user?.role !== "VENDOR") {
-      throw redirect({ to: "/" });
-    }
-  },
   component: VendorParkingPage,
 });
 
 function VendorParkingPage() {
+  const { isAuthorized } = useAuthGuard({ allowedRoles: ["VENDOR"] });
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
   const { data: locations = [], isLoading } = useQuery({
     queryKey: queryKeys.parking.mine(),
     queryFn: getMyParkingLocations,
+    enabled: isAuthorized,
   });
+
+  if (!isAuthorized) {
+    return null;
+  }
 
   return (
     <div className="space-y-6">
