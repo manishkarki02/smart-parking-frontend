@@ -19,10 +19,13 @@ function useLoginMutation({
     success: "Login successful!",
     error: "Login failed",
     onSuccess: (data) => {
-      setAuth(data.token, {
+      setAuth(data.accessToken, {
+        id: data.userId,
         name: data.name,
         email: data.email,
         role: data.role,
+        banned: data.banned,
+        approved: data.approved,
       });
 
       console.log("Login successful, user data:", {

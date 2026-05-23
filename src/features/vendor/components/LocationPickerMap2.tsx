@@ -8,6 +8,7 @@ import {
   Pin,
   ControlPosition,
   MapControl,
+  type MapMouseEvent,
 } from "@vis.gl/react-google-maps";
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
@@ -121,9 +122,12 @@ function MapContent({
   }, [resolvedAddress, value, onChange]);
 
   // ── Map click: select location — resets locate state (user moved away) ──
-  const handleMapClick = (e: { detail: { latLng: { lat: number; lng: number } } }) => {
+  const handleMapClick = (e: MapMouseEvent) => {
+    const latLng = e.detail.latLng;
+    if (!latLng) return;
+
     setLocateState("idle");
-    onChange({ lat: e.detail.latLng.lat, lng: e.detail.latLng.lng });
+    onChange({ lat: latLng.lat, lng: latLng.lng });
   };
 
   // ── Zoom helpers — update state then imperatively call the API ──

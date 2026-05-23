@@ -2,9 +2,12 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
 export interface AuthUser {
+  id?: string;
   name: string;
   email: string;
   role: "DRIVER" | "VENDOR" | "ADMIN";
+  banned?: boolean;
+  approved?: boolean;
 }
 
 interface AuthState {

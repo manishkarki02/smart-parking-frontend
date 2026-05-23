@@ -20,7 +20,7 @@ export const Route = createFileRoute("/")({
       throw redirect({ to: "/dashboard" });
     }
     if (user?.role === "VENDOR") {
-      throw redirect({ to: "/vendor/parking" });
+      throw redirect({ to: "/vendor/dashboard" });
     }
   },
   component: HomePage,
