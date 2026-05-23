@@ -26,3 +26,4 @@ export * from "./hooks/use-mobile";
 export * from "./types/api.types";
 export * from "./types/map.types";
 export { default as createApi } from "./utils/api";
+export * from "./utils/get-api-error-message";

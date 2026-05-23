@@ -4,6 +4,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { queryKeys } from "@/config/query-keys";
 import { useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
+import { getApiErrorMessage } from "@/common/utils/get-api-error-message";
 
 function useBookingMutation() {
   const queryClient = useQueryClient();
@@ -20,7 +21,10 @@ function useBookingMutation() {
       navigate({ to: "/bookings" as string });
     },
     onError: (error) => {
-      toast.error(error.message);
+      const message = getApiErrorMessage(error);
+      if (typeof message === "string") {
+        toast.error(message);
+      }
     },
   });
 

@@ -3,6 +3,7 @@ import { loginUser } from "../services/auth.service";
 import { useAuthStore } from "@/stores/auth-store";
 import { toast } from "sonner";
 import { useNavigate } from "@tanstack/react-router";
+import { getApiErrorMessage } from "@/common/utils/get-api-error-message";
 
 function useLoginMutation({
   onSuccess,
@@ -54,7 +55,10 @@ function useLoginMutation({
       }
     },
     onError: (error) => {
-      toast.error(error.message);
+      const message = getApiErrorMessage(error);
+      if (typeof message === "string") {
+        toast.error(message);
+      }
     },
   });
 

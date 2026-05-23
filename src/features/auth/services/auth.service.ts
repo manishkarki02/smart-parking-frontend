@@ -14,10 +14,28 @@ export async function loginUser(data: LoginSchema): Promise<AuthResponse> {
   return response.data.data;
 }
 
-export async function registerUser(data: RegisterSchema): Promise<string> {
-  const response = await authApi.post<ApiResponse<string>>(
+export async function registerUser(
+  data: RegisterSchema,
+): Promise<AuthResponse> {
+  const response = await authApi.post<ApiResponse<AuthResponse>>(
     AUTH_ROUTES.REGISTER,
     data,
-  ); // TODO: Change this to AuthResponse when backend is fixed
+  );
+  console.log("Registration response:", response);
   return response.data.data;
+}
+
+export async function refreshToken(): Promise<AuthResponse> {
+  const response = await authApi.post<ApiResponse<AuthResponse>>(
+    AUTH_ROUTES.REFRESH,
+  );
+  return response.data.data;
+}
+
+export async function logoutUser(): Promise<void> {
+  await authApi.post(AUTH_ROUTES.LOGOUT);
+}
+
+export async function logoutAllSessions(): Promise<void> {
+  await authApi.post(AUTH_ROUTES.LOGOUT_ALL);
 }
