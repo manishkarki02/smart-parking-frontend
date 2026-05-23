@@ -1,5 +1,5 @@
 import axios, { AxiosError, type InternalAxiosRequestConfig } from "axios";
-import { useAuthStore } from "@/store/auth-store";
+import { useAuthStore } from "@/stores/auth-store";
 
 axios.defaults.headers.post["Content-Type"] = "application/json";
 const API_URL = "/api";

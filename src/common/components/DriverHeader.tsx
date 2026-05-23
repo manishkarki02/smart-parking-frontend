@@ -1,5 +1,5 @@
 import { Link, useNavigate } from "@tanstack/react-router";
-import { useAuthStore } from "@/store/auth-store";
+import { useAuthStore } from "@/stores/auth-store";
 import { Button } from "@/components/ui/button";
 import { Car, User, LogOut, Settings } from "lucide-react";
 import { useState } from "react";

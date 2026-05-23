@@ -2,14 +2,14 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { AppLayout } from "@/common/components/AppLayout";
 import { PublicShell } from "@/common/components/PublicShell";
 import { useState, useMemo } from "react";
-import { SlotGrid } from "@/features/parking/components/SlotGrid";
-import { useAuthStore } from "@/store/auth-store";
+import { SlotGrid } from "@/features/parkings/components/SlotGrid";
+import { useAuthStore } from "@/stores/auth-store";
 import { LoginModal } from "@/features/auth/components/LoginModal";
 import { Button } from "@/components/ui/button";
 import { MapPin, Image as ImageIcon, Loader2 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { toast } from "sonner";
-import useParkingSlots from "@/features/parking/hooks/useParkingSlots";
+import useParkingSlots from "@/features/parkings/hooks/useParkingSlots";
 
 export const Route = createFileRoute("/parking/$id")({
   component: ParkingDetailsPage,

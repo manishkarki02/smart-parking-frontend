@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useNavigate } from "@tanstack/react-router";
-import type { AuthUser } from "@/store/auth-store";
-import { useAuthStore } from "@/store/auth-store";
+import type { AuthUser } from "@/stores/auth-store";
+import { useAuthStore } from "@/stores/auth-store";
 
 type AuthRole = AuthUser["role"];
 

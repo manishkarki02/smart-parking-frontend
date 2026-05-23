@@ -22,8 +22,8 @@ import {
   Loader2,
   ParkingCircle,
 } from "lucide-react";
-import { useAuthStore } from "@/store/auth-store";
-import useParkingSlots from "@/features/parking/hooks/useParkingSlots";
+import { useAuthStore } from "@/stores/auth-store";
+import useParkingSlots from "@/features/parkings/hooks/useParkingSlots";
 import { getAuthHomePath } from "@/features/auth/utils/get-auth-home-path";
 
 export const Route = createFileRoute("/")({
