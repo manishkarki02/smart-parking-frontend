@@ -14,7 +14,6 @@ function useRegisterMutation() {
     onSuccess: () => navigate({ to: "/login" }),
     onError: (error) => {
       const message = getApiErrorMessage(error);
-      console.log("Registration error:", error.response?.data ?? error);
       if (typeof message === "string") {
         toast.error(message);
       }

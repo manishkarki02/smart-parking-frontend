@@ -21,7 +21,6 @@ export async function registerUser(
     AUTH_ROUTES.REGISTER,
     data,
   );
-  console.log("Registration response:", response);
   return response.data.data;
 }
 
@@ -33,9 +32,9 @@ export async function refreshToken(): Promise<AuthResponse> {
 }
 
 export async function logoutUser(): Promise<void> {
-  await authApi.post(AUTH_ROUTES.LOGOUT);
+  await authApi.post<ApiResponse<void>>(AUTH_ROUTES.LOGOUT);
 }
 
 export async function logoutAllSessions(): Promise<void> {
-  await authApi.post(AUTH_ROUTES.LOGOUT_ALL);
+  await authApi.post<ApiResponse<void>>(AUTH_ROUTES.LOGOUT_ALL);
 }
