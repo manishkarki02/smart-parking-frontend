@@ -9,7 +9,7 @@ import { Plus } from "lucide-react";
 import { initiatePayment } from "@/features/payment/services/payment.service";
 import type { BookingResponse } from "@/features/booking/types/booking.types";
 import { toast } from "sonner";
-import { DriverLayout } from "@/common/components/DriverLayout";
+import { AppLayout } from "@/common/components/AppLayout";
 import { useAuthGuard } from "@/common/hooks/use-auth-guard";
 
 export const Route = createFileRoute("/bookings/")({
@@ -46,7 +46,7 @@ function BookingsPage() {
   };
 
   return (
-    <DriverLayout>
+    <AppLayout>
       <div className="container mx-auto px-4 py-8 max-w-7xl">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
           <div>
@@ -90,6 +90,6 @@ function BookingsPage() {
           )}
         </div>
       </div>
-    </DriverLayout>
+    </AppLayout>
   );
 }

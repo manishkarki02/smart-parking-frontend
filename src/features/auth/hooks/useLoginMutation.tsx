@@ -49,7 +49,7 @@ function useLoginMutation({
             onSuccess?.();
             onOpenChange?.(false);
           } else {
-            navigate({ to: "/" });
+            navigate({ to: "/dashboard" });
           }
       }
     },

@@ -1,5 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { DriverLayout } from "@/common/components/DriverLayout";
+import { AppLayout } from "@/common/components/AppLayout";
+import { PublicShell } from "@/common/components/PublicShell";
 import { useState, useMemo } from "react";
 import { SlotGrid } from "@/features/parking/components/SlotGrid";
 import { useAuthStore } from "@/store/auth-store";
@@ -17,7 +18,8 @@ export const Route = createFileRoute("/parking/$id")({
 function ParkingDetailsPage() {
   const { id } = Route.useParams();
   const navigate = useNavigate();
-  const { isAuthenticated } = useAuthStore();
+  const token = useAuthStore((state) => state.token);
+  const isSignedIn = Boolean(token);
 
   const [selectedSlot, setSelectedSlot] = useState<number | null>(null);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
@@ -38,7 +40,7 @@ function ParkingDetailsPage() {
       return;
     }
 
-    if (!isAuthenticated()) {
+    if (!isSignedIn) {
       setIsLoginModalOpen(true);
     } else {
       navigate({
@@ -57,26 +59,26 @@ function ParkingDetailsPage() {
 
   if (isLoading) {
     return (
-      <DriverLayout>
+      <ParkingDetailsLayout isSignedIn={isSignedIn}>
         <div className="flex h-[50vh] items-center justify-center">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>
-      </DriverLayout>
+      </ParkingDetailsLayout>
     );
   }
 
   if (!location) {
     return (
-      <DriverLayout>
+      <ParkingDetailsLayout isSignedIn={isSignedIn}>
         <div className="container mx-auto py-12 text-center text-muted-foreground">
           <p className="text-xl">Parking location not found.</p>
         </div>
-      </DriverLayout>
+      </ParkingDetailsLayout>
     );
   }
 
   return (
-    <DriverLayout>
+    <ParkingDetailsLayout isSignedIn={isSignedIn}>
       <div className="container mx-auto px-4 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           {/* Details Section */}
@@ -198,6 +200,20 @@ function ParkingDetailsPage() {
         onOpenChange={setIsLoginModalOpen}
         onSuccess={handleLoginSuccess}
       />
-    </DriverLayout>
+    </ParkingDetailsLayout>
   );
+}
+
+function ParkingDetailsLayout({
+  children,
+  isSignedIn,
+}: {
+  children: React.ReactNode;
+  isSignedIn: boolean;
+}) {
+  if (isSignedIn) {
+    return <AppLayout>{children}</AppLayout>;
+  }
+
+  return <PublicShell>{children}</PublicShell>;
 }

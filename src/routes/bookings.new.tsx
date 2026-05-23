@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { BookingForm } from "@/features/booking/components/BookingForm";
 import { z } from "zod";
-import { DriverLayout } from "@/common/components/DriverLayout";
+import { AppLayout } from "@/common/components/AppLayout";
 import { useAuthGuard } from "@/common/hooks/use-auth-guard";
 
 const searchSchema = z.object({
@@ -22,7 +22,7 @@ function NewBookingPage() {
   }
 
   return (
-    <DriverLayout>
+    <AppLayout>
       <div className="container mx-auto px-4 py-12 max-w-7xl">
         <div className="text-center mb-10">
           <h1 className="text-4xl font-extrabold tracking-tight bg-gradient-to-br from-primary to-green-600 bg-clip-text text-transparent mb-2">
@@ -37,6 +37,6 @@ function NewBookingPage() {
           <BookingForm preselectedParkingId={parkingLocationId} />
         </div>
       </div>
-    </DriverLayout>
+    </AppLayout>
   );
 }

@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { DriverLayout } from "@/common/components/DriverLayout";
+import { AppLayout } from "@/common/components/AppLayout";
 import { useState } from "react";
 import {
   ArrowLeft,
@@ -19,12 +19,14 @@ import { DirectionsMap } from "@/features/parking/maps/components/DirectionsMap"
 import { MapProvider } from "@/features/parking/maps/components/MapProvider";
 import type { ParkingLocation } from "@/features/parking/types/parking.types";
 import { useGeolocation } from "@/features/parking/maps/hooks/useGeolocation";
+import { useAuthGuard } from "@/common/hooks/use-auth-guard";
 
 export const Route = createFileRoute("/parking/map")({
   component: ParkingMapPage,
 });
 
 function ParkingMapPage() {
+  const { isAuthorized } = useAuthGuard({ allowedRoles: ["DRIVER"] });
   const { locations, isLoading } = useParkingSlots();
   const { state: geoState, locate } = useGeolocation();
   const navigate = useNavigate();
@@ -43,8 +45,12 @@ function ParkingMapPage() {
     setDirectionsTarget(spot);
   };
 
+  if (!isAuthorized) {
+    return null;
+  }
+
   return (
-    <DriverLayout>
+    <AppLayout>
       {/*
         This wrapper fills exactly the remaining viewport below the sticky 64px header.
         `overflow-hidden` prevents any scroll bleed.
@@ -324,6 +330,6 @@ function ParkingMapPage() {
           </>
         )}
       </div>
-    </DriverLayout>
+    </AppLayout>
   );
 }

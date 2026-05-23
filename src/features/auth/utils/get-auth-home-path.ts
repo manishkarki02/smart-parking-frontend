@@ -1,6 +1,6 @@
 import type { AuthUser } from "@/store/auth-store";
 
-export type AuthHomePath = "/dashboard" | "/vendor/dashboard" | "/parking/map";
+export type AuthHomePath = "/dashboard" | "/vendor/dashboard";
 
 export function getAuthHomePath(user: AuthUser | null): AuthHomePath {
   console.log("Determining home path for user:", user);
@@ -12,5 +12,5 @@ export function getAuthHomePath(user: AuthUser | null): AuthHomePath {
     return "/vendor/dashboard";
   }
 
-  return "/parking/map";
+  return "/dashboard";
 }

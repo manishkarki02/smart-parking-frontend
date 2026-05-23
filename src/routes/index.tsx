@@ -1,5 +1,5 @@
 import { createFileRoute, Link, redirect } from "@tanstack/react-router";
-import { DriverLayout } from "@/common/components/DriverLayout";
+import { PublicShell } from "@/common/components/PublicShell";
 import {
   Card,
   CardContent,
@@ -7,20 +7,30 @@ import {
   CardTitle,
   CardFooter,
 } from "@/components/ui/card";
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/components/ui/empty";
 import { Button } from "@/components/ui/button";
-import { MapPin, Navigation, ArrowRight, Loader2, Map } from "lucide-react";
+import {
+  MapPin,
+  Navigation,
+  ArrowRight,
+  Loader2,
+  ParkingCircle,
+} from "lucide-react";
 import { useAuthStore } from "@/store/auth-store";
 import useParkingSlots from "@/features/parking/hooks/useParkingSlots";
+import { getAuthHomePath } from "@/features/auth/utils/get-auth-home-path";
 
 export const Route = createFileRoute("/")({
   beforeLoad: () => {
-    const { user } = useAuthStore.getState();
-    // Redirect admins and vendors to their dashboards. Drivers and guests stay here.
-    if (user?.role === "ADMIN") {
-      throw redirect({ to: "/dashboard" });
-    }
-    if (user?.role === "VENDOR") {
-      throw redirect({ to: "/vendor/dashboard" });
+    const auth = useAuthStore.getState();
+    if (auth.isAuthenticated()) {
+      throw redirect({ to: getAuthHomePath(auth.user) });
     }
   },
   component: HomePage,
@@ -30,7 +40,7 @@ function HomePage() {
   const { locations, isLoading } = useParkingSlots();
 
   return (
-    <DriverLayout>
+    <PublicShell>
       {/* Hero Section */}
       <section className="relative w-full h-75 md:h-100 flex items-center justify-center overflow-hidden bg-primary/5">
         <div className="absolute inset-0 bg-linear-to-br from-green-500/20 via-emerald-400/10 to-transparent pointer-events-none" />
@@ -52,14 +62,8 @@ function HomePage() {
 
       {/* Parking Spaces Grid */}
       <section className="container mx-auto px-4 py-12">
-        <div className="flex items-center justify-between mb-8">
+        <div className="mb-8">
           <h2 className="text-3xl font-bold">Parking Spaces</h2>
-          <Button asChild variant="outline" className="gap-2">
-            <Link to="/parking/map">
-              <Map className="w-4 h-4" />
-              View on Map
-            </Link>
-          </Button>
         </div>
 
         {isLoading ? (
@@ -126,14 +130,23 @@ function HomePage() {
               </Card>
             ))}
 
-            {locations?.length === 0 && (
-              <div className="col-span-full text-center py-12 text-muted-foreground">
-                No parking locations found. Check back later!
-              </div>
+            {!locations?.length && (
+              <Empty className="col-span-full border bg-card">
+                <EmptyHeader>
+                  <EmptyMedia variant="icon">
+                    <ParkingCircle />
+                  </EmptyMedia>
+                  <EmptyTitle>No parking spots available</EmptyTitle>
+                  <EmptyDescription>
+                    There are no parking spaces listed right now. Please check
+                    back later.
+                  </EmptyDescription>
+                </EmptyHeader>
+              </Empty>
             )}
           </div>
         )}
       </section>
-    </DriverLayout>
+    </PublicShell>
   );
 }
