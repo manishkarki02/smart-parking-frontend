@@ -187,7 +187,7 @@ function ParkingDetailsPage() {
                     (!selectedSlot && location.availableSlots > 0)
                   }
                 >
-                  Book Now
+                  {isSignedIn ? "Book Now" : "Sign in to book"}
                 </Button>
               </div>
             </div>
