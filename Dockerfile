@@ -1,32 +1,43 @@
+# ---------- Base ----------
 FROM node:24-slim AS base
 WORKDIR /app
 
 RUN corepack enable
 
-# --- Dependencies Stage ---
+
+# ---------- Dependencies ----------
 FROM base AS deps
-COPY package.json  pnpm-lock.yaml ./
+COPY package.json pnpm-lock.yaml ./
 RUN pnpm install --frozen-lockfile
 
-# -- Build the app --
-FROM deps AS build
-COPY . .
-RUN \
-  if [ -f yarn.lock ]; then yarn build; \
-  elif [ -f package-lock.json ]; then npm run build; \
-  elif [ -f pnpm-lock.yaml ]; then pnpm build; \
-  else pnpm build; \
-  fi
 
-# --- Development Stage ---
+# ---------- Build ----------
+FROM deps AS build
+
+ARG VITE_API_BASE_URL=http://localhost:8080
+ARG VITE_GOOGLE_MAPS_API_KEY=not-configured
+ARG VITE_NODE_ENV=production
+ARG VITE_APP_NAME="Smart Parking"
+
+ENV VITE_API_BASE_URL=$VITE_API_BASE_URL \
+    VITE_GOOGLE_MAPS_API_KEY=$VITE_GOOGLE_MAPS_API_KEY \
+    VITE_NODE_ENV=$VITE_NODE_ENV \
+    VITE_APP_NAME=$VITE_APP_NAME
+
+COPY . .
+RUN pnpm build
+
+
+# ---------- Development ----------
 FROM base AS development
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
 EXPOSE 5173
-CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"]
+CMD ["pnpm", "dev", "--", "--host", "0.0.0.0"]
 
-# --- Production Stage ---
+
+# ---------- Production ----------
 FROM nginx:alpine-slim AS production
 COPY ./nginx.conf /etc/nginx/conf.d/default.conf
 COPY --from=build /app/dist /usr/share/nginx/html

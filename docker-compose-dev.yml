@@ -1,6 +1,8 @@
 services:
-  frontend-app:
-    env_file: ".env"
+  frontend:
+    container_name: smart-parking-frontend-dev
+    env_file:
+      - .env
     build:
       context: .
       target: development
@@ -16,4 +18,3 @@ services:
 networks:
   smart-parking-dev-network:
     external: true
-
