@@ -39,6 +39,7 @@
 }
 
 :root {
+    color-scheme: only light;
     --radius: 0.75rem; /* 12px for modern rounded corners */
     --background: #F9FAFB;
     --foreground: #111827;
