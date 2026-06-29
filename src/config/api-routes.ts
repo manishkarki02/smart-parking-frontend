@@ -36,6 +36,8 @@ export const BOOKING_ROUTES = {
   CREATE: "",
   ME: "/me",
   BY_ID: (id: number | string) => `/${id}`,
+  STATUS: (id: number | string) => `/${id}/status`,
+  CANCEL: (id: number | string) => `/${id}`,
 } as const;
 
 // ─── Vendor ───────────────────────────────────────────────────────────────────
@@ -49,6 +51,11 @@ export const ADMIN_ROUTES = {
   BOOKINGS: "/bookings",
   USERS: "/users",
   VENDORS: "/vendors",
+  VENDOR_APPROVE: (id: number | string) => `/vendors/${id}/approve`,
+  VENDOR_BY_ID: (id: number | string) => `/vendors/${id}`,
+  USER_BAN: (id: number | string) => `/users/${id}/ban`,
+  USER_UNBAN: (id: number | string) => `/users/${id}/unban`,
+  USER_BY_ID: (id: number | string) => `/users/${id}`,
 } as const;
 
 // ─── Payment ──────────────────────────────────────────────────────────────────
