@@ -4,11 +4,20 @@ WORKDIR /app
 
 RUN corepack enable
 
+ENV PNPM_STORE_DIR=/pnpm/store
+
 
 # ---------- Dependencies ----------
 FROM base AS deps
 COPY package.json pnpm-lock.yaml ./
-RUN pnpm install --frozen-lockfile
+RUN pnpm config set store-dir "$PNPM_STORE_DIR" \
+    && pnpm config set fetch-retries 5 \
+    && pnpm config set fetch-retry-mintimeout 20000 \
+    && pnpm config set fetch-retry-maxtimeout 120000 \
+    && pnpm config set fetch-timeout 600000 \
+    && pnpm config set network-concurrency 8
+RUN --mount=type=cache,id=smart-parking-frontend-pnpm-store,target=/pnpm/store \
+    pnpm install --frozen-lockfile
 
 
 # ---------- Build ----------

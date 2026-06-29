@@ -1,5 +1,26 @@
 # React + TypeScript + Vite
 
+## Docker Development
+
+Start the frontend dev server with Docker:
+
+```bash
+docker compose -f docker-compose-dev.yml up --build
+```
+
+The app runs on `http://localhost:5173` by default. If the port is already in
+use, override it without editing the compose file:
+
+```bash
+FRONTEND_PORT=5174 docker compose -f docker-compose-dev.yml up --build
+```
+
+PowerShell:
+
+```powershell
+$env:FRONTEND_PORT="5174"; docker compose -f docker-compose-dev.yml up --build
+```
+
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
 Currently, two official plugins are available:
