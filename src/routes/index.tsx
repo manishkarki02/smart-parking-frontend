@@ -42,8 +42,8 @@ function HomePage() {
   return (
     <PublicShell>
       {/* Hero Section */}
-      <section className="relative w-full h-75 md:h-100 flex items-center justify-center overflow-hidden bg-primary/5">
-        <div className="absolute inset-0 bg-linear-to-br from-green-500/20 via-emerald-400/10 to-transparent pointer-events-none" />
+      <section className="relative w-full h-75 md:h-100 flex items-center justify-center overflow-hidden bg-[#F0FDF4]">
+        <div className="absolute inset-0 bg-gradient-to-br from-green-200/30 via-emerald-400/10 to-transparent pointer-events-none" />
         <div className="absolute inset-0 backdrop-blur-[2px] pointer-events-none" />
 
         <div className="relative z-10 text-center px-4 max-w-3xl">
@@ -53,7 +53,7 @@ function HomePage() {
               Parking Space
             </span>
           </h1>
-          <p className="text-lg md:text-xl text-muted-foreground font-medium max-w-2xl mx-auto">
+          <p className="text-lg md:text-xl text-indigo-900 font-medium  max-w-2xl mx-auto">
             Discover convenient, secure, and affordable parking spots around
             you. Book in seconds and drive with peace of mind.
           </p>
@@ -82,7 +82,7 @@ function HomePage() {
                     <CardTitle className="text-xl font-bold line-clamp-1 group-hover:text-primary transition-colors">
                       {location.name}
                     </CardTitle>
-                    <div className="px-3 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 font-semibold text-sm rounded-full">
+                   <div className="px-3 py-1 bg-green-100 text-green-700 font-semibold text-sm rounded-full">
                       ${(location.id % 5) + 2}/hr
                     </div>
                   </div>
