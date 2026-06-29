@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
+import { Check, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import DataTable, { type ColumnDef } from "@/common/components/DataTable";
 import { ConfirmDialog } from "@/common/components/ConfirmDialog";
@@ -123,20 +124,24 @@ function AdminVendorsPage() {
             {canApproveVendor(vendor) && (
               <Button
                 type="button"
-                size="sm"
+                size="icon-sm"
                 onClick={() => approveMutation.mutate(vendor.id)}
                 disabled={approveMutation.isPending}
+                aria-label="Approve vendor"
+                title="Approve vendor"
               >
-                Approve
+                <Check />
               </Button>
             )}
             <Button
               type="button"
-              size="sm"
+              size="icon-sm"
               variant="destructive"
               onClick={() => setDeletingVendorId(String(vendor.id))}
+              aria-label="Delete vendor"
+              title="Delete vendor"
             >
-              Delete
+              <Trash2 />
             </Button>
           </>
         )}

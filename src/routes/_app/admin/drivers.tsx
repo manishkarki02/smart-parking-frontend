@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
-import { Trash2 } from "lucide-react";
+import { ShieldCheck, ShieldX, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import DataTable, { type ColumnDef } from "@/common/components/DataTable";
 import { ConfirmDialog } from "@/common/components/ConfirmDialog";
@@ -131,32 +131,37 @@ function AdminDriversPage() {
               {isBanned ? (
                 <Button
                   type="button"
-                  size="sm"
+                  size="icon-sm"
                   variant="outline"
                   disabled={unbanMutation.isPending}
                   onClick={() => unbanMutation.mutate(driver.id)}
+                  aria-label="Unban driver"
+                  title="Unban driver"
                 >
-                  Unban
+                  <ShieldCheck />
                 </Button>
               ) : (
                 <Button
                   type="button"
-                  size="sm"
+                  size="icon-sm"
                   variant="destructive"
                   disabled={banMutation.isPending}
                   onClick={() => banMutation.mutate(driver.id)}
+                  aria-label="Ban driver"
+                  title="Ban driver"
                 >
-                  Ban
+                  <ShieldX />
                 </Button>
               )}
               <Button
                 type="button"
-                size="sm"
+                size="icon-sm"
                 variant="destructive"
                 onClick={() => setDeletingDriverId(String(driver.id))}
+                aria-label="Delete driver"
+                title="Delete driver"
               >
                 <Trash2 />
-                Delete
               </Button>
             </>
           );
