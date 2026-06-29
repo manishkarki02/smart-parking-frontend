@@ -1,4 +1,10 @@
 export * from "./components/AppLayout";
+export * from "./components/ConfirmDialog";
+export { default as DataTable } from "./components/DataTable";
+export type {
+  ColumnDef,
+  DataTableProps,
+} from "./components/DataTable";
 export * from "./components/DriverHeader";
 export * from "./components/DriverLayout";
 export * from "./components/LoadingSpinner";

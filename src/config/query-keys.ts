@@ -23,6 +23,8 @@ export const queryKeys = {
   bookings: {
     all: () => ["BOOKINGS"] as const,
     me: () => ["BOOKINGS", "ME"] as const,
+    vendor: (params?: { search?: string; page?: number }) =>
+      ["BOOKINGS", "VENDOR", params ?? {}] as const,
     byId: (id: number | string) => ["BOOKINGS", "DETAIL", id] as const,
   },
 
@@ -36,10 +38,13 @@ export const queryKeys = {
   admin: {
     all: () => ["ADMIN"] as const,
     dashboard: () => ["ADMIN", "DASHBOARD"] as const,
-    bookings: () => ["ADMIN", "BOOKINGS"] as const,
+    bookings: (params?: { search?: string; page?: number }) =>
+      ["ADMIN", "BOOKINGS", params ?? {}] as const,
     users: (role?: "VENDOR" | "DRIVER") => ["ADMIN", "USERS", { role }] as const,
-    vendors: () => ["ADMIN", "USERS", { role: "VENDOR" }] as const,
-    drivers: () => ["ADMIN", "USERS", { role: "DRIVER" }] as const,
+    vendors: (params?: { search?: string; page?: number }) =>
+      ["ADMIN", "USERS", { role: "VENDOR" }, params ?? {}] as const,
+    drivers: (params?: { search?: string; page?: number }) =>
+      ["ADMIN", "USERS", { role: "DRIVER" }, params ?? {}] as const,
   },
 
   // ─── Payment ─────────────────────────────────────────────────────────────────

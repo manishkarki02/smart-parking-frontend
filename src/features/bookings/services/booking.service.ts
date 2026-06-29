@@ -5,6 +5,60 @@ import { API_BASE, BOOKING_ROUTES } from "@/config/api-routes";
 
 const bookingApi = createApi(API_BASE.BOOKINGS)
 
+export interface BookingListParams {
+  search?: string;
+  page?: number;
+}
+
+export interface VendorBooking {
+  id: number;
+  driver?: {
+    name?: string;
+    email?: string;
+  };
+  user?: {
+    name?: string;
+    email?: string;
+  };
+  startTime: string;
+  endTime: string;
+  slot?: string | number;
+  slotNumber?: string | number;
+  status: string;
+  totalAmount?: number;
+  amount?: number;
+}
+
+export interface PaginatedBookings<TData> {
+  data: TData[];
+  totalPages: number;
+}
+
+type PaginatedBookingPayload<TData> = {
+  items?: TData[];
+  content?: TData[];
+  data?: TData[];
+  totalPages?: number;
+  totalPage?: number;
+  meta?: {
+    totalPages?: number;
+  };
+};
+
+function normalizeBookings<TData>(
+  payload: TData[] | PaginatedBookingPayload<TData>,
+): PaginatedBookings<TData> {
+  if (Array.isArray(payload)) {
+    return { data: payload, totalPages: 1 };
+  }
+
+  return {
+    data: payload.items ?? payload.content ?? payload.data ?? [],
+    totalPages:
+      payload.totalPages ?? payload.totalPage ?? payload.meta?.totalPages ?? 1,
+  };
+}
+
 export async function createBooking(
   data: BookingRequest
 ): Promise<BookingResponse> {
@@ -15,4 +69,34 @@ export async function createBooking(
 export async function getMyBookings(): Promise<BookingResponse[]> {
   const response = await bookingApi.get<ApiResponse<BookingResponse[]>>(BOOKING_ROUTES.ME);
   return response.data.data ?? [];
+}
+
+export async function getVendorBookings(
+  params: BookingListParams = {},
+): Promise<PaginatedBookings<VendorBooking>> {
+  const response = await bookingApi.get<
+    ApiResponse<VendorBooking[] | PaginatedBookingPayload<VendorBooking>>
+  >("", {
+    params: {
+      search: params.search || undefined,
+      page: params.page,
+    },
+  });
+  return normalizeBookings(response.data.data ?? []);
+}
+
+export async function updateBookingStatus({
+  id,
+  status,
+}: {
+  id: number | string;
+  status: string;
+}): Promise<void> {
+  await bookingApi.patch<ApiResponse<void>>(BOOKING_ROUTES.STATUS(id), {
+    status,
+  });
+}
+
+export async function cancelBooking(id: number | string): Promise<void> {
+  await bookingApi.delete<ApiResponse<void>>(BOOKING_ROUTES.CANCEL(id));
 }

@@ -20,6 +20,7 @@ import { Route as BookingsNewRouteImport } from './routes/bookings.new'
 import { Route as AppDashboardRouteImport } from './routes/_app/dashboard'
 import { Route as AppVendorParkingRouteImport } from './routes/_app/vendor/parking'
 import { Route as AppVendorDashboardRouteImport } from './routes/_app/vendor/dashboard'
+import { Route as AppVendorBookingsRouteImport } from './routes/_app/vendor/bookings'
 import { Route as AppAdminVendorsRouteImport } from './routes/_app/admin/vendors'
 import { Route as AppAdminDriversRouteImport } from './routes/_app/admin/drivers'
 import { Route as AppAdminBookingsRouteImport } from './routes/_app/admin/bookings'
@@ -78,6 +79,11 @@ const AppVendorDashboardRoute = AppVendorDashboardRouteImport.update({
   path: '/vendor/dashboard',
   getParentRoute: () => AppRoute,
 } as any)
+const AppVendorBookingsRoute = AppVendorBookingsRouteImport.update({
+  id: '/vendor/bookings',
+  path: '/vendor/bookings',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppAdminVendorsRoute = AppAdminVendorsRouteImport.update({
   id: '/admin/vendors',
   path: '/admin/vendors',
@@ -106,6 +112,7 @@ export interface FileRoutesByFullPath {
   '/admin/bookings': typeof AppAdminBookingsRoute
   '/admin/drivers': typeof AppAdminDriversRoute
   '/admin/vendors': typeof AppAdminVendorsRoute
+  '/vendor/bookings': typeof AppVendorBookingsRoute
   '/vendor/dashboard': typeof AppVendorDashboardRoute
   '/vendor/parking': typeof AppVendorParkingRoute
 }
@@ -121,6 +128,7 @@ export interface FileRoutesByTo {
   '/admin/bookings': typeof AppAdminBookingsRoute
   '/admin/drivers': typeof AppAdminDriversRoute
   '/admin/vendors': typeof AppAdminVendorsRoute
+  '/vendor/bookings': typeof AppVendorBookingsRoute
   '/vendor/dashboard': typeof AppVendorDashboardRoute
   '/vendor/parking': typeof AppVendorParkingRoute
 }
@@ -138,6 +146,7 @@ export interface FileRoutesById {
   '/_app/admin/bookings': typeof AppAdminBookingsRoute
   '/_app/admin/drivers': typeof AppAdminDriversRoute
   '/_app/admin/vendors': typeof AppAdminVendorsRoute
+  '/_app/vendor/bookings': typeof AppVendorBookingsRoute
   '/_app/vendor/dashboard': typeof AppVendorDashboardRoute
   '/_app/vendor/parking': typeof AppVendorParkingRoute
 }
@@ -155,6 +164,7 @@ export interface FileRouteTypes {
     | '/admin/bookings'
     | '/admin/drivers'
     | '/admin/vendors'
+    | '/vendor/bookings'
     | '/vendor/dashboard'
     | '/vendor/parking'
   fileRoutesByTo: FileRoutesByTo
@@ -170,6 +180,7 @@ export interface FileRouteTypes {
     | '/admin/bookings'
     | '/admin/drivers'
     | '/admin/vendors'
+    | '/vendor/bookings'
     | '/vendor/dashboard'
     | '/vendor/parking'
   id:
@@ -186,6 +197,7 @@ export interface FileRouteTypes {
     | '/_app/admin/bookings'
     | '/_app/admin/drivers'
     | '/_app/admin/vendors'
+    | '/_app/vendor/bookings'
     | '/_app/vendor/dashboard'
     | '/_app/vendor/parking'
   fileRoutesById: FileRoutesById
@@ -280,6 +292,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppVendorDashboardRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/vendor/bookings': {
+      id: '/_app/vendor/bookings'
+      path: '/vendor/bookings'
+      fullPath: '/vendor/bookings'
+      preLoaderRoute: typeof AppVendorBookingsRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/admin/vendors': {
       id: '/_app/admin/vendors'
       path: '/admin/vendors'
@@ -309,6 +328,7 @@ interface AppRouteChildren {
   AppAdminBookingsRoute: typeof AppAdminBookingsRoute
   AppAdminDriversRoute: typeof AppAdminDriversRoute
   AppAdminVendorsRoute: typeof AppAdminVendorsRoute
+  AppVendorBookingsRoute: typeof AppVendorBookingsRoute
   AppVendorDashboardRoute: typeof AppVendorDashboardRoute
   AppVendorParkingRoute: typeof AppVendorParkingRoute
 }
@@ -318,6 +338,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppAdminBookingsRoute: AppAdminBookingsRoute,
   AppAdminDriversRoute: AppAdminDriversRoute,
   AppAdminVendorsRoute: AppAdminVendorsRoute,
+  AppVendorBookingsRoute: AppVendorBookingsRoute,
   AppVendorDashboardRoute: AppVendorDashboardRoute,
   AppVendorParkingRoute: AppVendorParkingRoute,
 }
