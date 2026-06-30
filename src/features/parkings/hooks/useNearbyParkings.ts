@@ -18,7 +18,7 @@ function useNearbyParkings({
       enabled: lat !== null && lng !== null,
     },
   });
-  return { locations: data, isLoading };
+  return { data, locations: data, isLoading };
 }
 
 export default useNearbyParkings;
