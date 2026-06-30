@@ -181,7 +181,7 @@ function DriverDashboardPage({
                     <Navigation className="mr-2 h-4 w-4 text-primary/70" />
                     <span>
                       {location.distance !== undefined
-                        ? `${location.distance.toFixed(1)} km away`
+                        ? `${location.distance?.toFixed(1)} km away`
                         : "Distance unknown"}
                     </span>
                   </div>
