@@ -8,6 +8,7 @@ import {
   ZoomControl,
 } from "react-leaflet";
 import L from "leaflet";
+import type { LeafletMouseEvent, LeafletEvent } from "leaflet";
 import {
   Loader2,
   LocateFixed,
@@ -40,7 +41,7 @@ function MapClickHandler({
   onPick: (location: LatLng) => void;
 }) {
   useMapEvents({
-    click(event) {
+    click(event: LeafletMouseEvent) {
       onPick({ lat: event.latlng.lat, lng: event.latlng.lng });
     },
   });
@@ -237,7 +238,7 @@ export function LeafletLocationPickerMap({
               icon={pickerIcon}
               position={[value.lat, value.lng]}
               eventHandlers={{
-                dragend(event) {
+                dragend(event: LeafletEvent) {
                   const { lat, lng } = (event.target as L.Marker).getLatLng();
                   pickLocation({ lat, lng });
                 },

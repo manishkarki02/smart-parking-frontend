@@ -21,7 +21,7 @@ export function ParkingDetails({ parkingId }: ParkingDetailsProps) {
   const { locations, isLoading } = useParkingSlots();
 
   const location = useMemo(() => {
-    return locations?.find((loc) => loc.id === Number(parkingId));
+    return locations?.find((loc) => loc.id === parkingId);
   }, [locations, parkingId]);
 
   const handleBookNow = () => {
@@ -102,7 +102,13 @@ export function ParkingDetails({ parkingId }: ParkingDetailsProps) {
                     </div>
                     <div>
                       <p className="font-semibold text-foreground">Price</p>
-                      <p className="text-sm">${(location.id % 5) + 2} per hour</p>
+                      <p className="text-sm">
+                        Rs.{" "}
+                        {location.fourWheelerRatePerHour ??
+                          location.twoWheelerRatePerHour ??
+                          0}{" "}
+                        per hour
+                      </p>
                     </div>
                   </div>
 

@@ -5,11 +5,10 @@ import { useDirections } from "../../hooks/maps/useDirections";
 
 const DEFAULT_CENTER = { lat: 27.7172, lng: 85.324 };
 
-function DirectionsRenderer({ result }: { result: unknown }) {
+function DirectionsRenderer({ result }: { result: google.maps.DirectionsResult }) {
   const map = useMap();
   const routesLib = useMapsLibrary("routes");
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const rendererRef = useRef<any>(null);
+  const rendererRef = useRef<google.maps.DirectionsRenderer | null>(null);
 
   useEffect(() => {
     if (!map || !result || !routesLib) return;

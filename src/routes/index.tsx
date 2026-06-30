@@ -83,8 +83,8 @@ function HomePage() {
                       {location.name}
                     </CardTitle>
                    <div className="px-3 py-1 bg-green-100 text-green-700 font-semibold text-sm rounded-full">
-                      ${(location.id % 5) + 2}/hr
-                    </div>
+                      Rs. {location.fourWheelerRatePerHour ?? location.twoWheelerRatePerHour ?? 0}/hr
+                   </div>
                   </div>
                 </CardHeader>
 

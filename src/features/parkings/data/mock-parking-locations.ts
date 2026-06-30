@@ -2,7 +2,7 @@ import type { ParkingLocation } from "../types/parking.types";
 
 export const mockParkingLocations: ParkingLocation[] = [
   {
-    id: 9001,
+    id: "mock-9001",
     name: "Thamel Central Parking",
     address: "Tridevi Marg, Thamel, Kathmandu",
     latitude: 27.7149,
@@ -12,7 +12,7 @@ export const mockParkingLocations: ParkingLocation[] = [
     vendorName: "Kathmandu Parking Co.",
   },
   {
-    id: 9002,
+    id: "mock-9002",
     name: "Durbar Marg Secure Lot",
     address: "Durbar Marg, near Narayanhiti Palace Museum",
     latitude: 27.7128,
@@ -22,7 +22,7 @@ export const mockParkingLocations: ParkingLocation[] = [
     vendorName: "Metro Park Services",
   },
   {
-    id: 9003,
+    id: "mock-9003",
     name: "Lazimpat Plaza Parking",
     address: "Lazimpat Road, Kathmandu",
     latitude: 27.7207,
@@ -32,7 +32,7 @@ export const mockParkingLocations: ParkingLocation[] = [
     vendorName: "CitySlot Nepal",
   },
   {
-    id: 9004,
+    id: "mock-9004",
     name: "Kamaladi Business Park",
     address: "Kamaladi, Kathmandu",
     latitude: 27.7095,

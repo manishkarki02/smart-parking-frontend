@@ -162,7 +162,7 @@ function DriverDashboardPage({
                       {location.name}
                     </CardTitle>
                     <span className="rounded-md bg-green-100 px-2 py-1 text-xs font-semibold text-green-700">
-                      ${(location.id % 5) + 2}/hr
+                      Rs. {location.fourWheelerRatePerHour ?? location.twoWheelerRatePerHour ?? 0}/hr
                     </span>
                   </div>
                 </CardHeader>

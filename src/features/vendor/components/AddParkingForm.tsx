@@ -1,4 +1,10 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  type ChangeEvent,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2, LocateFixed, MapPin, RotateCcw, Search } from "lucide-react";
@@ -35,6 +41,12 @@ interface LocationFieldsProps {
 }
 
 type LocationMethod = "search" | "coordinates" | "map" | null;
+type ParkingFormInputName =
+  | "name"
+  | "totalFourWheelerSlots"
+  | "totalTwoWheelerSlots"
+  | "fourWheelerRatePerHour"
+  | "twoWheelerRatePerHour";
 
 function isValidCoordinatePair(latValue: string, lngValue: string) {
   const lat = Number(latValue);
@@ -375,12 +387,12 @@ function getParkingFormDefaults(
   return {
     name: location?.name ?? "",
     address: location?.address ?? "",
-    latitude: location?.latitude,
-    longitude: location?.longitude,
-    totalFourWheelerSlots: location?.totalFourWheelerSlots,
-    totalTwoWheelerSlots: location?.totalTwoWheelerSlots,
-    fourWheelerRatePerHour: location?.fourWheelerRatePerHour,
-    twoWheelerRatePerHour: location?.twoWheelerRatePerHour,
+    latitude: location?.latitude ?? "",
+    longitude: location?.longitude ?? "",
+    totalFourWheelerSlots: location?.totalFourWheelerSlots ?? "",
+    totalTwoWheelerSlots: location?.totalTwoWheelerSlots ?? "",
+    fourWheelerRatePerHour: location?.fourWheelerRatePerHour ?? "",
+    twoWheelerRatePerHour: location?.twoWheelerRatePerHour ?? "",
   };
 }
 
@@ -410,10 +422,13 @@ export function ParkingLocationForm({
     reset,
     resetField,
     setValue,
+    watch,
     formState: { errors },
   } = useForm<AddParkingFormValues>({
     resolver: zodResolver(addParkingSchema),
     defaultValues: getParkingFormDefaults(initialValues),
+    mode: "onChange",
+    reValidateMode: "onChange",
   });
 
   useEffect(() => {
@@ -432,6 +447,24 @@ export function ParkingLocationForm({
   });
 
   const isPending = addMutation.isPending || updateMutation.isPending;
+
+  const getInputValue = (field: ParkingFormInputName) => {
+    const value = watch(field);
+    return typeof value === "string" || typeof value === "number" ? value : "";
+  };
+
+  const bindFormInput = (field: ParkingFormInputName) => {
+    const registered = register(field);
+
+    return {
+      ...registered,
+      value: getInputValue(field),
+      onChange: (event: ChangeEvent<HTMLInputElement>) => {
+        registered.onChange(event);
+        setValue(field, event.target.value, { shouldValidate: true });
+      },
+    };
+  };
 
   const handleLocationChange = useCallback((coords: PickerLocation) => {
     setPickedLocation(coords);
@@ -480,7 +513,7 @@ export function ParkingLocationForm({
             id="name"
             placeholder="e.g. Thamel Parking Hub"
             className="h-12 rounded-lg border-[#E2E8F0] bg-white text-[#0F172A] shadow-sm placeholder:text-[#94A3B8] focus-visible:ring-blue-100"
-            {...register("name")}
+            {...bindFormInput("name")}
           />
           {errors.name && (
             <p className="text-sm text-destructive">{errors.name.message}</p>
@@ -510,7 +543,7 @@ export function ParkingLocationForm({
               min={0}
               placeholder="20"
               className="h-12 rounded-lg border-[#E2E8F0] bg-white text-[#0F172A] shadow-sm placeholder:text-[#94A3B8] focus-visible:ring-blue-100"
-              {...register("totalFourWheelerSlots")}
+              {...bindFormInput("totalFourWheelerSlots")}
             />
             {errors.totalFourWheelerSlots && (
               <p className="text-sm text-destructive">
@@ -532,7 +565,7 @@ export function ParkingLocationForm({
               min={0}
               placeholder="30"
               className="h-12 rounded-lg border-[#E2E8F0] bg-white text-[#0F172A] shadow-sm placeholder:text-[#94A3B8] focus-visible:ring-blue-100"
-              {...register("totalTwoWheelerSlots")}
+              {...bindFormInput("totalTwoWheelerSlots")}
             />
             {errors.totalTwoWheelerSlots && (
               <p className="text-sm text-destructive">
@@ -554,7 +587,7 @@ export function ParkingLocationForm({
               min={1}
               placeholder="80"
               className="h-12 rounded-lg border-[#E2E8F0] bg-white text-[#0F172A] shadow-sm placeholder:text-[#94A3B8] focus-visible:ring-blue-100"
-              {...register("fourWheelerRatePerHour")}
+              {...bindFormInput("fourWheelerRatePerHour")}
             />
             {errors.fourWheelerRatePerHour && (
               <p className="text-sm text-destructive">
@@ -576,7 +609,7 @@ export function ParkingLocationForm({
               min={1}
               placeholder="40"
               className="h-12 rounded-lg border-[#E2E8F0] bg-white text-[#0F172A] shadow-sm placeholder:text-[#94A3B8] focus-visible:ring-blue-100"
-              {...register("twoWheelerRatePerHour")}
+              {...bindFormInput("twoWheelerRatePerHour")}
             />
             {errors.twoWheelerRatePerHour && (
               <p className="text-sm text-destructive">

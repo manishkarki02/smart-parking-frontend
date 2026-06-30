@@ -27,7 +27,7 @@ function ParkingDetailsPage() {
   const { locations, isLoading } = useParkingSlots();
 
   const location = useMemo(() => {
-    return locations?.find((loc) => loc.id === Number(id));
+    return locations?.find((loc) => loc.id === id);
   }, [locations, id]);
 
   const handleBookNow = () => {
@@ -111,7 +111,11 @@ function ParkingDetailsPage() {
                     <div>
                       <p className="font-semibold text-foreground">Price</p>
                       <p className="text-sm">
-                        ${(location.id % 5) + 2} per hour
+                        Rs.{" "}
+                        {location.fourWheelerRatePerHour ??
+                          location.twoWheelerRatePerHour ??
+                          0}{" "}
+                        per hour
                       </p>
                     </div>
                   </div>

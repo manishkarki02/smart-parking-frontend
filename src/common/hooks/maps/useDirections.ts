@@ -7,7 +7,7 @@ interface LatLng {
 }
 
 interface DirectionsState {
-  raw: unknown;
+  raw: google.maps.DirectionsResult | null;
   distance: string | null;
   duration: string | null;
   error: string | null;
@@ -41,7 +41,7 @@ export function useDirections(origin: LatLng | null, destination: LatLng | null)
         travelMode: routesLib.TravelMode.DRIVING,
       },
       (
-        result: { routes: Array<{ legs: Array<{ distance?: { text: string }; duration?: { text: string } }> }> } | null,
+        result: google.maps.DirectionsResult | null,
         status: string,
       ) => {
         if (cancelled) return; // stale response — ignore
