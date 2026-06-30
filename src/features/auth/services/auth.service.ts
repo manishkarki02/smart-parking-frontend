@@ -5,6 +5,7 @@ import type { LoginSchema, RegisterSchema } from "../validations/auth.schema";
 import { API_BASE, AUTH_ROUTES } from "@/config/api-routes";
 
 const authApi = createApi(API_BASE.AUTH);
+type RegisterPayload = Omit<RegisterSchema, "confirmPassword">;
 
 export async function loginUser(data: LoginSchema): Promise<AuthResponse> {
   const response = await authApi.post<ApiResponse<AuthResponse>>(
@@ -15,7 +16,7 @@ export async function loginUser(data: LoginSchema): Promise<AuthResponse> {
 }
 
 export async function registerUser(
-  data: RegisterSchema,
+  data: RegisterPayload,
 ): Promise<AuthResponse> {
   const response = await authApi.post<ApiResponse<AuthResponse>>(
     AUTH_ROUTES.REGISTER,

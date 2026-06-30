@@ -102,7 +102,8 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
           <div className="flex min-w-0 items-center gap-2 md:hidden">
             <Car className="size-5 shrink-0 text-primary" />
             <span className="truncate text-sm font-semibold">
-              Smart Parking
+              Smart
+              <span className="text-blue-500">Parking</span>
             </span>
           </div>
         </header>

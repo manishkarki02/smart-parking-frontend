@@ -86,7 +86,7 @@ export async function getAdminDrivers(
 }
 
 export async function approveVendor(id: number | string): Promise<void> {
-  await adminApi.patch<ApiResponse<void>>(ADMIN_ROUTES.VENDOR_APPROVE(id));
+  await adminApi.put<ApiResponse<void>>(ADMIN_ROUTES.VENDOR_APPROVE(id));
 }
 
 export async function deleteVendor(id: number | string): Promise<void> {
@@ -94,11 +94,11 @@ export async function deleteVendor(id: number | string): Promise<void> {
 }
 
 export async function banUser(id: number | string): Promise<void> {
-  await adminApi.patch<ApiResponse<void>>(ADMIN_ROUTES.USER_BAN(id));
+  await adminApi.put<ApiResponse<void>>(ADMIN_ROUTES.USER_BAN(id));
 }
 
 export async function unbanUser(id: number | string): Promise<void> {
-  await adminApi.patch<ApiResponse<void>>(ADMIN_ROUTES.USER_UNBAN(id));
+  await adminApi.put<ApiResponse<void>>(ADMIN_ROUTES.USER_UNBAN(id));
 }
 
 export async function deleteUser(id: number | string): Promise<void> {

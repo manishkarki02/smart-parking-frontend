@@ -1,6 +1,5 @@
 import { Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
-import { Car } from "lucide-react";
 
 export function PublicNavbar() {
   return (
@@ -8,9 +7,9 @@ export function PublicNavbar() {
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
         {/* Logo */}
         <Link to="/" className="flex items-center gap-2">
-          <Car className="h-6 w-6 text-primary" />
-          <span className="text-xl font-bold bg-linear-to-r from-primary to-green-500 bg-clip-text text-transparent">
-            Smart Parking
+          <span className="text-xl font-bold">
+            Smart 
+            <span className="text-blue-500">Parking</span>
           </span>
         </Link>
 

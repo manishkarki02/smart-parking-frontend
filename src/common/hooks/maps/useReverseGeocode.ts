@@ -29,7 +29,7 @@ export function useReverseGeocode(
   return useQuery({
     queryKey: ["reverse-geocode", lat, lng],
     queryFn: () => reverseGeocode(geocodingLib!, { lat: lat!, lng: lng! }),
-    enabled: enabled && lat != null && lng != null,
+    enabled: enabled && Boolean(geocodingLib) && lat != null && lng != null,
     staleTime: Infinity,
   });
 }

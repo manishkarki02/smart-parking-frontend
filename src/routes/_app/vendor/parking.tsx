@@ -11,7 +11,6 @@ import { Plus } from "lucide-react";
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -51,16 +50,16 @@ function VendorParkingPage() {
                 Add New Location
               </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[425px]">
-              <DialogHeader>
-                <DialogTitle>Add New Parking Location</DialogTitle>
-                <DialogDescription>
-                  Register a new parking spot in the system
-                </DialogDescription>
+            <DialogContent className="max-h-[90vh] gap-0 overflow-y-auto p-0 sm:max-w-190">
+              <DialogHeader className="border-b px-6 py-5 sm:px-8">
+                <DialogTitle className="text-2xl font-semibold">
+                  Add location
+                </DialogTitle>
               </DialogHeader>
-              <div className="py-4">
-                <AddParkingForm onSuccess={() => setIsAddModalOpen(false)} />
-              </div>
+              <AddParkingForm
+                onCancel={() => setIsAddModalOpen(false)}
+                onSuccess={() => setIsAddModalOpen(false)}
+              />
             </DialogContent>
           </Dialog>
         }

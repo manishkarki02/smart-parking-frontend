@@ -3,7 +3,10 @@ export interface ParkingLocationRequest {
   address: string;
   latitude: number;
   longitude: number;
-  totalSlots: number;
+  totalFourWheelerSlots: number;
+  totalTwoWheelerSlots: number;
+  fourWheelerRatePerHour: number;
+  twoWheelerRatePerHour: number;
 }
 
 export type VendorDashboardSlotStats = {

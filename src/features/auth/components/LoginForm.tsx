@@ -1,11 +1,9 @@
+import { useState } from "react";
+import { Link } from "@tanstack/react-router";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { loginSchema, type LoginSchema } from "../validations/auth.schema";
-import { Link } from "@tanstack/react-router";
-import { useState } from "react";
+import { Eye, EyeOff, Loader2, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
   Card,
   CardContent,
@@ -13,8 +11,11 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Loader2, Car, Eye, EyeOff } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { loginSchema, type LoginSchema } from "../validations/auth.schema";
 import useLoginMutation from "../hooks/useLoginMutation";
+import { AuthLayout } from "./AuthLayout";
 
 export function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
@@ -37,58 +38,72 @@ export function LoginForm() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background px-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="text-center">
-          <div className="flex justify-center mb-2">
-            <Car className="h-10 w-10 text-primary" />
-          </div>
-          <CardTitle className="text-2xl">Welcome Back</CardTitle>
-          <CardDescription>
-            Sign in to your Smart Parking account
+    <AuthLayout>
+      <Card className="rounded-[2rem] border-[#E2E8F0] bg-white p-0 shadow-[0_18px_60px_rgba(37,99,235,0.10)]">
+        <CardHeader className="px-6 pt-8 text-center sm:px-8">
+          <CardTitle className="text-3xl font-black tracking-tight text-[#0F172A]">
+            Welcome back
+          </CardTitle>
+          <CardDescription className="text-sm leading-6 text-[#64748B]">
+            Sign in with your email and password to continue.
           </CardDescription>
         </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+
+        <CardContent className="px-6 pb-8 sm:px-8">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="you@example.com"
-                {...register("email")}
-              />
+              <Label htmlFor="email" className="text-xs font-bold uppercase tracking-[0.14em] text-muted-foreground">
+                Email Address
+              </Label>
+              <div className="relative">
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="you@example.com"
+                  autoComplete="email"
+                  className="h-12 rounded-lg border-[#E2E8F0] bg-white pr-12 text-[#0F172A] shadow-sm placeholder:text-[#94A3B8] focus-visible:ring-blue-100"
+                  {...register("email")}
+                />
+                <Mail className="absolute right-4 top-1/2 size-5 -translate-y-1/2 text-[#94A3B8]" />
+              </div>
               {errors.email && (
-                <p className="text-sm text-destructive">
+                <p className="text-sm font-medium text-red-600">
                   {errors.email.message}
                 </p>
               )}
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <Label
+                htmlFor="password"
+                className="text-xs font-bold uppercase tracking-[0.14em] text-muted-foreground"
+              >
+                Password
+              </Label>
               <div className="relative">
                 <Input
                   id="password"
                   type={showPassword ? "text" : "password"}
-                  placeholder="••••••••"
-                  className="pr-8"
+                  placeholder="Enter your password"
+                  autoComplete="current-password"
+                  className="h-12 rounded-lg border-[#E2E8F0] bg-white pr-12 text-[#0F172A] shadow-sm placeholder:text-[#94A3B8] focus-visible:ring-blue-100"
                   {...register("password")}
                 />
                 <button
                   type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  onClick={() => setShowPassword((value) => !value)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 rounded-md p-1 text-[#94A3B8] transition hover:text-[#0F172A] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-200"
+                  aria-label={showPassword ? "Hide password" : "Show password"}
                 >
                   {showPassword ? (
-                    <EyeOff className="h-4 w-4" />
+                    <EyeOff className="size-5" />
                   ) : (
-                    <Eye className="h-4 w-4" />
+                    <Eye className="size-5" />
                   )}
                 </button>
               </div>
               {errors.password && (
-                <p className="text-sm text-destructive">
+                <p className="text-sm font-medium text-red-600">
                   {errors.password.message}
                 </p>
               )}
@@ -96,27 +111,27 @@ export function LoginForm() {
 
             <Button
               type="submit"
-              className="w-full"
+              className="h-12 w-full rounded-lg bg-[#2563EB] text-sm font-bold shadow-lg shadow-blue-600/20 hover:bg-blue-700"
               disabled={loginMutation.isPending}
             >
               {loginMutation.isPending && (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                <Loader2 className="mr-2 size-4 animate-spin" />
               )}
               Sign In
             </Button>
 
-            <p className="text-center text-sm text-muted-foreground">
-              Don't have an account?{" "}
+            <p className="pt-2 text-center text-sm text-[#64748B]">
+              New to Smart Parking?{" "}
               <Link
                 to="/register"
-                className="text-primary underline-offset-4 hover:underline"
+                className="font-semibold text-[#2563EB] underline-offset-4 hover:underline"
               >
-                Register
+                Create an account
               </Link>
             </p>
           </form>
         </CardContent>
       </Card>
-    </div>
+    </AuthLayout>
   );
 }
