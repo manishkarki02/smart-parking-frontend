@@ -33,7 +33,12 @@ export const queryKeys = {
   bookings: {
     all: () => ["BOOKINGS"] as const,
     me: () => ["BOOKINGS", "ME"] as const,
-    vendor: (params?: { search?: string; page?: number }) =>
+    vendor: (params?: {
+      search?: string;
+      page?: number;
+      locationId?: string;
+      status?: string;
+    }) =>
       ["BOOKINGS", "VENDOR", params ?? {}] as const,
     byId: (id: number | string) => ["BOOKINGS", "DETAIL", id] as const,
   },

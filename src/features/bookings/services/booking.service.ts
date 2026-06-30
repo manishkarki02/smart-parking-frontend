@@ -5,17 +5,27 @@ import type {
   BookingResponse,
 } from "../types/booking.types";
 import createApi from "@/common/utils/api";
-import { API_BASE, BOOKING_ROUTES } from "@/config/api-routes";
+import { API_BASE, BOOKING_ROUTES, VENDOR_ROUTES } from "@/config/api-routes";
 
 const bookingApi = createApi(API_BASE.BOOKINGS)
+const vendorApi = createApi(API_BASE.VENDORS);
 
 export interface BookingListParams {
   search?: string;
   page?: number;
+  locationId?: string;
+  status?: string;
 }
 
 export interface VendorBooking {
   id: string;
+  bookingId?: string;
+  driverId?: string | null;
+  customerName?: string | null;
+  customerPhone?: string | null;
+  driverName?: string | null;
+  driverPhone?: string | null;
+  driverEmail?: string | null;
   driver?: {
     name?: string;
     email?: string;
@@ -24,13 +34,27 @@ export interface VendorBooking {
     name?: string;
     email?: string;
   };
+  parkingLocationId: string;
+  parkingLocationName: string;
   startTime: string;
-  endTime: string;
+  endTime?: string | null;
   slot?: string | number;
   slotNumber?: string | number;
+  slotId?: string;
+  slotStatus?: "AVAILABLE" | "RESERVED" | "BOOKED" | "OCCUPIED" | "MAINTENANCE";
+  vehicleNumber?: string | null;
+  vehicleType?: "TWO_WHEELER" | "FOUR_WHEELER";
+  walkIn: boolean;
   status: string;
   totalAmount?: number;
   amount?: number;
+  paymentId?: string | null;
+  paymentStatus?: "PENDING" | "SUCCESS" | "FAILED" | string | null;
+  paymentMethod?: "CASH" | "KHALTI" | "ESEWA" | string | null;
+  paidAt?: string | null;
+  cancelledAt?: string | null;
+  createdAt?: string | null;
+  updatedAt?: string | null;
 }
 
 export interface PaginatedBookings<TData> {
@@ -78,12 +102,14 @@ export async function getMyBookings(): Promise<BookingResponse[]> {
 export async function getVendorBookings(
   params: BookingListParams = {},
 ): Promise<PaginatedBookings<VendorBooking>> {
-  const response = await bookingApi.get<
+  const response = await vendorApi.get<
     ApiResponse<VendorBooking[] | PaginatedBookingPayload<VendorBooking>>
-  >("", {
+  >(VENDOR_ROUTES.BOOKINGS, {
     params: {
       search: params.search || undefined,
       page: params.page,
+      locationId: params.locationId || undefined,
+      status: params.status || undefined,
     },
   });
   return normalizeBookings(response.data.data ?? []);

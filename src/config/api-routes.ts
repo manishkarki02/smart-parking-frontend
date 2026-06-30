@@ -48,6 +48,7 @@ export const BOOKING_ROUTES = {
 // ─── Vendor ───────────────────────────────────────────────────────────────────
 export const VENDOR_ROUTES = {
   DASHBOARD: "/dashboard",
+  BOOKINGS: "/bookings",
   WALK_IN_BOOKING: "/bookings/walk-in",
   BOOKING_STATUS: (bookingId: number | string) =>
     `/bookings/${bookingId}/status`,
