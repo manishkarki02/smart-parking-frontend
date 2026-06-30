@@ -6,6 +6,7 @@ export * from "./components/VendorLocationStats";
 export * from "./components/VendorParkingCard";
 export * from "./components/VendorVehicleStats";
 export { default as useAddParkingMutation } from "./hooks/useAddParkingMutation";
+export { default as useUpdateParkingMutation } from "./hooks/useUpdateParkingMutation";
 export { default as useUpdateSlotsMutation } from "./hooks/useUpdateSlotsMutation";
 export * from "./hooks/useVendorDashboard";
 export * from "./services/vendor.service";

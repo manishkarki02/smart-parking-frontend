@@ -3,7 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { getMyParkingLocations } from "@/features/vendor/services/vendor.service";
 import { VendorParkingCard } from "@/features/vendor/components/VendorParkingCard";
-import { AddParkingForm } from "@/features/vendor/components/AddParkingForm";
+import { ParkingLocationForm } from "@/features/vendor/components/AddParkingForm";
 import { LoadingSpinner } from "@/common/components/LoadingSpinner";
 import { queryKeys } from "@/config/query-keys";
 import { Button } from "@/components/ui/button";
@@ -55,7 +55,8 @@ function VendorParkingPage() {
                   Add location
                 </DialogTitle>
               </DialogHeader>
-              <AddParkingForm
+              <ParkingLocationForm
+                mode="create"
                 onCancel={() => setIsAddModalOpen(false)}
                 onSuccess={() => setIsAddModalOpen(false)}
               />

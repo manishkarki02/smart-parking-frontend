@@ -20,6 +20,17 @@ export async function addParkingLocation(
   return response.data.data;
 }
 
+export async function updateParkingLocation(
+  id: number | string,
+  data: ParkingLocationRequest,
+): Promise<ParkingLocation> {
+  const response = await parkingApi.put<ApiResponse<ParkingLocation>>(
+    PARKING_ROUTES.BY_ID(id),
+    data,
+  );
+  return response.data.data;
+}
+
 export async function getMyParkingLocations(): Promise<ParkingLocation[]> {
   const response = await parkingApi.get<ApiResponse<ParkingLocation[]>>(
     PARKING_ROUTES.MINE,
@@ -28,7 +39,7 @@ export async function getMyParkingLocations(): Promise<ParkingLocation[]> {
 }
 
 export async function updateAvailableSlots(
-  id: number,
+  id: number | string,
   newAvailableSlots: number,
 ): Promise<void> {
   await parkingApi.patch<ApiResponse<ParkingLocation>>(
@@ -37,6 +48,12 @@ export async function updateAvailableSlots(
       availableSlots: newAvailableSlots,
     },
   );
+}
+
+export async function deleteParkingLocation(
+  id: number | string,
+): Promise<void> {
+  await parkingApi.delete<ApiResponse<void>>(PARKING_ROUTES.BY_ID(id));
 }
 
 export async function getVendorDashboard(): Promise<VendorDashboardData> {

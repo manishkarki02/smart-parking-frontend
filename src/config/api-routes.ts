@@ -29,6 +29,7 @@ export const PARKING_ROUTES = {
   NEARBY: "/nearby",
   BY_ID: (id: number | string) => `/${id}`,
   SLOTS: (id: number | string) => `/${id}/slots`,
+  VENDOR_SLOTS: (id: number | string) => `/${id}/slots/all`,
 } as const;
 
 // ─── Booking ──────────────────────────────────────────────────────────────────
