@@ -35,6 +35,12 @@ function formatDateTime(dateStr: string): string {
   });
 }
 
+function formatDriverName(booking: AdminBooking): string {
+  if (booking.driverName) return booking.driverName;
+  if (booking.customerName) return booking.customerName;
+  return booking.walkIn ? "Walk-in customer" : "Driver booking";
+}
+
 export function BookingsTable({ bookings }: BookingsTableProps) {
   if (bookings.length === 0) {
     return (
@@ -60,20 +66,22 @@ export function BookingsTable({ bookings }: BookingsTableProps) {
         </TableHeader>
         <TableBody>
           {bookings.map((booking) => (
-            <TableRow key={booking.id}>
-              <TableCell className="font-medium">{booking.id}</TableCell>
+            <TableRow key={booking.bookingId}>
+              <TableCell className="font-medium">
+                {booking.bookingId.slice(0, 8)}…
+              </TableCell>
               <TableCell>
                 <div>
                   <p className="text-sm font-medium">
-                    {booking.user?.name ?? "N/A"}
+                    {formatDriverName(booking)}
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    {booking.user?.email ?? ""}
+                    {booking.vehicleNumber ?? booking.slotNumber}
                   </p>
                 </div>
               </TableCell>
               <TableCell>
-                {booking.parkingLocation?.name ?? "N/A"}
+                {booking.parkingLocationName}
               </TableCell>
               <TableCell className="text-sm">
                 {formatDateTime(booking.startTime)}
@@ -81,7 +89,7 @@ export function BookingsTable({ bookings }: BookingsTableProps) {
               <TableCell className="text-sm">
                 {formatDateTime(booking.endTime)}
               </TableCell>
-              <TableCell>Rs. {booking.totalAmount?.toFixed(2)}</TableCell>
+              <TableCell>Rs. {Number(booking.totalAmount).toFixed(2)}</TableCell>
               <TableCell>
                 <Badge variant={getStatusVariant(booking.status)}>
                   {booking.status}

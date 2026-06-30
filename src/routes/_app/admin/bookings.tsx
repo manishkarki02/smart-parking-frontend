@@ -17,7 +17,8 @@ function getStatusVariant(
   status: string,
 ): "default" | "secondary" | "destructive" | "outline" {
   switch (status?.toUpperCase()) {
-    case "ACTIVE":
+    case "CONFIRMED":
+    case "COMPLETED":
       return "default";
     case "PENDING":
       return "secondary";
@@ -33,22 +34,28 @@ function formatDateTime(value: string): string {
   return `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
 }
 
+function formatDriverName(booking: AdminBooking): string {
+  if (booking.driverName) return booking.driverName;
+  if (booking.customerName) return booking.customerName;
+  return booking.walkIn ? "Walk-in customer" : "Driver booking";
+}
+
 const columns: ColumnDef<AdminBooking>[] = [
   {
-    key: "id",
+    key: "bookingId",
     header: "ID",
     className: "font-mono",
-    cell: (booking) => `${String(booking.id).slice(0, 8)}…`,
+    cell: (booking) => `${booking.bookingId.slice(0, 8)}…`,
   },
   {
     key: "driver",
     header: "Driver name",
-    cell: (booking) => booking.user?.name ?? "N/A",
+    cell: formatDriverName,
   },
   {
     key: "location",
     header: "Parking location name",
-    cell: (booking) => booking.parkingLocation?.name ?? "N/A",
+    cell: (booking) => booking.parkingLocationName,
   },
   {
     key: "startTime",
@@ -65,7 +72,7 @@ const columns: ColumnDef<AdminBooking>[] = [
   {
     key: "amount",
     header: "Amount",
-    cell: (booking) => `Rs. ${booking.totalAmount}`,
+    cell: (booking) => `Rs. ${Number(booking.totalAmount).toFixed(2)}`,
   },
 ];
 
