@@ -9,6 +9,7 @@ import { useLeafletLocationSearch } from "@/common/hooks/maps/useLeafletGeocode"
 import { useReverseGeocode } from "@/common/hooks/maps/useReverseGeocode";
 import useDebounce from "@/common/hooks/useDebounce";
 import type { PickerLocation } from "@/common/types/map.types";
+import type { ParkingLocation } from "@/features/parkings/types/parking.types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -17,8 +18,11 @@ import {
   type AddParkingFormValues,
 } from "../validations/vendor.schema";
 import useAddParkingMutation from "../hooks/useAddParkingMutation";
+import useUpdateParkingMutation from "../hooks/useUpdateParkingMutation";
 
-interface AddParkingFormProps {
+interface ParkingLocationFormProps {
+  mode?: "create" | "edit";
+  initialValues?: ParkingLocation;
   onCancel?: () => void;
   onSuccess?: () => void;
 }
@@ -85,6 +89,14 @@ function LocationFields({
     isFetching: isResolvingAddress,
     isError: isReverseError,
   } = useReverseGeocode(reverseCoords?.lat, reverseCoords?.lng, !!reverseCoords);
+
+  useEffect(() => {
+    if (!pickedLocation || activeMethod != null) return;
+
+    setSearchQuery(pickedLocation.address ?? "");
+    setManualLat(String(pickedLocation.lat));
+    setManualLng(String(pickedLocation.lng));
+  }, [activeMethod, pickedLocation]);
 
   useEffect(() => {
     if (
@@ -357,9 +369,39 @@ function LocationFields({
   );
 }
 
-export function AddParkingForm({ onCancel, onSuccess }: AddParkingFormProps) {
+function getParkingFormDefaults(
+  location?: ParkingLocation,
+): AddParkingFormValues {
+  return {
+    name: location?.name ?? "",
+    address: location?.address ?? "",
+    latitude: location?.latitude,
+    longitude: location?.longitude,
+    totalFourWheelerSlots: location?.totalFourWheelerSlots,
+    totalTwoWheelerSlots: location?.totalTwoWheelerSlots,
+    fourWheelerRatePerHour: location?.fourWheelerRatePerHour,
+    twoWheelerRatePerHour: location?.twoWheelerRatePerHour,
+  };
+}
+
+function getPickedLocation(location?: ParkingLocation): PickerLocation | null {
+  if (location?.latitude == null || location?.longitude == null) return null;
+
+  return {
+    lat: location.latitude,
+    lng: location.longitude,
+    address: location.address,
+  };
+}
+
+export function ParkingLocationForm({
+  mode = "create",
+  initialValues,
+  onCancel,
+  onSuccess,
+}: ParkingLocationFormProps) {
   const [pickedLocation, setPickedLocation] = useState<PickerLocation | null>(
-    null,
+    getPickedLocation(initialValues),
   );
 
   const {
@@ -371,23 +413,25 @@ export function AddParkingForm({ onCancel, onSuccess }: AddParkingFormProps) {
     formState: { errors },
   } = useForm<AddParkingFormValues>({
     resolver: zodResolver(addParkingSchema),
-    defaultValues: {
-      name: "",
-      address: "",
-      latitude: undefined,
-      longitude: undefined,
-      totalFourWheelerSlots: undefined,
-      totalTwoWheelerSlots: undefined,
-      fourWheelerRatePerHour: undefined,
-      twoWheelerRatePerHour: undefined,
-    },
+    defaultValues: getParkingFormDefaults(initialValues),
   });
 
-  const { mutateAsync, isPending } = useAddParkingMutation(() => {
+  useEffect(() => {
+    reset(getParkingFormDefaults(initialValues));
+    setPickedLocation(getPickedLocation(initialValues));
+  }, [initialValues, reset]);
+
+  const addMutation = useAddParkingMutation(() => {
     reset();
     setPickedLocation(null);
     onSuccess?.();
   });
+
+  const updateMutation = useUpdateParkingMutation(() => {
+    onSuccess?.();
+  });
+
+  const isPending = addMutation.isPending || updateMutation.isPending;
 
   const handleLocationChange = useCallback((coords: PickerLocation) => {
     setPickedLocation(coords);
@@ -407,7 +451,17 @@ export function AddParkingForm({ onCancel, onSuccess }: AddParkingFormProps) {
   }, [resetField]);
 
   const onSubmit = async (data: AddParkingFormValues) => {
-    await mutateAsync(addParkingSchema.parse(data));
+    const parsed = addParkingSchema.parse(data);
+
+    if (mode === "edit" && initialValues?.id) {
+      await updateMutation.mutateAsync({
+        parkingId: initialValues.id,
+        data: parsed,
+      });
+      return;
+    }
+
+    await addMutation.mutateAsync(parsed);
   };
 
   const hasLocationError = errors.latitude || errors.longitude || errors.address;
@@ -549,9 +603,11 @@ export function AddParkingForm({ onCancel, onSuccess }: AddParkingFormProps) {
           disabled={isPending}
         >
           {isPending && <Loader2 className="mr-2 size-4 animate-spin" />}
-          Save
+          {mode === "edit" ? "Update" : "Save"}
         </Button>
       </div>
     </form>
   );
 }
+
+export const AddParkingForm = ParkingLocationForm;
