@@ -3,8 +3,12 @@ import { z } from "zod/v4";
 export const bookingSchema = z
   .object({
     parkingLocationId: z.coerce
-      .number({ message: "Please select a parking location" })
-      .positive("Please select a parking location"),
+      .string({ message: "Please select a parking location" })
+      .min(1, "Please select a parking location"),
+    slotId: z.string().min(1, "Please select a slot"),
+    vehicleType: z.enum(["TWO_WHEELER", "FOUR_WHEELER"], {
+      error: "Please select a vehicle type",
+    }),
     startTime: z.string().min(1, "Start time is required"),
     endTime: z.string().min(1, "End time is required"),
   })

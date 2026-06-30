@@ -5,6 +5,7 @@ import {
   type BookingFormValues,
 } from "../validations/booking.schema";
 import { getAllSlots } from "@/features/parkings/services/parking.service";
+import { getParkingSlots } from "@/features/parkings/services/parking.service";
 import { useQuery } from "@tanstack/react-query";
 import { queryKeys } from "@/config/query-keys";
 import { Button } from "@/components/ui/button";
@@ -28,7 +29,7 @@ import { Loader2, Car } from "lucide-react";
 import useBookingMutation from "../hooks/useBookingMutation";
 
 interface BookingFormProps {
-  preselectedParkingId?: number;
+  preselectedParkingId?: string;
 }
 
 export function BookingForm({ preselectedParkingId }: BookingFormProps) {
@@ -41,16 +42,30 @@ export function BookingForm({ preselectedParkingId }: BookingFormProps) {
     register,
     handleSubmit,
     setValue,
+    watch,
     formState: { errors },
   } = useForm<BookingFormValues>({
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    resolver: zodResolver(bookingSchema as any),
+    resolver: zodResolver(bookingSchema),
     defaultValues: {
-      parkingLocationId: preselectedParkingId ?? 0,
+      parkingLocationId: preselectedParkingId ?? "",
+      slotId: "",
+      vehicleType: "TWO_WHEELER",
       startTime: "",
       endTime: "",
     },
   });
+
+  const selectedParkingId = watch("parkingLocationId");
+  const selectedVehicleType = watch("vehicleType");
+  const { data: availableSlots = [], isLoading: slotsForLocationLoading } =
+    useQuery({
+      queryKey: queryKeys.parking.vendorSlots(
+        selectedParkingId ? `${selectedParkingId}-${selectedVehicleType}` : "none",
+      ),
+      queryFn: () => getParkingSlots(selectedParkingId, selectedVehicleType),
+      enabled: Boolean(selectedParkingId),
+      select: (slots) => slots.filter((slot) => slot.status === "AVAILABLE"),
+    });
 
   const bookingMutation = useBookingMutation();
 
@@ -58,6 +73,8 @@ export function BookingForm({ preselectedParkingId }: BookingFormProps) {
     const today = new Date().toISOString().split("T")[0];
     bookingMutation.mutateAsync({
       parkingLocationId: data.parkingLocationId,
+      slotId: data.slotId,
+      vehicleType: data.vehicleType,
       startTime: new Date(`${today}T${data.startTime}:00`).toISOString(),
       endTime: new Date(`${today}T${data.endTime}:00`).toISOString(),
     });
@@ -90,21 +107,22 @@ export function BookingForm({ preselectedParkingId }: BookingFormProps) {
               <Select
                 defaultValue={
                   preselectedParkingId
-                    ? String(preselectedParkingId)
+                    ? preselectedParkingId
                     : undefined
                 }
-                onValueChange={(val) =>
-                  setValue("parkingLocationId", Number(val), {
+                onValueChange={(val) => {
+                  setValue("parkingLocationId", val, {
                     shouldValidate: true,
-                  })
-                }
+                  });
+                  setValue("slotId", "", { shouldValidate: true });
+                }}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Select a parking location" />
                 </SelectTrigger>
                 <SelectContent>
                   {parkingSlots.map((slot) => (
-                    <SelectItem key={slot.id} value={String(slot.id)}>
+                    <SelectItem key={slot.id} value={slot.id}>
                       {slot.name} ({slot.availableSlots} slots available)
                     </SelectItem>
                   ))}
@@ -115,6 +133,61 @@ export function BookingForm({ preselectedParkingId }: BookingFormProps) {
               <p className="text-sm text-destructive">
                 {errors.parkingLocationId.message}
               </p>
+            )}
+          </div>
+
+          <div className="space-y-2">
+            <Label>Vehicle Type</Label>
+            <Select
+              defaultValue="TWO_WHEELER"
+              onValueChange={(val) => {
+                if (val === "TWO_WHEELER" || val === "FOUR_WHEELER") {
+                  setValue("vehicleType", val, { shouldValidate: true });
+                  setValue("slotId", "", { shouldValidate: true });
+                }
+              }}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select vehicle type" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="TWO_WHEELER">Two Wheeler</SelectItem>
+                <SelectItem value="FOUR_WHEELER">Four Wheeler</SelectItem>
+              </SelectContent>
+            </Select>
+            {errors.vehicleType && (
+              <p className="text-sm text-destructive">
+                {errors.vehicleType.message}
+              </p>
+            )}
+          </div>
+
+          <div className="space-y-2">
+            <Label>Slot</Label>
+            {slotsForLocationLoading ? (
+              <p className="text-sm text-muted-foreground">Loading slots...</p>
+            ) : (
+              <Select
+                value={watch("slotId") || undefined}
+                onValueChange={(val) =>
+                  setValue("slotId", val, { shouldValidate: true })
+                }
+                disabled={!selectedParkingId || availableSlots.length === 0}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select an available slot" />
+                </SelectTrigger>
+                <SelectContent>
+                  {availableSlots.map((slot) => (
+                    <SelectItem key={slot.id} value={slot.id}>
+                      {slot.slotNumber}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
+            {errors.slotId && (
+              <p className="text-sm text-destructive">{errors.slotId.message}</p>
             )}
           </div>
 

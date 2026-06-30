@@ -1,15 +1,15 @@
 export interface PaymentRequest {
-  bookingId: number;
+  bookingId: string;
   paymentMethod: "KHALTI" | "CASH";
 }
 
 export interface PaymentResponse {
-  paymentId: number;
-  bookingId: number;
+  paymentId: string;
+  bookingId: string;
   amount: number;
   status: string;
   transactionId: string;
-  PaymentUrl: string;
+  paymentUrl?: string;
   paidAt: string;
   message: string;
   pidx: string;

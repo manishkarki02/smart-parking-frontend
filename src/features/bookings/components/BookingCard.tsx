@@ -46,7 +46,7 @@ function formatDateTime(dateStr: string): string {
 export function BookingCard({ booking, onPay }: BookingCardProps) {
   const queryClient = useQueryClient();
   const [isCancelDialogOpen, setIsCancelDialogOpen] = useState(false);
-  const canCancel = ["PENDING", "ACTIVE"].includes(booking.status?.toUpperCase());
+  const canCancel = ["PENDING", "CONFIRMED"].includes(booking.status?.toUpperCase());
 
   const cancelMutation = useCustomMutation({
     api: cancelBooking,
@@ -65,7 +65,7 @@ export function BookingCard({ booking, onPay }: BookingCardProps) {
       <Card className="group overflow-hidden border bg-card/60 backdrop-blur-sm sm:hover:scale-[1.02] hover:shadow-xl hover:border-primary/30 transition-all duration-300">
         <CardHeader className="pb-3 bg-muted/20 border-b">
           <div className="flex items-start justify-between">
-            <CardTitle className="text-lg font-bold group-hover:text-primary transition-colors">{booking.parkingName}</CardTitle>
+            <CardTitle className="text-lg font-bold group-hover:text-primary transition-colors">{booking.parkingLocationName}</CardTitle>
             <Badge variant={getStatusVariant(booking.status)} className="shadow-sm">
               {booking.status}
             </Badge>

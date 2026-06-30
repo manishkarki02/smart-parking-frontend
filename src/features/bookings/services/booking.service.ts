@@ -11,7 +11,7 @@ export interface BookingListParams {
 }
 
 export interface VendorBooking {
-  id: number;
+  id: string;
   driver?: {
     name?: string;
     email?: string;
@@ -98,5 +98,5 @@ export async function updateBookingStatus({
 }
 
 export async function cancelBooking(id: number | string): Promise<void> {
-  await bookingApi.delete<ApiResponse<void>>(BOOKING_ROUTES.CANCEL(id));
+  await bookingApi.put<ApiResponse<void>>(`${BOOKING_ROUTES.BY_ID(id)}/cancel`);
 }

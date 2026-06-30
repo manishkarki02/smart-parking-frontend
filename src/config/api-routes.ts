@@ -30,6 +30,8 @@ export const PARKING_ROUTES = {
   BY_ID: (id: number | string) => `/${id}`,
   SLOTS: (id: number | string) => `/${id}/slots`,
   VENDOR_SLOTS: (id: number | string) => `/${id}/slots/all`,
+  SLOT_STATUS: (parkingLocationId: number | string, slotId: number | string) =>
+    `/${parkingLocationId}/slots/${slotId}/status`,
 } as const;
 
 // ─── Booking ──────────────────────────────────────────────────────────────────
@@ -44,6 +46,9 @@ export const BOOKING_ROUTES = {
 // ─── Vendor ───────────────────────────────────────────────────────────────────
 export const VENDOR_ROUTES = {
   DASHBOARD: "/dashboard",
+  WALK_IN_BOOKING: "/bookings/walk-in",
+  BOOKING_STATUS: (bookingId: number | string) =>
+    `/bookings/${bookingId}/status`,
 } as const;
 
 // ─── Admin ────────────────────────────────────────────────────────────────────

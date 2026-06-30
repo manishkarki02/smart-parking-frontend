@@ -35,8 +35,8 @@ function BookingsPage() {
         paymentMethod: "KHALTI",
       });
 
-      if (payment.PaymentUrl) {
-        window.open(payment.PaymentUrl, "_blank");
+      if (payment.paymentUrl) {
+        window.open(payment.paymentUrl, "_blank");
       } else {
         toast.info("Payment initiated. Transaction ID: " + payment.transactionId);
       }

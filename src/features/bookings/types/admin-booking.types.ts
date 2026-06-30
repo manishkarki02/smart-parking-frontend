@@ -1,5 +1,5 @@
 export interface AdminBooking {
-  id: number;
+  id: string;
   user: { name: string; email: string };
   parkingLocation: { name: string; address: string };
   startTime: string;

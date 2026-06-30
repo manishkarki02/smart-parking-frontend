@@ -5,7 +5,7 @@ import { AppLayout } from "@/common/components/AppLayout";
 import { useAuthGuard } from "@/common/hooks/use-auth-guard";
 
 const searchSchema = z.object({
-  parkingLocationId: z.coerce.number().optional(),
+  parkingLocationId: z.string().optional(),
 });
 
 export const Route = createFileRoute("/bookings/new")({
