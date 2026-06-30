@@ -106,6 +106,12 @@ const navItems: NavItem[] = [
     roles: ["VENDOR"],
   },
   {
+    label: "Bookings",
+    to: "/vendor/bookings",
+    icon: CalendarCheck,
+    roles: ["VENDOR"],
+  },
+  {
     label: "All Bookings",
     to: "/admin/bookings",
     icon: CalendarCheck,
