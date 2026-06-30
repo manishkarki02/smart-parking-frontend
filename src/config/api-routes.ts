@@ -27,6 +27,8 @@ export const PARKING_ROUTES = {
   MINE: "/mine",
   NEAREST: "/nearest",
   NEARBY: "/nearby",
+  NEARBY_GPS: "/nearby-gps",
+  THAMEL_NEARBY: "/thamel/closest-by-road-dis",
   BY_ID: (id: number | string) => `/${id}`,
   SLOTS: (id: number | string) => `/${id}/slots`,
   VENDOR_SLOTS: (id: number | string) => `/${id}/slots/all`,

@@ -1,8 +1,8 @@
 import useCustomQuery from "@/common/hooks/useCustomQuery";
 import { queryKeys } from "@/config/query-keys";
-import { getNearbyParking } from "../services/parking.service";
+import { getThamelNearbyParking } from "../services/parking.service";
 
-function useNearbyParkings({
+function useThamelNearbyParking({
   lat,
   lng,
   radius = 5,
@@ -12,8 +12,8 @@ function useNearbyParkings({
   radius?: number;
 }) {
   const { data = [], isLoading } = useCustomQuery({
-    key: queryKeys.parking.nearby(lat ?? 0, lng ?? 0, radius),
-    queryFn: () => getNearbyParking(lat ?? 0, lng ?? 0, radius),
+    key: queryKeys.parking.thamelNearby(lat ?? 0, lng ?? 0, radius),
+    queryFn: () => getThamelNearbyParking(lat ?? 0, lng ?? 0, radius),
     options: {
       enabled: lat !== null && lng !== null,
     },
@@ -21,4 +21,4 @@ function useNearbyParkings({
   return { locations: data, isLoading };
 }
 
-export default useNearbyParkings;
+export default useThamelNearbyParking;

@@ -15,8 +15,16 @@ export const queryKeys = {
       ["PARKING", "NEAREST", { lat, lng }] as const,
     nearby: (lat: number, lng: number, limit = 5) =>
       ["PARKING", "NEARBY", { lat, lng, limit }] as const,
+    nearbyGps: (lat: number, lng: number, limit = 5) =>
+      ["PARKING", "NEARBY_GPS", { lat, lng, limit }] as const,
+    thamelNearby: (lat: number, lng: number, limit = 5) =>
+      ["PARKING", "THAMEL_NEARBY", { lat, lng, limit }] as const,
     mine: () => ["PARKING", "MINE"] as const,
     detail: (id: number | string) => ["PARKING", "DETAIL", id] as const,
+    slotsForLocation: (id: number | string) =>
+      ["PARKING", "SLOTS", id] as const,
+    slots: (id: number | string, vehicleType?: string) =>
+      ["PARKING", "SLOTS", id, vehicleType ?? "ALL"] as const,
     vendorSlots: (id: number | string) =>
       ["PARKING", "VENDOR_SLOTS", id] as const,
   },

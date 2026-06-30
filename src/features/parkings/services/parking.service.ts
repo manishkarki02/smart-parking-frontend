@@ -70,7 +70,7 @@ export async function updateParkingSlotStatus({
   return response.data.data;
 }
 
-export async function getNearby(
+export async function getSingleNearestParking(
   lat: number,
   lng: number,
 ): Promise<ParkingLocation[]> {
@@ -81,10 +81,11 @@ export async function getNearby(
     },
   });
   const data = response.data.data;
+  console.log("Nearest Parking Location:", data);
   return data ? [data] : [];
 }
 
-export async function getThamelNearby(
+export async function getNearbyParking(
   lat: number,
   lng: number,
   limit = 5,
@@ -96,5 +97,38 @@ export async function getThamelNearby(
       limit,
     },
   });
+  console.log("Nearby Parking Locations:", response.data.data);
+  return response.data.data ?? [];
+}
+
+export async function getNearbyGPSParking(
+  lat: number,
+  lng: number,
+  limit = 5,
+): Promise<ParkingLocation[]> {
+  const response = await parkingApi.get<ApiResponse<ParkingLocation[]>>(PARKING_ROUTES.NEARBY_GPS, {
+    params: {
+      latitude: lat,
+      longitude: lng,
+      limit,
+    },
+  });
+  console.log("Nearby GPS Parking Locations:", response.data.data);
+  return response.data.data ?? [];
+}
+
+export async function getThamelNearbyParking(
+  lat: number,
+  lng: number,
+  limit = 5,
+): Promise<ParkingLocation[]> {
+  const response = await parkingApi.get<ApiResponse<ParkingLocation[]>>(PARKING_ROUTES.THAMEL_NEARBY, {
+    params: {
+      latitude: lat,
+      longitude: lng,
+      limit,
+    },
+  });
+  console.log("Thamel Nearby Parking Locations:", response.data.data);
   return response.data.data ?? [];
 }

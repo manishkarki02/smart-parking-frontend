@@ -23,8 +23,8 @@ import {
   ParkingCircle,
 } from "lucide-react";
 import { useAuthStore } from "@/stores/auth-store";
-import useParkingSlots from "@/features/parkings/hooks/useParkingSlots";
 import { getAuthHomePath } from "@/features/auth/utils/get-auth-home-path";
+import useThamelNearbyParking from "@/features/parkings/hooks/useThamelNearbyParking";
 
 export const Route = createFileRoute("/")({
   beforeLoad: () => {
@@ -37,7 +37,11 @@ export const Route = createFileRoute("/")({
 });
 
 function HomePage() {
-  const { locations, isLoading } = useParkingSlots();
+  const { locations, isLoading } = useThamelNearbyParking({
+    lat: 27.718391063838315,
+    lng: 85.35217956423477,
+    radius: 5,
+  });
 
   return (
     <PublicShell>
@@ -82,9 +86,13 @@ function HomePage() {
                     <CardTitle className="text-xl font-bold line-clamp-1 group-hover:text-primary transition-colors">
                       {location.name}
                     </CardTitle>
-                   <div className="px-3 py-1 bg-green-100 text-green-700 font-semibold text-sm rounded-full">
-                      Rs. {location.fourWheelerRatePerHour ?? location.twoWheelerRatePerHour ?? 0}/hr
-                   </div>
+                    <div className="px-3 py-1 bg-green-100 text-green-700 font-semibold text-sm rounded-full">
+                      Rs.{" "}
+                      {location.fourWheelerRatePerHour ??
+                        location.twoWheelerRatePerHour ??
+                        0}
+                      /hr
+                    </div>
                   </div>
                 </CardHeader>
 
