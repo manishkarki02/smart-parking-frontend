@@ -4,6 +4,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { ShieldCheck, ShieldX, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import DataTable, { type ColumnDef } from "@/common/components/DataTable";
+import { PageHeader } from "@/common/components/PageHeader";
 import { ConfirmDialog } from "@/common/components/ConfirmDialog";
 import useCustomMutation from "@/common/hooks/useCustomMutation";
 import useCustomQuery from "@/common/hooks/useCustomQuery";
@@ -109,11 +110,11 @@ function AdminDriversPage() {
 
   return (
     <>
+      <PageHeader title="Drivers" />
       <DataTable
         columns={columns}
         data={data?.data ?? []}
         isLoading={isLoading}
-        heading="Drivers"
         searchValue={search}
         onSearchChange={(value) => {
           setSearch(value);

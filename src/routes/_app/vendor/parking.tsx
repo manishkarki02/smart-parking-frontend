@@ -41,7 +41,6 @@ function VendorParkingPage() {
     <div className="space-y-6">
       <PageHeader
         title="My Parking Locations"
-        description="Manage your parking locations and available slots"
         action={
           <Dialog open={isAddModalOpen} onOpenChange={setIsAddModalOpen}>
             <DialogTrigger asChild>

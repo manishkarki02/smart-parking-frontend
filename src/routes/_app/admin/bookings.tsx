@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import DataTable, { type ColumnDef } from "@/common/components/DataTable";
+import { PageHeader } from "@/common/components/PageHeader";
 import useCustomQuery from "@/common/hooks/useCustomQuery";
 import { useAuthGuard } from "@/common/hooks/use-auth-guard";
 import { Badge } from "@/components/ui/badge";
@@ -86,11 +87,12 @@ function AdminBookingsPage() {
   }
 
   return (
-    <DataTable
+    <>
+      <PageHeader title="Bookings" />
+      <DataTable
       columns={columns}
       data={data?.data ?? []}
       isLoading={isLoading}
-      heading="Bookings"
       searchValue={search}
       onSearchChange={(value) => {
         setSearch(value);
@@ -101,5 +103,6 @@ function AdminBookingsPage() {
       onPageChange={setPage}
       emptyMessage="No bookings found"
     />
+    </>
   );
 }
