@@ -16,7 +16,7 @@ import useUpdateSlotsMutation from "../hooks/useUpdateSlotsMutation";
 interface UpdateSlotsDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  parkingId: number;
+  parkingId: number | string;
   parkingName: string;
   currentSlots: number;
 }

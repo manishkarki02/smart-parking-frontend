@@ -1,6 +1,6 @@
 import createApi from "@/common/utils/api";
 import type { ApiResponse } from "@/common/types/api.types";
-import type { ParkingLocation } from "../types/parking.types";
+import type { ParkingLocation, ParkingSlot } from "../types/parking.types";
 import { API_BASE, PARKING_ROUTES } from "@/config/api-routes";
 
 const parkingApi = createApi(API_BASE.PARKING);
@@ -14,6 +14,24 @@ export async function getAllSlots(): Promise<ParkingLocation[]> {
         available: true,
       },
     },
+  );
+  return response.data.data ?? [];
+}
+
+export async function getParkingById(
+  id: number | string,
+): Promise<ParkingLocation> {
+  const response = await parkingApi.get<ApiResponse<ParkingLocation>>(
+    PARKING_ROUTES.BY_ID(id),
+  );
+  return response.data.data;
+}
+
+export async function getVendorSlots(
+  id: number | string,
+): Promise<ParkingSlot[]> {
+  const response = await parkingApi.get<ApiResponse<ParkingSlot[]>>(
+    PARKING_ROUTES.VENDOR_SLOTS(id),
   );
   return response.data.data ?? [];
 }

@@ -15,3 +15,20 @@ export interface ParkingLocation {
   distance?: number;
   vendorName: string;
 }
+
+export type ParkingSlotStatus =
+  | "AVAILABLE"
+  | "OCCUPIED"
+  | "RESERVED"
+  | "MAINTENANCE";
+
+export type ParkingSlotVehicleType = "TWO_WHEELER" | "FOUR_WHEELER";
+
+export interface ParkingSlot {
+  id: string;
+  parkingLocationId: string;
+  parkingLocationName: string;
+  slotNumber: string;
+  vehicleType: ParkingSlotVehicleType;
+  status: ParkingSlotStatus;
+}

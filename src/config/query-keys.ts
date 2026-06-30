@@ -17,6 +17,8 @@ export const queryKeys = {
       ["PARKING", "NEARBY", { lat, lng, limit }] as const,
     mine: () => ["PARKING", "MINE"] as const,
     detail: (id: number | string) => ["PARKING", "DETAIL", id] as const,
+    vendorSlots: (id: number | string) =>
+      ["PARKING", "VENDOR_SLOTS", id] as const,
   },
 
   // ─── Bookings ────────────────────────────────────────────────────────────────
