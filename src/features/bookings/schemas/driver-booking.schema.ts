@@ -2,6 +2,7 @@ import { z } from "zod/v4";
 
 export const driverBookingSchema = z
   .object({
+    vehicleNumber: z.string().min(1, "Vehicle number is required"),
     startTime: z.string().min(1, "Start time is required"),
     endTime: z.string().min(1, "End time is required"),
   })

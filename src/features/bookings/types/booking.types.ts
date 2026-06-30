@@ -2,6 +2,7 @@ export interface BookingRequest {
   parkingLocationId: string;
   slotId: string;
   vehicleType: "TWO_WHEELER" | "FOUR_WHEELER";
+  vehicleNumber: string;
   startTime: string;
   endTime: string;
 }

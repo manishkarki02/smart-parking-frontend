@@ -81,6 +81,7 @@ export function DriverSlotBookingDialog({
   } = useForm<DriverBookingFormValues>({
     resolver: zodResolver(driverBookingSchema),
     defaultValues: {
+      vehicleNumber: "",
       startTime: defaultStartTime,
       endTime: defaultEndTime,
     },
@@ -90,6 +91,7 @@ export function DriverSlotBookingDialog({
   useEffect(() => {
     if (!open) return;
     reset({
+      vehicleNumber: "",
       startTime: defaultStartTime,
       endTime: defaultEndTime,
     });
@@ -132,6 +134,7 @@ export function DriverSlotBookingDialog({
         parkingLocationId: parkingLocation.id,
         slotId: slot.id,
         vehicleType: slot.vehicleType,
+        vehicleNumber: values.vehicleNumber.trim(),
         startTime: toBackendLocalDateTime(values.startTime),
         endTime: toBackendLocalDateTime(values.endTime),
       });
@@ -200,6 +203,21 @@ export function DriverSlotBookingDialog({
                   Rs. {estimatedAmount.toFixed(2)}
                 </p>
               </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="driver-vehicle-number">Vehicle number</Label>
+              <Input
+                id="driver-vehicle-number"
+                placeholder="e.g. BA 2 PA 1234"
+                autoComplete="off"
+                {...register("vehicleNumber")}
+              />
+              {errors.vehicleNumber && (
+                <p className="text-sm text-destructive">
+                  {errors.vehicleNumber.message}
+                </p>
+              )}
             </div>
 
             <div className="grid gap-4 sm:grid-cols-2">

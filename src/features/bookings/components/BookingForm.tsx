@@ -50,6 +50,7 @@ export function BookingForm({ preselectedParkingId }: BookingFormProps) {
       parkingLocationId: preselectedParkingId ?? "",
       slotId: "",
       vehicleType: "TWO_WHEELER",
+      vehicleNumber: "",
       startTime: "",
       endTime: "",
     },
@@ -76,6 +77,7 @@ export function BookingForm({ preselectedParkingId }: BookingFormProps) {
       parkingLocationId: data.parkingLocationId,
       slotId: data.slotId,
       vehicleType: data.vehicleType,
+      vehicleNumber: data.vehicleNumber.trim(),
       startTime: new Date(`${today}T${data.startTime}:00`).toISOString(),
       endTime: new Date(`${today}T${data.endTime}:00`).toISOString(),
     });
@@ -189,6 +191,21 @@ export function BookingForm({ preselectedParkingId }: BookingFormProps) {
             )}
             {errors.slotId && (
               <p className="text-sm text-destructive">{errors.slotId.message}</p>
+            )}
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="vehicleNumber">Vehicle Number</Label>
+            <Input
+              id="vehicleNumber"
+              placeholder="e.g. BA 2 PA 1234"
+              autoComplete="off"
+              {...register("vehicleNumber")}
+            />
+            {errors.vehicleNumber && (
+              <p className="text-sm text-destructive">
+                {errors.vehicleNumber.message}
+              </p>
             )}
           </div>
 
