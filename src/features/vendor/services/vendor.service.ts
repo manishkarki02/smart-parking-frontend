@@ -1,6 +1,14 @@
 import type { ApiResponse } from "@/common/types/api.types";
 import type { ParkingLocation } from "@/features/parkings/types/parking.types";
 import type {
+  VendorBookingStatusRequest,
+  BookingResponse,
+} from "@/features/bookings/types/booking.types";
+import type {
+  WalkInBookingRequest,
+  WalkInBookingResponse,
+} from "@/features/bookings/types/walk-in-booking.types";
+import type {
   ParkingLocationRequest,
   VendorDashboardData,
 } from "../types/vendor.types";
@@ -59,6 +67,30 @@ export async function deleteParkingLocation(
 export async function getVendorDashboard(): Promise<VendorDashboardData> {
   const response = await vendorApi.get<ApiResponse<VendorDashboardData>>(
     VENDOR_ROUTES.DASHBOARD,
+  );
+  return response.data.data;
+}
+
+export async function createWalkInBooking(
+  data: WalkInBookingRequest,
+): Promise<WalkInBookingResponse> {
+  const response = await vendorApi.post<ApiResponse<WalkInBookingResponse>>(
+    VENDOR_ROUTES.WALK_IN_BOOKING,
+    data,
+  );
+  return response.data.data;
+}
+
+export async function updateVendorBookingStatus({
+  bookingId,
+  data,
+}: {
+  bookingId: string;
+  data: VendorBookingStatusRequest;
+}): Promise<BookingResponse> {
+  const response = await vendorApi.put<ApiResponse<BookingResponse>>(
+    VENDOR_ROUTES.BOOKING_STATUS(bookingId),
+    data,
   );
   return response.data.data;
 }

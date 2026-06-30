@@ -16,7 +16,7 @@ export type VendorDashboardSlotStats = {
 };
 
 export type VendorDashboardLocation = {
-  id: number;
+  id: string;
   name: string;
   totalSlots: number;
   availableSlots: number;

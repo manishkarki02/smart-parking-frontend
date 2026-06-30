@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import type { ReactNode } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
@@ -17,6 +17,7 @@ import type {
   ParkingSlot,
   ParkingSlotStatus,
 } from "@/features/parkings/types/parking.types";
+import { VendorSlotActionDialog } from "@/features/vendor/components/VendorSlotActionDialog";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_app/vendor/parking_/$parkingId")({
@@ -26,7 +27,7 @@ export const Route = createFileRoute("/_app/vendor/parking_/$parkingId")({
 const statusLabels: Record<ParkingSlotStatus, string> = {
   AVAILABLE: "Available",
   OCCUPIED: "Occupied",
-  RESERVED: "Booked",
+  RESERVED: "Reserved",
   MAINTENANCE: "Maintenance",
 };
 
@@ -42,6 +43,7 @@ function VendorParkingDetailsPage() {
   const { isAuthorized } = useAuthGuard({ allowedRoles: ["VENDOR"] });
   const { parkingId } = Route.useParams();
   const navigate = useNavigate();
+  const [selectedSlot, setSelectedSlot] = useState<ParkingSlot | null>(null);
 
   const parkingQuery = useQuery({
     queryKey: queryKeys.parking.detail(parkingId),
@@ -177,12 +179,31 @@ function VendorParkingDetailsPage() {
             <SlotLegend />
 
             <div className="space-y-8 rounded-2xl border bg-sky-50/40 p-5 sm:p-6">
-              <SlotGroup title="Two Wheeler" slots={twoWheelerSlots} />
-              <SlotGroup title="Four Wheeler" slots={fourWheelerSlots} />
+              <SlotGroup
+                title="Two Wheeler"
+                slots={twoWheelerSlots}
+                onSlotClick={setSelectedSlot}
+              />
+              <SlotGroup
+                title="Four Wheeler"
+                slots={fourWheelerSlots}
+                onSlotClick={setSelectedSlot}
+              />
             </div>
           </CardContent>
         </Card>
       </div>
+
+      <VendorSlotActionDialog
+        open={selectedSlot !== null}
+        onOpenChange={(open) => {
+          if (!open) {
+            setSelectedSlot(null);
+          }
+        }}
+        slot={selectedSlot}
+        parkingLocation={location}
+      />
     </div>
   );
 }
@@ -214,7 +235,7 @@ function SlotLegend() {
     <div className="flex flex-wrap gap-5 rounded-2xl bg-muted/20 p-4 text-sm font-semibold">
       <LegendItem className="border-emerald-400 bg-emerald-100" label="Available" />
       <LegendItem className="border-red-300 bg-red-100" label="Occupied" />
-      <LegendItem className="border-yellow-400 bg-yellow-100" label="Booked" />
+      <LegendItem className="border-yellow-400 bg-yellow-100" label="Reserved" />
       <LegendItem className="border-slate-300 bg-slate-100" label="Maintenance" />
     </div>
   );
@@ -235,26 +256,42 @@ function LegendItem({
   );
 }
 
-function VendorSlotGrid({ slots }: { slots: ParkingSlot[] }) {
+function VendorSlotGrid({
+  slots,
+  onSlotClick,
+}: {
+  slots: ParkingSlot[];
+  onSlotClick: (slot: ParkingSlot) => void;
+}) {
   return (
     <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
       {slots.map((slot) => (
-        <div
+        <button
+          type="button"
           key={slot.id}
           className={cn(
-            "flex h-20 items-center justify-center rounded-xl border-2 text-base font-black shadow-sm",
+            "flex h-20 items-center justify-center rounded-xl border-2 text-base font-black shadow-sm transition-transform hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
             statusClasses[slot.status],
           )}
           title={`${slot.slotNumber} - ${slot.vehicleType} - ${statusLabels[slot.status]}`}
+          onClick={() => onSlotClick(slot)}
         >
           {slot.slotNumber}
-        </div>
+        </button>
       ))}
     </div>
   );
 }
 
-function SlotGroup({ title, slots }: { title: string; slots: ParkingSlot[] }) {
+function SlotGroup({
+  title,
+  slots,
+  onSlotClick,
+}: {
+  title: string;
+  slots: ParkingSlot[];
+  onSlotClick: (slot: ParkingSlot) => void;
+}) {
   return (
     <section className="space-y-3">
       <div className="flex items-center gap-3">
@@ -265,7 +302,7 @@ function SlotGroup({ title, slots }: { title: string; slots: ParkingSlot[] }) {
       </div>
 
       {slots.length > 0 ? (
-        <VendorSlotGrid slots={slots} />
+        <VendorSlotGrid slots={slots} onSlotClick={onSlotClick} />
       ) : (
         <div className="rounded-xl border border-dashed bg-background/60 p-5 text-sm text-muted-foreground">
           No {title.toLowerCase()} slots found.
