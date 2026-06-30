@@ -1,7 +1,10 @@
 export * from "./components/BookingCard";
 export * from "./components/BookingForm";
 export * from "./components/BookingsTable";
+export * from "./components/DriverSlotBookingDialog";
 export { default as useBookingMutation } from "./hooks/useBookingMutation";
+export * from "./hooks/use-create-driver-booking";
+export * from "./schemas/driver-booking.schema";
 export * from "./services/admin-bookings.service";
 export * from "./services/booking.service";
 export * from "./types/admin-booking.types";

@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
 import { Image as ImageIcon, Loader2, MapPin } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -7,6 +8,10 @@ import { Card, CardContent } from "@/components/ui/card";
 import { LoginModal } from "@/features/auth/components/LoginModal";
 import { useAuthStore } from "@/stores/auth-store";
 import useParkingSlots from "@/features/parkings/hooks/useParkingSlots";
+import { DriverSlotBookingDialog } from "@/features/bookings/components/DriverSlotBookingDialog";
+import { queryKeys } from "@/config/query-keys";
+import { getParkingSlots } from "../services/parking.service";
+import type { ParkingSlot } from "../types/parking.types";
 import { SlotGrid } from "./SlotGrid";
 
 type ParkingDetailsProps = {
@@ -16,7 +21,8 @@ type ParkingDetailsProps = {
 export function ParkingDetails({ parkingId }: ParkingDetailsProps) {
   const navigate = useNavigate();
   const { isAuthenticated } = useAuthStore();
-  const [selectedSlot, setSelectedSlot] = useState<number | null>(null);
+  const [selectedSlot, setSelectedSlot] = useState<ParkingSlot | null>(null);
+  const [isBookingDialogOpen, setIsBookingDialogOpen] = useState(false);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const { locations, isLoading } = useParkingSlots();
 
@@ -24,28 +30,36 @@ export function ParkingDetails({ parkingId }: ParkingDetailsProps) {
     return locations?.find((loc) => loc.id === parkingId);
   }, [locations, parkingId]);
 
-  const handleBookNow = () => {
-    if (
-      !selectedSlot &&
-      location?.availableSlots &&
-      location.availableSlots > 0
-    ) {
-      toast.error("Please select an available slot first.");
+  const { data: slots = [], isLoading: isSlotsLoading } = useQuery({
+    queryKey: queryKeys.parking.slots(parkingId),
+    queryFn: () => getParkingSlots(parkingId),
+    enabled: Boolean(location),
+  });
+
+  const availableSlots = slots.filter((slot) => slot.status === "AVAILABLE");
+
+  const handleSlotSelect = (slot: ParkingSlot) => {
+    if (slot.status !== "AVAILABLE") {
+      toast.error("Only available slots can be booked.");
       return;
     }
 
+    setSelectedSlot(slot);
     if (!isAuthenticated()) {
       setIsLoginModalOpen(true);
       return;
     }
 
-    navigate({
-      to: "/bookings/new",
-      search: { parkingLocationId: location?.id },
-    });
+    setIsBookingDialogOpen(true);
   };
 
   const handleLoginSuccess = () => {
+    setIsLoginModalOpen(false);
+    if (selectedSlot) {
+      setIsBookingDialogOpen(true);
+      return;
+    }
+
     navigate({
       to: "/bookings/new",
       search: { parkingLocationId: location?.id },
@@ -68,7 +82,6 @@ export function ParkingDetails({ parkingId }: ParkingDetailsProps) {
     );
   }
 
-  const canBook = location.availableSlots > 0;
   const signedIn = isAuthenticated();
 
   return (
@@ -128,7 +141,7 @@ export function ParkingDetails({ parkingId }: ParkingDetailsProps) {
                     <p className="text-sm leading-relaxed text-foreground/80">
                       Secure and affordable parking space provided by{" "}
                       {location.vendorName}. Conveniently located with easy
-                      access. Total of {location.availableSlots} slots available
+                      access. Total of {availableSlots.length} slots available
                       right now.
                     </p>
                   </div>
@@ -142,21 +155,25 @@ export function ParkingDetails({ parkingId }: ParkingDetailsProps) {
               <h2 className="mb-6 flex items-center gap-2 text-2xl font-bold">
                 Select a Slot
                 <span className="rounded-full bg-primary/10 px-3 py-1 text-sm font-normal text-primary">
-                  {location.availableSlots} available
+                  {availableSlots.length} available
                 </span>
               </h2>
 
-              {canBook ? (
+              {isSlotsLoading ? (
+                <div className="flex min-h-64 items-center justify-center rounded-xl border bg-muted/20">
+                  <Loader2 className="size-6 animate-spin text-primary" />
+                </div>
+              ) : slots.length > 0 ? (
                 <SlotGrid
-                  availableCount={location.availableSlots}
-                  selectedSlot={selectedSlot}
-                  onSelectSlot={setSelectedSlot}
+                  slots={slots}
+                  selectedSlotId={selectedSlot?.id ?? null}
+                  onSelectSlot={handleSlotSelect}
                 />
               ) : (
                 <div className="rounded-xl border border-red-200 bg-red-50 p-8 text-center text-red-600">
-                  <p className="text-lg font-semibold">Fully Booked</p>
+                  <p className="text-lg font-semibold">No Slots Found</p>
                   <p className="mt-1 text-sm">
-                    There are no available slots at this location right now.
+                    This parking location does not have slots configured yet.
                   </p>
                 </div>
               )}
@@ -164,20 +181,27 @@ export function ParkingDetails({ parkingId }: ParkingDetailsProps) {
               <div className="mt-8 flex items-center justify-between border-t pt-6">
                 <div>
                   {selectedSlot ? (
-                    <p className="font-medium text-primary">Slot Selected</p>
+                    <p className="font-medium text-primary">
+                      Selected: {selectedSlot.slotNumber}
+                    </p>
                   ) : (
                     <p className="text-sm text-muted-foreground">
-                      Select an available slot to continue
+                      Click an available slot to book
                     </p>
                   )}
                 </div>
                 <Button
                   size="lg"
                   className="px-8"
-                  onClick={handleBookNow}
-                  disabled={canBook && !selectedSlot}
+                  onClick={() => {
+                    if (signedIn) {
+                      navigate({ to: "/bookings" });
+                      return;
+                    }
+                    setIsLoginModalOpen(true);
+                  }}
                 >
-                  {signedIn ? "Book Now" : "Sign in to book"}
+                  {signedIn ? "My Bookings" : "Sign in to book"}
                 </Button>
               </div>
             </div>
@@ -189,6 +213,18 @@ export function ParkingDetails({ parkingId }: ParkingDetailsProps) {
         open={isLoginModalOpen}
         onOpenChange={setIsLoginModalOpen}
         onSuccess={handleLoginSuccess}
+      />
+
+      <DriverSlotBookingDialog
+        open={isBookingDialogOpen}
+        onOpenChange={(open) => {
+          setIsBookingDialogOpen(open);
+          if (!open) {
+            setSelectedSlot(null);
+          }
+        }}
+        parkingLocation={location}
+        slot={selectedSlot}
       />
     </>
   );

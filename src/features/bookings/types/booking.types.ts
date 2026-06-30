@@ -30,6 +30,16 @@ export interface BookingResponse {
   paidAt?: string;
 }
 
+export interface BookingCancelResponse {
+  bookingId: string;
+  status: string;
+  refundEligible: boolean;
+  refundStatus?: string;
+  refundAmount?: number;
+  cancelledAt?: string;
+  message: string;
+}
+
 export type VendorBookingAction = "CHECK_IN" | "COMPLETE";
 
 export interface VendorBookingStatusRequest {

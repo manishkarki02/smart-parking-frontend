@@ -1,5 +1,9 @@
 import type { ApiResponse } from "@/common/types/api.types";
-import type { BookingRequest, BookingResponse } from "../types/booking.types";
+import type {
+  BookingCancelResponse,
+  BookingRequest,
+  BookingResponse,
+} from "../types/booking.types";
 import createApi from "@/common/utils/api";
 import { API_BASE, BOOKING_ROUTES } from "@/config/api-routes";
 
@@ -97,6 +101,11 @@ export async function updateBookingStatus({
   });
 }
 
-export async function cancelBooking(id: number | string): Promise<void> {
-  await bookingApi.put<ApiResponse<void>>(`${BOOKING_ROUTES.BY_ID(id)}/cancel`);
+export async function cancelBooking(
+  id: number | string,
+): Promise<BookingCancelResponse> {
+  const response = await bookingApi.put<ApiResponse<BookingCancelResponse>>(
+    `${BOOKING_ROUTES.BY_ID(id)}/cancel`,
+  );
+  return response.data.data;
 }

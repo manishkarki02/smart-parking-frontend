@@ -53,6 +53,9 @@ export function BookingCard({ booking, onPay }: BookingCardProps) {
     onSuccess: () => {
       setIsCancelDialogOpen(false);
       void queryClient.invalidateQueries({ queryKey: queryKeys.bookings.me() });
+      void queryClient.invalidateQueries({
+        queryKey: queryKeys.parking.slotsForLocation(booking.parkingLocationId),
+      });
       toast.success("Booking cancelled successfully");
     },
     onError: () => {

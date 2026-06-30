@@ -59,8 +59,9 @@ export function BookingForm({ preselectedParkingId }: BookingFormProps) {
   const selectedVehicleType = watch("vehicleType");
   const { data: availableSlots = [], isLoading: slotsForLocationLoading } =
     useQuery({
-      queryKey: queryKeys.parking.vendorSlots(
-        selectedParkingId ? `${selectedParkingId}-${selectedVehicleType}` : "none",
+      queryKey: queryKeys.parking.slots(
+        selectedParkingId || "none",
+        selectedVehicleType,
       ),
       queryFn: () => getParkingSlots(selectedParkingId, selectedVehicleType),
       enabled: Boolean(selectedParkingId),

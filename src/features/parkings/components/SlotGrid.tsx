@@ -1,96 +1,155 @@
-import { useMemo } from "react";
+import type {
+  ParkingSlot,
+  ParkingSlotStatus,
+  ParkingSlotVehicleType,
+} from "../types/parking.types";
 import { cn } from "@/lib/utils";
 
-export type SlotStatus = "AVAILABLE" | "OCCUPIED" | "BOOKED";
-
-interface MockSlot {
-  id: number;
-  number: string;
-  status: SlotStatus;
-}
-
 interface SlotGridProps {
-  availableCount: number;
-  selectedSlot: number | null;
-  onSelectSlot: (slotNum: number | null) => void;
+  slots: ParkingSlot[];
+  selectedSlotId?: string | null;
+  onSelectSlot?: (slot: ParkingSlot) => void;
 }
 
-export function SlotGrid({ availableCount, selectedSlot, onSelectSlot }: SlotGridProps) {
-  // Generate a mock grid of slots
-  const slots = useMemo(() => {
-    const totalSlots = availableCount + 6; // Just to show some occupied/booked slots
-    const generatedSlots: MockSlot[] = [];
-    
-    let assignedAvailable = 0;
-    
-    for (let i = 1; i <= totalSlots; i++) {
-      let status: SlotStatus = "OCCUPIED";
-      
-      // Randomly assign available slots until we hit the count
-      if (assignedAvailable < availableCount) {
-        // High probability to be available if we need to fill them, to ensure we get to the count
-        if (Math.random() > 0.3 || (totalSlots - i) <= (availableCount - assignedAvailable)) {
-          status = "AVAILABLE";
-          assignedAvailable++;
-        } else {
-           // If not available, maybe booked or occupied
-           status = Math.random() > 0.5 ? "BOOKED" : "OCCUPIED";
-        }
-      } else {
-        status = Math.random() > 0.5 ? "BOOKED" : "OCCUPIED";
-      }
+const statusLabels: Record<ParkingSlotStatus, string> = {
+  AVAILABLE: "Available",
+  RESERVED: "Reserved",
+  OCCUPIED: "Occupied",
+  MAINTENANCE: "Maintenance",
+};
 
-      generatedSlots.push({
-        id: i,
-        number: `A-${i.toString().padStart(2, '0')}`,
-        status,
-      });
-    }
-    return generatedSlots;
-  }, [availableCount]);
+const vehicleTypeLabels: Record<ParkingSlotVehicleType, string> = {
+  TWO_WHEELER: "Two Wheeler",
+  FOUR_WHEELER: "Four Wheeler",
+};
 
+const statusClasses: Record<ParkingSlotStatus, string> = {
+  AVAILABLE:
+    "border-green-300 bg-green-100 text-green-800 hover:bg-green-200 dark:border-green-700 dark:bg-green-900/40 dark:text-green-300 dark:hover:bg-green-900/60",
+  RESERVED:
+    "border-yellow-300 bg-yellow-100 text-yellow-800 opacity-75 dark:border-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-300",
+  OCCUPIED:
+    "border-red-300 bg-red-100 text-red-800 opacity-75 dark:border-red-700 dark:bg-red-900/40 dark:text-red-300",
+  MAINTENANCE:
+    "border-slate-300 bg-slate-100 text-slate-700 opacity-75 dark:border-slate-700 dark:bg-slate-900/40 dark:text-slate-300",
+};
+
+function LegendItem({
+  status,
+  label,
+}: {
+  status: ParkingSlotStatus;
+  label: string;
+}) {
   return (
-    <div className="w-full">
-      <div className="flex flex-wrap gap-4 mb-6 text-sm font-medium p-4 bg-muted/30 rounded-lg">
-        <div className="flex items-center gap-2">
-          <div className="w-4 h-4 rounded bg-green-200 border border-green-400 dark:bg-green-900/50 dark:border-green-600"></div>
-          <span>Available</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="w-4 h-4 rounded bg-red-200 border border-red-400 dark:bg-red-900/50 dark:border-red-600"></div>
-          <span>Occupied</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="w-4 h-4 rounded bg-yellow-200 border border-yellow-400 dark:bg-yellow-900/50 dark:border-yellow-600"></div>
-          <span>Booked</span>
-        </div>
+    <div className="flex items-center gap-2">
+      <div
+        className={cn("size-4 rounded border", statusClasses[status])}
+        aria-hidden="true"
+      />
+      <span>{label}</span>
+    </div>
+  );
+}
+
+function SlotGroup({
+  vehicleType,
+  slots,
+  selectedSlotId,
+  onSelectSlot,
+}: {
+  vehicleType: ParkingSlotVehicleType;
+  slots: ParkingSlot[];
+  selectedSlotId?: string | null;
+  onSelectSlot?: (slot: ParkingSlot) => void;
+}) {
+  return (
+    <section className="space-y-3">
+      <div className="flex items-center justify-between gap-3">
+        <h3 className="text-sm font-bold uppercase tracking-wide text-muted-foreground">
+          {vehicleTypeLabels[vehicleType]}
+        </h3>
+        <span className="text-sm text-muted-foreground">
+          {slots.filter((slot) => slot.status === "AVAILABLE").length} available
+        </span>
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 bg-pink-50/50 dark:bg-slate-900/50 p-6 rounded-xl border">
-        {slots.map((slot) => {
-          const isSelected = selectedSlot === slot.id;
-          const isAvailable = slot.status === "AVAILABLE";
+      {slots.length > 0 ? (
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+          {slots.map((slot) => {
+            const isAvailable = slot.status === "AVAILABLE";
+            const isSelected = selectedSlotId === slot.id;
 
-          return (
-            <button
-              key={slot.id}
-              disabled={!isAvailable}
-              onClick={() => isAvailable && onSelectSlot(isSelected ? null : slot.id)}
-              className={cn(
-                "relative flex items-center justify-center p-4 h-20 rounded-xl border-2 transition-all duration-300 shadow-sm",
-                "focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
-                // Status colors matching wireframe requests
-                slot.status === "AVAILABLE" && "bg-green-100 hover:bg-green-200 border-green-300 text-green-800 dark:bg-green-900/40 dark:border-green-700 dark:text-green-300 dark:hover:bg-green-900/60 cursor-pointer",
-                slot.status === "OCCUPIED" && "bg-red-100 border-red-300 text-red-800 dark:bg-red-900/40 dark:border-red-700 dark:text-red-300 opacity-70 cursor-not-allowed",
-                slot.status === "BOOKED" && "bg-yellow-100 border-yellow-300 text-yellow-800 dark:bg-yellow-900/40 dark:border-yellow-700 dark:text-yellow-300 opacity-70 cursor-not-allowed",
-                // Selected state
-                isSelected && "ring-2 ring-primary ring-offset-2 scale-105 border-primary shadow-md bg-green-200 dark:bg-green-800"
-              )}
-            >
-              <span className="font-bold tracking-wider">{slot.number}</span>
-            </button>
-          );
-        })}
+            return (
+              <button
+                key={slot.id}
+                type="button"
+                disabled={!isAvailable}
+                onClick={() => {
+                  if (isAvailable) {
+                    onSelectSlot?.(slot);
+                  }
+                }}
+                title={`${slot.slotNumber} - ${vehicleTypeLabels[slot.vehicleType]} - ${statusLabels[slot.status]}`}
+                className={cn(
+                  "relative flex h-20 items-center justify-center rounded-xl border-2 p-4 font-bold tracking-wider shadow-sm transition-all",
+                  "focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+                  isAvailable ? "cursor-pointer" : "cursor-not-allowed",
+                  statusClasses[slot.status],
+                  isAvailable && "hover:-translate-y-0.5",
+                  isSelected &&
+                    "scale-105 border-primary bg-green-200 ring-2 ring-primary ring-offset-2 dark:bg-green-800",
+                )}
+              >
+                <span>{slot.slotNumber}</span>
+                <span className="sr-only">{statusLabels[slot.status]}</span>
+              </button>
+            );
+          })}
+        </div>
+      ) : (
+        <div className="rounded-xl border border-dashed bg-background/60 p-5 text-sm text-muted-foreground">
+          No {vehicleTypeLabels[vehicleType].toLowerCase()} slots found.
+        </div>
+      )}
+    </section>
+  );
+}
+
+export function SlotGrid({
+  slots,
+  selectedSlotId = null,
+  onSelectSlot,
+}: SlotGridProps) {
+  const twoWheelerSlots = slots.filter(
+    (slot) => slot.vehicleType === "TWO_WHEELER",
+  );
+  const fourWheelerSlots = slots.filter(
+    (slot) => slot.vehicleType === "FOUR_WHEELER",
+  );
+
+  return (
+    <div className="w-full space-y-6">
+      <div className="flex flex-wrap gap-4 rounded-lg bg-muted/30 p-4 text-sm font-medium">
+        <LegendItem status="AVAILABLE" label="Available" />
+        <LegendItem status="RESERVED" label="Reserved" />
+        <LegendItem status="OCCUPIED" label="Occupied" />
+        <LegendItem status="MAINTENANCE" label="Maintenance" />
+      </div>
+
+      <div className="space-y-8 rounded-xl border bg-pink-50/50 p-5 dark:bg-slate-900/50">
+        <SlotGroup
+          vehicleType="TWO_WHEELER"
+          slots={twoWheelerSlots}
+          selectedSlotId={selectedSlotId}
+          onSelectSlot={onSelectSlot}
+        />
+        <SlotGroup
+          vehicleType="FOUR_WHEELER"
+          slots={fourWheelerSlots}
+          selectedSlotId={selectedSlotId}
+          onSelectSlot={onSelectSlot}
+        />
       </div>
     </div>
   );
