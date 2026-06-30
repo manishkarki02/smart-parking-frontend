@@ -43,7 +43,7 @@ function HomePage() {
     <PublicShell>
       {/* Hero Section */}
       <section className="relative w-full h-75 md:h-100 flex items-center justify-center overflow-hidden bg-[#F0FDF4]">
-        <div className="absolute inset-0 bg-gradient-to-br from-green-200/30 via-emerald-400/10 to-transparent pointer-events-none" />
+        <div className="absolute inset-0 pointer-events-none" />
         <div className="absolute inset-0 backdrop-blur-[2px] pointer-events-none" />
 
         <div className="relative z-10 text-center px-4 max-w-3xl">

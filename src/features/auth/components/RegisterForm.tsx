@@ -3,7 +3,6 @@ import { Link } from "@tanstack/react-router";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
-  Car,
   Eye,
   EyeOff,
   Loader2,
@@ -73,21 +72,18 @@ export function RegisterForm() {
     <AuthLayout>
       <Card className="rounded-[2rem] border-[#E2E8F0] bg-white p-0 shadow-[0_18px_60px_rgba(37,99,235,0.10)]">
         <CardHeader className="px-6 pt-8 text-center sm:px-8">
-          <div className="mx-auto mb-5 flex size-14 items-center justify-center rounded-2xl bg-blue-50 text-[#2563EB] ring-1 ring-blue-100">
-            <Car className="size-7" />
-          </div>
           <CardTitle className="text-3xl font-black tracking-tight text-[#0F172A]">
             Create your account
           </CardTitle>
-          <CardDescription className="pt-2 text-sm leading-6 text-[#64748B]">
-            Register as a driver or admin for Smart Parking.
+          <CardDescription className="text-sm leading-6 text-[#64748B]">
+            Register as a driver or vendor for Smart Parking.
           </CardDescription>
         </CardHeader>
 
         <CardContent className="px-6 pb-8 sm:px-8">
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
             <div className="space-y-2">
-              <Label htmlFor="name" className="font-semibold text-[#0F172A]">
+              <Label htmlFor="name" className="text-xs font-bold uppercase tracking-[0.14em] text-muted-foreground">
                 Full Name
               </Label>
               <div className="relative">
@@ -108,7 +104,7 @@ export function RegisterForm() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="email" className="font-semibold text-[#0F172A]">
+              <Label htmlFor="email" className="text-xs font-bold uppercase tracking-[0.14em] text-muted-foreground">
                 Email Address
               </Label>
               <div className="relative">
@@ -132,7 +128,7 @@ export function RegisterForm() {
             <div className="space-y-2">
               <Label
                 htmlFor="password"
-                className="font-semibold text-[#0F172A]"
+                className="text-xs font-bold uppercase tracking-[0.14em] text-muted-foreground"
               >
                 Password
               </Label>
@@ -168,7 +164,7 @@ export function RegisterForm() {
             <div className="space-y-2">
               <Label
                 htmlFor="confirmPassword"
-                className="font-semibold text-[#0F172A]"
+                className="text-xs font-bold uppercase tracking-[0.14em] text-muted-foreground"
               >
                 Confirm Password
               </Label>
@@ -204,7 +200,7 @@ export function RegisterForm() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="phone" className="font-semibold text-[#0F172A]">
+              <Label htmlFor="phone" className="text-xs font-bold uppercase tracking-[0.14em] text-muted-foreground">
                 Phone Number
               </Label>
               <div className="relative">
@@ -225,7 +221,7 @@ export function RegisterForm() {
             </div>
 
             <div className="space-y-2">
-              <Label className="font-semibold text-[#0F172A]">Role</Label>
+              <Label className="text-xs font-bold uppercase tracking-[0.14em] text-muted-foreground">Role</Label>
               <Controller
                 name="role"
                 control={control}

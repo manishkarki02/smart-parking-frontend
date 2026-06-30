@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Car, Eye, EyeOff, Loader2, Lock, Mail } from "lucide-react";
+import { Eye, EyeOff, Loader2, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -41,13 +41,10 @@ export function LoginForm() {
     <AuthLayout>
       <Card className="rounded-[2rem] border-[#E2E8F0] bg-white p-0 shadow-[0_18px_60px_rgba(37,99,235,0.10)]">
         <CardHeader className="px-6 pt-8 text-center sm:px-8">
-          <div className="mx-auto mb-5 flex size-14 items-center justify-center rounded-2xl bg-blue-50 text-[#2563EB] ring-1 ring-blue-100">
-            <Car className="size-7" />
-          </div>
           <CardTitle className="text-3xl font-black tracking-tight text-[#0F172A]">
             Welcome back
           </CardTitle>
-          <CardDescription className="pt-2 text-sm leading-6 text-[#64748B]">
+          <CardDescription className="text-sm leading-6 text-[#64748B]">
             Sign in with your email and password to continue.
           </CardDescription>
         </CardHeader>
@@ -55,7 +52,7 @@ export function LoginForm() {
         <CardContent className="px-6 pb-8 sm:px-8">
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
             <div className="space-y-2">
-              <Label htmlFor="email" className="font-semibold text-[#0F172A]">
+              <Label htmlFor="email" className="text-xs font-bold uppercase tracking-[0.14em] text-muted-foreground">
                 Email Address
               </Label>
               <div className="relative">
@@ -79,7 +76,7 @@ export function LoginForm() {
             <div className="space-y-2">
               <Label
                 htmlFor="password"
-                className="font-semibold text-[#0F172A]"
+                className="text-xs font-bold uppercase tracking-[0.14em] text-muted-foreground"
               >
                 Password
               </Label>
@@ -110,20 +107,6 @@ export function LoginForm() {
                   {errors.password.message}
                 </p>
               )}
-            </div>
-
-            <div className="flex items-center justify-between gap-4 text-sm">
-              <label className="flex items-center gap-2 font-medium text-[#64748B]">
-                <input
-                  type="checkbox"
-                  className="size-4 rounded border-[#E2E8F0] text-[#2563EB] focus:ring-[#2563EB]"
-                />
-                Remember me
-              </label>
-              <div className="flex items-center gap-1 text-[#94A3B8]">
-                <Lock className="size-4" />
-                <span>Secure login</span>
-              </div>
             </div>
 
             <Button
