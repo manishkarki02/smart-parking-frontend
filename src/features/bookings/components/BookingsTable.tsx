@@ -14,9 +14,15 @@ interface BookingsTableProps {
 }
 
 function getStatusVariant(
-  status: string
+  status: string,
+  slotStatus?: string,
 ): "default" | "secondary" | "destructive" | "outline" {
+  if (slotStatus === "BOOKED" || slotStatus === "OCCUPIED") {
+    return "secondary";
+  }
+
   switch (status?.toUpperCase()) {
+    case "COMPLETED":
     case "CONFIRMED":
       return "default";
     case "PENDING":
@@ -26,6 +32,15 @@ function getStatusVariant(
     default:
       return "outline";
   }
+}
+
+function formatStatus(status: string, slotStatus?: string): string {
+  if (status === "COMPLETED") return "Completed";
+  if (status === "CANCELLED") return "Cancelled";
+  if (slotStatus === "RESERVED") return "Reserved";
+  if (slotStatus === "BOOKED") return "Booked";
+  if (slotStatus === "OCCUPIED") return "Occupied";
+  return status;
 }
 
 function formatDateTime(dateStr: string): string {
@@ -91,8 +106,8 @@ export function BookingsTable({ bookings }: BookingsTableProps) {
               </TableCell>
               <TableCell>Rs. {Number(booking.totalAmount).toFixed(2)}</TableCell>
               <TableCell>
-                <Badge variant={getStatusVariant(booking.status)}>
-                  {booking.status}
+                <Badge variant={getStatusVariant(booking.status, booking.slotStatus)}>
+                  {formatStatus(booking.status, booking.slotStatus)}
                 </Badge>
               </TableCell>
             </TableRow>

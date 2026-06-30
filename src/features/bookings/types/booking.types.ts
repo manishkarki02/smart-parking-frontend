@@ -19,6 +19,7 @@ export interface BookingResponse {
   parkingLocationName: string;
   slotId: string;
   slotNumber: string;
+  slotStatus?: "AVAILABLE" | "RESERVED" | "BOOKED" | "OCCUPIED" | "MAINTENANCE";
   vehicleType: "TWO_WHEELER" | "FOUR_WHEELER";
   status: string;
   startTime: string;

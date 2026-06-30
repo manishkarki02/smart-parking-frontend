@@ -18,8 +18,9 @@ export interface ParkingLocation {
 
 export type ParkingSlotStatus =
   | "AVAILABLE"
-  | "OCCUPIED"
   | "RESERVED"
+  | "BOOKED"
+  | "OCCUPIED"
   | "MAINTENANCE";
 
 export type ParkingSlotVehicleType = "TWO_WHEELER" | "FOUR_WHEELER";

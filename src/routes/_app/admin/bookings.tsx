@@ -15,12 +15,17 @@ export const Route = createFileRoute("/_app/admin/bookings")({
 
 function getStatusVariant(
   status: string,
+  slotStatus?: string,
 ): "default" | "secondary" | "destructive" | "outline" {
+  if (slotStatus === "BOOKED" || slotStatus === "OCCUPIED") {
+    return "secondary";
+  }
+
   switch (status?.toUpperCase()) {
-    case "CONFIRMED":
     case "COMPLETED":
       return "default";
     case "PENDING":
+    case "CONFIRMED":
       return "secondary";
     case "CANCELLED":
       return "destructive";
@@ -29,9 +34,24 @@ function getStatusVariant(
   }
 }
 
-function formatDateTime(value: string): string {
-  const date = new Date(value);
-  return `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
+function formatStatus(status: string, slotStatus?: string): string {
+  if (status === "COMPLETED") return "Completed";
+  if (status === "CANCELLED") return "Cancelled";
+  if (slotStatus === "RESERVED") return "Reserved";
+  if (slotStatus === "BOOKED") return "Booked";
+  if (slotStatus === "OCCUPIED") return "Occupied";
+  return status;
+}
+
+function formatDate(value: string): string {
+  return new Date(value).toLocaleDateString();
+}
+
+function formatTime(value: string): string {
+  return new Date(value).toLocaleTimeString([], {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
 }
 
 function formatDriverName(booking: AdminBooking): string {
@@ -49,30 +69,66 @@ const columns: ColumnDef<AdminBooking>[] = [
   },
   {
     key: "driver",
-    header: "Driver name",
-    cell: formatDriverName,
+    header: "Driver",
+    cell: (booking) => (
+      <div>
+        <p className="font-medium">{formatDriverName(booking)}</p>
+        <p className="text-xs text-muted-foreground">
+          {booking.customerPhone ?? booking.vehicleNumber ?? "No phone"}
+        </p>
+      </div>
+    ),
   },
   {
     key: "location",
-    header: "Parking location name",
-    cell: (booking) => booking.parkingLocationName,
+    header: "Location",
+    cell: (booking) => (
+      <span className="rounded-md border bg-muted/30 px-2 py-1 text-sm">
+        {booking.parkingLocationName}
+      </span>
+    ),
+  },
+  {
+    key: "slot",
+    header: "Slot",
+    cell: (booking) => (
+      <span className="rounded-md bg-primary/10 px-2 py-1 font-mono text-sm font-semibold text-primary">
+        {booking.slotNumber}
+      </span>
+    ),
   },
   {
     key: "startTime",
-    header: "Start time",
-    cell: (booking) => formatDateTime(booking.startTime),
+    header: "Time",
+    cell: (booking) => (
+      <div>
+        <p className="font-medium">
+          {formatTime(booking.startTime)}-{formatTime(booking.endTime)}
+        </p>
+        <p className="text-xs text-muted-foreground">
+          {formatDate(booking.startTime)}
+        </p>
+      </div>
+    ),
   },
   {
     key: "status",
     header: "Status",
     cell: (booking) => (
-      <Badge variant={getStatusVariant(booking.status)}>{booking.status}</Badge>
+      <Badge variant={getStatusVariant(booking.status, booking.slotStatus)}>
+        {formatStatus(booking.status, booking.slotStatus)}
+      </Badge>
     ),
   },
   {
     key: "amount",
     header: "Amount",
     cell: (booking) => `Rs. ${Number(booking.totalAmount).toFixed(2)}`,
+  },
+  {
+    key: "action",
+    header: "Action",
+    cell: () => <span className="text-muted-foreground">-</span>,
   },
 ];
 
@@ -97,19 +153,19 @@ function AdminBookingsPage() {
     <>
       <PageHeader title="Bookings" />
       <DataTable
-      columns={columns}
-      data={data?.data ?? []}
-      isLoading={isLoading}
-      searchValue={search}
-      onSearchChange={(value) => {
-        setSearch(value);
-        setPage(1);
-      }}
-      page={page}
-      totalPages={data?.totalPages ?? 1}
-      onPageChange={setPage}
-      emptyMessage="No bookings found"
-    />
+        columns={columns}
+        data={data?.data ?? []}
+        isLoading={isLoading}
+        searchValue={search}
+        onSearchChange={(value) => {
+          setSearch(value);
+          setPage(1);
+        }}
+        page={page}
+        totalPages={data?.totalPages ?? 1}
+        onPageChange={setPage}
+        emptyMessage="No bookings found"
+      />
     </>
   );
 }

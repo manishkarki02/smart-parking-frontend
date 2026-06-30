@@ -12,8 +12,9 @@ interface SlotGridProps {
 }
 
 const statusLabels: Record<ParkingSlotStatus, string> = {
-  AVAILABLE: "Available",
+  AVAILABLE: "Free",
   RESERVED: "Reserved",
+  BOOKED: "Booked",
   OCCUPIED: "Occupied",
   MAINTENANCE: "Maintenance",
 };
@@ -28,6 +29,8 @@ const statusClasses: Record<ParkingSlotStatus, string> = {
     "border-green-300 bg-green-100 text-green-800 hover:bg-green-200 dark:border-green-700 dark:bg-green-900/40 dark:text-green-300 dark:hover:bg-green-900/60",
   RESERVED:
     "border-yellow-300 bg-yellow-100 text-yellow-800 opacity-75 dark:border-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-300",
+  BOOKED:
+    "border-blue-300 bg-blue-100 text-blue-800 opacity-75 dark:border-blue-700 dark:bg-blue-900/40 dark:text-blue-300",
   OCCUPIED:
     "border-red-300 bg-red-100 text-red-800 opacity-75 dark:border-red-700 dark:bg-red-900/40 dark:text-red-300",
   MAINTENANCE:
@@ -131,8 +134,9 @@ export function SlotGrid({
   return (
     <div className="w-full space-y-6">
       <div className="flex flex-wrap gap-4 rounded-lg bg-muted/30 p-4 text-sm font-medium">
-        <LegendItem status="AVAILABLE" label="Available" />
+        <LegendItem status="AVAILABLE" label="Free" />
         <LegendItem status="RESERVED" label="Reserved" />
+        <LegendItem status="BOOKED" label="Booked" />
         <LegendItem status="OCCUPIED" label="Occupied" />
         <LegendItem status="MAINTENANCE" label="Maintenance" />
       </div>

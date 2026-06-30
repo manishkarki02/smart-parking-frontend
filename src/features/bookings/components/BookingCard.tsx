@@ -22,18 +22,31 @@ interface BookingCardProps {
 }
 
 function getStatusVariant(
-  status: string
+  status: string,
+  slotStatus?: string,
 ): "default" | "secondary" | "destructive" | "outline" {
   switch (status?.toUpperCase()) {
-    case "CONFIRMED":
+    case "COMPLETED":
       return "default";
     case "PENDING":
+    case "CONFIRMED":
       return "secondary";
     case "CANCELLED":
       return "destructive";
     default:
-      return "outline";
+      return slotStatus === "BOOKED" || slotStatus === "OCCUPIED"
+        ? "secondary"
+        : "outline";
   }
+}
+
+function formatStatus(status: string, slotStatus?: string): string {
+  if (status === "COMPLETED") return "Completed";
+  if (status === "CANCELLED") return "Cancelled";
+  if (slotStatus === "RESERVED") return "Reserved";
+  if (slotStatus === "BOOKED") return "Booked";
+  if (slotStatus === "OCCUPIED") return "Occupied";
+  return status;
 }
 
 function formatDateTime(dateStr: string): string {
@@ -69,8 +82,11 @@ export function BookingCard({ booking, onPay }: BookingCardProps) {
         <CardHeader className="pb-3 bg-muted/20 border-b">
           <div className="flex items-start justify-between">
             <CardTitle className="text-lg font-bold group-hover:text-primary transition-colors">{booking.parkingLocationName}</CardTitle>
-            <Badge variant={getStatusVariant(booking.status)} className="shadow-sm">
-              {booking.status}
+            <Badge
+              variant={getStatusVariant(booking.status, booking.slotStatus)}
+              className="shadow-sm"
+            >
+              {formatStatus(booking.status, booking.slotStatus)}
             </Badge>
           </div>
         </CardHeader>
@@ -106,7 +122,9 @@ export function BookingCard({ booking, onPay }: BookingCardProps) {
           )}
 
           <div className="space-y-2 pt-1">
-            {onPay && booking.status?.toUpperCase() === "CONFIRMED" && (
+            {onPay &&
+              (booking.status?.toUpperCase() === "PENDING" ||
+                booking.slotStatus === "RESERVED") && (
               <Button
                 className="w-full font-semibold group-hover:bg-primary transition-colors"
                 size="default"

@@ -44,8 +44,9 @@ interface VendorSlotActionDialogProps {
 }
 
 const statusLabels: Record<ParkingSlot["status"], string> = {
-  AVAILABLE: "Available",
+  AVAILABLE: "Free",
   RESERVED: "Reserved",
+  BOOKED: "Booked",
   OCCUPIED: "Occupied",
   MAINTENANCE: "Maintenance",
 };
@@ -279,7 +280,9 @@ export function VendorSlotActionDialog({
           </form>
         ) : (
           <div className="space-y-5">
-            {(slot.status === "RESERVED" || slot.status === "OCCUPIED") && (
+            {(slot.status === "RESERVED" ||
+              slot.status === "BOOKED" ||
+              slot.status === "OCCUPIED") && (
               <BookingSummary slot={slot} />
             )}
 
@@ -306,7 +309,7 @@ export function VendorSlotActionDialog({
               </div>
             )}
 
-            {slot.status === "RESERVED" && (
+            {slot.status === "BOOKED" && (
               <Button
                 type="button"
                 className="w-full"

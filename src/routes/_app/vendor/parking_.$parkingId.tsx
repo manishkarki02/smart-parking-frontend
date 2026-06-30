@@ -25,17 +25,19 @@ export const Route = createFileRoute("/_app/vendor/parking_/$parkingId")({
 });
 
 const statusLabels: Record<ParkingSlotStatus, string> = {
-  AVAILABLE: "Available",
-  OCCUPIED: "Occupied",
+  AVAILABLE: "Free",
   RESERVED: "Reserved",
+  BOOKED: "Booked",
+  OCCUPIED: "Occupied",
   MAINTENANCE: "Maintenance",
 };
 
 const statusClasses: Record<ParkingSlotStatus, string> = {
   AVAILABLE:
     "border-emerald-300 bg-emerald-100 text-emerald-800 shadow-emerald-100",
-  OCCUPIED: "border-red-200 bg-red-100 text-red-700 shadow-red-100",
   RESERVED: "border-yellow-300 bg-yellow-100 text-yellow-800 shadow-yellow-100",
+  BOOKED: "border-blue-300 bg-blue-100 text-blue-800 shadow-blue-100",
+  OCCUPIED: "border-red-200 bg-red-100 text-red-700 shadow-red-100",
   MAINTENANCE: "border-slate-300 bg-slate-100 text-slate-700 shadow-slate-100",
 };
 
@@ -233,9 +235,10 @@ function DetailRow({
 function SlotLegend() {
   return (
     <div className="flex flex-wrap gap-5 rounded-2xl bg-muted/20 p-4 text-sm font-semibold">
-      <LegendItem className="border-emerald-400 bg-emerald-100" label="Available" />
-      <LegendItem className="border-red-300 bg-red-100" label="Occupied" />
+      <LegendItem className="border-emerald-400 bg-emerald-100" label="Free" />
       <LegendItem className="border-yellow-400 bg-yellow-100" label="Reserved" />
+      <LegendItem className="border-blue-400 bg-blue-100" label="Booked" />
+      <LegendItem className="border-red-300 bg-red-100" label="Occupied" />
       <LegendItem className="border-slate-300 bg-slate-100" label="Maintenance" />
     </div>
   );

@@ -14,6 +14,7 @@ export interface AdminBooking {
   paymentStatus?: "PENDING" | "SUCCESS" | "FAILED" | null;
   slotId: string;
   slotNumber: string;
+  slotStatus?: "AVAILABLE" | "RESERVED" | "BOOKED" | "OCCUPIED" | "MAINTENANCE";
   startTime: string;
   endTime: string;
   status: string;
