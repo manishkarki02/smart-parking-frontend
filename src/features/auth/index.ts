@@ -1,3 +1,4 @@
+export * from "./components/AuthLayout";
 export * from "./components/LoginForm";
 export * from "./components/LoginModal";
 export * from "./components/RegisterForm";
