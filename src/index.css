@@ -228,6 +228,18 @@
   border: 1px solid var(--border);
 }
 
+.add-location-map .lp-wrapper {
+  gap: 0.65rem;
+}
+
+.add-location-map .lp-map-area {
+  height: 260px;
+}
+
+.add-location-map .lp-footer {
+  font-size: 0.8rem;
+}
+
 .lp-map-area--picker {
   height: 420px;
 }

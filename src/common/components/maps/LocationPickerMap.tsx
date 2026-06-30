@@ -313,7 +313,7 @@ export function LocationPickerMap({
         <input
           ref={searchInputRef}
           className="lp-search-input"
-          placeholder="Search for your parking location…"
+          placeholder="Search for your parking location"
           type="text"
           autoComplete="off"
         />
@@ -365,9 +365,8 @@ export function LocationPickerMap({
       <div className="lp-footer">
         {value ? (
           <p>
-            📍{" "}
             {isGeocoding
-              ? "Locating address…"
+              ? "Locating address..."
               : value.address ||
                 `${value.lat.toFixed(5)}, ${value.lng.toFixed(5)}`}
           </p>
