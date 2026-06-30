@@ -3,6 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import DataTable, { type ColumnDef } from "@/common/components/DataTable";
+import { PageHeader } from "@/common/components/PageHeader";
 import { ConfirmDialog } from "@/common/components/ConfirmDialog";
 import useCustomMutation from "@/common/hooks/useCustomMutation";
 import useCustomQuery from "@/common/hooks/useCustomQuery";
@@ -133,11 +134,11 @@ function VendorBookingsPage() {
 
   return (
     <>
+      <PageHeader title="Bookings" />
       <DataTable
         columns={columns}
         data={data?.data ?? []}
         isLoading={isLoading}
-        heading="Bookings"
         searchValue={search}
         onSearchChange={(value) => {
           setSearch(value);

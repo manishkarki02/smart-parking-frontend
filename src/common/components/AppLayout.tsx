@@ -1,3 +1,10 @@
+import {
+  createContext,
+  useContext,
+  useMemo,
+  useState,
+  type ReactNode,
+} from "react";
 import { Link, useLocation } from "@tanstack/react-router";
 import { useAuthStore } from "@/stores/auth-store";
 import {
@@ -15,7 +22,6 @@ import {
   SidebarProvider,
   SidebarRail,
   SidebarSeparator,
-  SidebarTrigger,
   useSidebar,
 } from "@/components/ui/sidebar";
 import {
@@ -35,6 +41,31 @@ interface NavItem {
   to: string;
   icon: LucideIcon;
   roles: string[];
+}
+
+interface PageHeaderState {
+  title: string;
+  action?: ReactNode;
+}
+
+interface PageHeaderContextValue {
+  pageHeader: PageHeaderState | null;
+  setPageHeader: (pageHeader: PageHeaderState | null) => void;
+}
+
+const PageHeaderContext = createContext<PageHeaderContextValue | null>(null);
+
+export function usePageHeader() {
+  const context = useContext(PageHeaderContext);
+
+  if (!context) {
+    return {
+      pageHeader: null,
+      setPageHeader: () => undefined,
+    } satisfies PageHeaderContextValue;
+  }
+
+  return context;
 }
 
 const navItems: NavItem[] = [
@@ -94,23 +125,52 @@ const navItems: NavItem[] = [
   },
 ];
 
-export function AppLayout({ children }: { children: React.ReactNode }) {
+export function AppLayout({ children }: { children: ReactNode }) {
+  const [pageHeader, setPageHeader] = useState<PageHeaderState | null>(null);
+  const pageHeaderValue = useMemo(
+    () => ({ pageHeader, setPageHeader }),
+    [pageHeader]
+  );
+
   return (
     <SidebarProvider>
-      <AppSidebar />
-      <SidebarInset>
-        <header className="sticky top-0 z-30 flex h-14 shrink-0 items-center gap-3 border-b bg-background/95 px-4 backdrop-blur supports-backdrop-filter:bg-background/80">
-          <SidebarTrigger />
-          <div className="flex min-w-0 items-center gap-2 md:hidden">
-            <Car className="size-5 shrink-0 text-primary" />
-            <span className="truncate text-sm font-semibold">
-              Smart
-              <span className="text-blue-500">Parking</span>
-            </span>
-          </div>
-        </header>
-        <main className="flex-1 overflow-y-auto p-4 md:p-6">{children}</main>
-      </SidebarInset>
+      <PageHeaderContext.Provider value={pageHeaderValue}>
+        <AppSidebar />
+        <SidebarInset>
+          <header className="sticky top-0 z-30 flex h-16 shrink-0 items-center border-b bg-background/95 px-4 backdrop-blur supports-backdrop-filter:bg-background/80 md:px-6">
+            <div className="flex min-w-0 flex-1 items-center gap-3">
+              <div className="flex min-w-0 items-center gap-2 md:hidden">
+                <Car className="size-5 shrink-0 text-primary" />
+                <span className="truncate text-sm font-semibold">
+                  Smart
+                  <span className="text-blue-500">Parking</span>
+                </span>
+              </div>
+
+              <div className="flex min-w-0 flex-1 items-center justify-between gap-3">
+                <div className="min-w-0 py-2">
+                  {pageHeader ? (
+                    <p className="truncate text-lg font-semibold tracking-tight text-foreground">
+                      {pageHeader.title}
+                    </p>
+                  ) : (
+                    <p className="truncate text-lg font-semibold tracking-tight text-foreground">
+                      Overview
+                    </p>
+                  )}
+                </div>
+
+                {pageHeader?.action ? (
+                  <div className="flex shrink-0 items-center">
+                    {pageHeader.action}
+                  </div>
+                ) : null}
+              </div>
+            </div>
+          </header>
+          <main className="flex-1 overflow-y-auto p-4 md:p-6">{children}</main>
+        </SidebarInset>
+      </PageHeaderContext.Provider>
     </SidebarProvider>
   );
 }

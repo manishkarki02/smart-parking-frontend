@@ -12,10 +12,7 @@ export function VendorDashboardPage() {
 
   return (
     <div className="space-y-6">
-      <PageHeader
-        title="Vendor Dashboard"
-        description="Overview of your parking locations, slots, and occupancy."
-      />
+      <PageHeader title="Dashboard" />
 
       {isLoading && (
         <Card className="rounded-none sm:rounded-lg p-6">

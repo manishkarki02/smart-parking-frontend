@@ -69,10 +69,7 @@ function DashboardPage() {
 
   return (
     <div className="space-y-6">
-      <PageHeader
-        title="Admin Dashboard"
-        description="Overview of the Smart Parking system"
-      />
+      <PageHeader title="Dashboard" />
 
       <Card className="rounded-none sm:rounded-lg p-6 overflow-hidden">
         {isLoading ? (
@@ -113,10 +110,7 @@ function DriverDashboardPage({
 
   return (
     <div className="space-y-6">
-      <PageHeader
-        title="Driver Dashboard"
-        description="Find nearby parking spaces and manage your next reservation"
-      />
+      <PageHeader title="Dashboard" />
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <StatsCard
@@ -181,7 +175,7 @@ function DriverDashboardPage({
                     <Navigation className="mr-2 h-4 w-4 text-primary/70" />
                     <span>
                       {location.distance !== undefined
-                        ? `${location.distance.toFixed(1)} km away`
+                        ? `${location.distance?.toFixed(1)} km away`
                         : "Distance unknown"}
                     </span>
                   </div>

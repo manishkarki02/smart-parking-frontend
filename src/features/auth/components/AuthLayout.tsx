@@ -20,7 +20,7 @@ export function AuthLayout({ children }: { children: ReactNode }) {
   return (
     <section className="min-h-[calc(100vh-4rem)] bg-[#F8FAFC] text-[#0F172A]">
       <div className="grid min-h-[calc(100vh-4rem)] lg:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)]">
-        <aside className="relative hidden overflow-hidden border-r border-[#E2E8F0] bg-linear-to-br from-blue-50 via-white to-teal-50 px-10 py-14 lg:flex lg:flex-col lg:justify-center xl:px-16">
+       <aside className="relative hidden overflow-hidden border-r border-[#E2E8F0] bg-linear-to-br from-blue-50 via-white to-teal-50 px-10 py-14 lg:sticky lg:top-16 lg:flex lg:h-[calc(100vh-4rem)] lg:flex-col lg:justify-center xl:px-16">
           <div className="pointer-events-none absolute right-10 top-12 h-40 w-40 rounded-[3rem] border border-blue-100 bg-white/60 rotate-12" />
           <div className="pointer-events-none absolute bottom-16 left-10 h-28 w-28 rounded-[2rem] border border-teal-100 bg-white/70 -rotate-6" />
 
