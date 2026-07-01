@@ -1,8 +1,21 @@
 import createApi from "@/common/utils/api";
 import type { ApiResponse } from "@/common/types/api.types";
-import type { AdminStats } from "../types/admin.types";
+import type {
+  AdminDashboardResponse,
+  AdminStats,
+  AdminUser,
+} from "../types/admin.types";
+import type {
+  AdminRawUser,
+  AdminUserRole,
+  AdminUserRoleFilter,
+} from "@/features/admin/types/admin-user.types";
 import { ADMIN_ROUTES, API_BASE } from "@/config/api-routes";
-import type { User } from "@/features/users/types/user.types";
+import { getAdminBookings } from "@/features/bookings/services/admin-bookings.service";
+import { buildAdminDashboardData } from "@/features/admin/utils/admin-dashboard.utils";
+import { mergeAdminUsers } from "@/features/admin/utils/admin-user.utils";
+
+export type { AdminUser } from "../types/admin.types";
 
 const adminApi = createApi(API_BASE.ADMIN);
 
@@ -14,13 +27,6 @@ export interface AdminListParams {
 export interface PaginatedResult<TData> {
   data: TData[];
   totalPages: number;
-}
-
-export interface AdminUser extends User {
-  status?: string;
-  approved?: boolean;
-  banned?: boolean;
-  businessName?: string;
 }
 
 type PaginatedPayload<TData> = {
@@ -55,6 +61,22 @@ export async function getDashboard(): Promise<AdminStats> {
   return response.data.data;
 }
 
+export async function getAdminDashboardData(): Promise<AdminDashboardResponse> {
+  const [stats, bookings, vendors, drivers] = await Promise.all([
+    getDashboard(),
+    getAdminBookings(),
+    getAdminVendors(),
+    getAdminDrivers(),
+  ]);
+
+  return buildAdminDashboardData({
+    stats,
+    bookings: bookings.data,
+    vendors: vendors.data,
+    drivers: drivers.data,
+  });
+}
+
 export async function getAdminVendors(
   params: AdminListParams = {},
 ): Promise<PaginatedResult<AdminUser>> {
@@ -83,6 +105,36 @@ export async function getAdminDrivers(
     },
   });
   return normalizePaginatedResult(response.data.data ?? []);
+}
+
+export async function getAdminUsers(
+  role: AdminUserRoleFilter,
+): Promise<AdminRawUser[]> {
+  if (role === "ALL") {
+    const [vendors, drivers] = await Promise.all([
+      getAdminUsersByRole("VENDOR"),
+      getAdminUsersByRole("DRIVER"),
+    ]);
+
+    return mergeAdminUsers(vendors, drivers);
+  }
+
+  return getAdminUsersByRole(role);
+}
+
+export async function getAdminUsersByRole(
+  role: AdminUserRole,
+): Promise<AdminRawUser[]> {
+  const response = await adminApi.get<ApiResponse<AdminRawUser[]>>(
+    ADMIN_ROUTES.USERS,
+    {
+      params: {
+        role,
+      },
+    },
+  );
+
+  return response.data.data ?? [];
 }
 
 export async function approveVendor(id: number | string): Promise<void> {
