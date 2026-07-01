@@ -7,15 +7,22 @@ import {
 import { LoadingSpinner } from "@/common/components/LoadingSpinner";
 import { queryKeys } from "@/config/query-keys";
 import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
+import { Plus, Search } from "lucide-react";
 import { initiatePayment } from "@/features/payments/services/payment.service";
 import type { BookingResponse } from "@/features/bookings/types/booking.types";
 import { toast } from "sonner";
 import { AppLayout } from "@/common/components/AppLayout";
 import { useAuthGuard } from "@/common/hooks/use-auth-guard";
-import DataTable, { type ColumnDef } from "@/common/components/DataTable";
+import {
+  SplitDataTable,
+  SplitDetailPanel,
+  TableToolbar,
+  type DataTableColumn,
+} from "@/common";
 import { Badge } from "@/components/ui/badge";
-import { useState } from "react";
+import { Empty, EmptyDescription } from "@/components/ui/empty";
+import { Input } from "@/components/ui/input";
+import { useMemo, useState } from "react";
 import { ConfirmDialog } from "@/common/components/ConfirmDialog";
 import useCustomMutation from "@/common/hooks/useCustomMutation";
 
@@ -27,16 +34,13 @@ function BookingsPage() {
   const { isAuthorized } = useAuthGuard({ allowedRoles: ["DRIVER"] });
   const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
+  const [selectedBookingId, setSelectedBookingId] = useState<string | null>(null);
   const [cancelBookingId, setCancelBookingId] = useState<string | null>(null);
   const { data: bookings = [], isLoading } = useQuery({
     queryKey: queryKeys.bookings.me(),
     queryFn: getMyBookings,
     enabled: isAuthorized,
   });
-
-  if (!isAuthorized) {
-    return null;
-  }
 
   const cancelMutation = useCustomMutation({
     api: cancelBooking,
@@ -86,15 +90,51 @@ function BookingsPage() {
       .some((value) => String(value).toLowerCase().includes(keyword));
   });
 
-  const columns: ColumnDef<BookingResponse>[] = [
+  const selectedBooking = useMemo(
+    () =>
+      visibleBookings.find((booking) => booking.bookingId === selectedBookingId) ??
+      null,
+    [visibleBookings, selectedBookingId],
+  );
+
+  const renderBookingActions = (booking: BookingResponse) => {
+    const status = booking.status.toUpperCase();
+    const slotStatus = booking.slotStatus?.toUpperCase();
+
+    return (
+      <div data-row-action="true" className="flex flex-wrap items-center gap-2">
+        {(status === "PENDING" || slotStatus === "RESERVED") && (
+          <Button type="button" size="sm" onClick={() => void handlePay(booking)}>
+            Pay
+          </Button>
+        )}
+        {(status === "PENDING" || status === "CONFIRMED") && (
+          <Button
+            type="button"
+            size="sm"
+            variant="destructive"
+            onClick={() => setCancelBookingId(booking.bookingId)}
+          >
+            Cancel
+          </Button>
+        )}
+        {status !== "PENDING" && status !== "CONFIRMED" && (
+          <span className="text-muted-foreground">-</span>
+        )}
+      </div>
+    );
+  };
+
+  const columns: DataTableColumn<BookingResponse>[] = [
     {
-      key: "bookingId",
+      id: "bookingId",
       header: "ID",
       className: "font-mono",
       cell: (booking) => `${booking.bookingId.slice(0, 8)}...`,
+      compact: true,
     },
     {
-      key: "customer",
+      id: "customer",
       header: "Driver",
       cell: (booking) => (
         <div>
@@ -106,9 +146,10 @@ function BookingsPage() {
           </p>
         </div>
       ),
+      compact: true,
     },
     {
-      key: "location",
+      id: "location",
       header: "Location",
       cell: (booking) => (
         <span className="rounded-md border bg-muted/30 px-2 py-1 text-sm">
@@ -117,7 +158,7 @@ function BookingsPage() {
       ),
     },
     {
-      key: "slot",
+      id: "slot",
       header: "Slot",
       cell: (booking) => (
         <span className="rounded-md bg-primary/10 px-2 py-1 font-mono text-sm font-semibold text-primary">
@@ -126,7 +167,7 @@ function BookingsPage() {
       ),
     },
     {
-      key: "time",
+      id: "time",
       header: "Time",
       cell: (booking) => (
         <div>
@@ -140,20 +181,31 @@ function BookingsPage() {
       ),
     },
     {
-      key: "amount",
+      id: "amount",
       header: "Amount",
       cell: (booking) => `Rs. ${Number(booking.totalAmount).toFixed(2)}`,
     },
     {
-      key: "status",
+      id: "status",
       header: "Status",
       cell: (booking) => (
         <Badge variant={getStatusVariant(booking.status, booking.slotStatus)}>
           {formatStatus(booking.status, booking.slotStatus)}
         </Badge>
       ),
+      compact: true,
+    },
+    {
+      id: "actions",
+      header: "Actions",
+      cell: renderBookingActions,
+      compact: true,
     },
   ];
+
+  if (!isAuthorized) {
+    return null;
+  }
 
   return (
     <AppLayout>
@@ -188,43 +240,50 @@ function BookingsPage() {
               </Button>
             </div>
           ) : (
-            <DataTable
+            <SplitDataTable
               columns={columns}
-              data={visibleBookings}
-              searchValue={search}
-              onSearchChange={setSearch}
-              searchPlaceholder="Search bookings..."
-              emptyMessage="No bookings found"
-              rowActions={(booking) => {
-                const status = booking.status.toUpperCase();
-                const slotStatus = booking.slotStatus?.toUpperCase();
-                return (
-                  <>
-                    {(status === "PENDING" || slotStatus === "RESERVED") && (
-                      <Button
-                        type="button"
-                        size="sm"
-                        onClick={() => void handlePay(booking)}
-                      >
-                        Pay
-                      </Button>
-                    )}
-                    {(status === "PENDING" || status === "CONFIRMED") && (
-                      <Button
-                        type="button"
-                        size="sm"
-                        variant="destructive"
-                        onClick={() => setCancelBookingId(booking.bookingId)}
-                      >
-                        Cancel
-                      </Button>
-                    )}
-                    {status !== "PENDING" && status !== "CONFIRMED" && (
-                      <span className="text-muted-foreground">-</span>
-                    )}
-                  </>
-                );
-              }}
+              rows={visibleBookings}
+              getRowId={(booking) => booking.bookingId}
+              selectedRowId={selectedBookingId}
+              onRowSelect={(booking) =>
+                setSelectedBookingId((current) =>
+                  current === booking.bookingId ? null : booking.bookingId,
+                )
+              }
+              onDetailClose={() => setSelectedBookingId(null)}
+              detailTitle="Booking details"
+              detailPanel={
+                selectedBooking ? (
+                  <DriverBookingDetailPanel
+                    booking={selectedBooking}
+                    onClose={() => setSelectedBookingId(null)}
+                    actions={renderBookingActions(selectedBooking)}
+                  />
+                ) : null
+              }
+              emptyState={
+                <Empty className="border-0 py-10">
+                  <EmptyDescription>No bookings found.</EmptyDescription>
+                </Empty>
+              }
+              toolbar={
+                <TableToolbar
+                  left={
+                    <div className="relative max-w-sm">
+                      <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                      <Input
+                        value={search}
+                        onChange={(event) => {
+                          setSearch(event.target.value);
+                          setSelectedBookingId(null);
+                        }}
+                        placeholder="Search bookings..."
+                        className="pl-9"
+                      />
+                    </div>
+                  }
+                />
+              }
             />
           )}
         </div>
@@ -245,6 +304,70 @@ function BookingsPage() {
       />
     </AppLayout>
   );
+}
+
+function DriverBookingDetailPanel({
+  booking,
+  onClose,
+  actions,
+}: {
+  booking: BookingResponse;
+  onClose: () => void;
+  actions: React.ReactNode;
+}) {
+  return (
+    <SplitDetailPanel
+      title={booking.parkingLocationName}
+      subtitle={booking.bookingId}
+      onClose={onClose}
+    >
+      <div className="space-y-4">
+        <section className="grid gap-3 sm:grid-cols-2">
+          <InfoItem label="Location" value={booking.parkingLocationName} />
+          <InfoItem label="Slot" value={booking.slotNumber} />
+          <InfoItem label="Vehicle" value={booking.vehicleNumber ?? "-"} />
+          <InfoItem label="Vehicle type" value={formatVehicleType(booking.vehicleType)} />
+          <InfoItem label="Amount" value={`Rs. ${Number(booking.totalAmount).toFixed(2)}`} />
+          <InfoItem label="Payment" value={booking.paymentStatus ?? "-"} />
+        </section>
+        <section className="rounded-lg border p-3">
+          <h3 className="text-sm font-medium">Status</h3>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <Badge variant={getStatusVariant(booking.status, booking.slotStatus)}>
+              {formatStatus(booking.status, booking.slotStatus)}
+            </Badge>
+            {booking.slotStatus ? (
+              <Badge variant="outline">{booking.slotStatus}</Badge>
+            ) : null}
+          </div>
+        </section>
+        <section className="grid gap-3 sm:grid-cols-2">
+          <InfoItem label="Start" value={`${formatDate(booking.startTime)} ${formatTime(booking.startTime)}`} />
+          <InfoItem label="End" value={`${formatDate(booking.endTime)} ${formatTime(booking.endTime)}`} />
+          <InfoItem label="Payment method" value={booking.paymentMethod ?? "-"} />
+          <InfoItem label="Paid at" value={booking.paidAt ? `${formatDate(booking.paidAt)} ${formatTime(booking.paidAt)}` : "-"} />
+        </section>
+        <div className="flex flex-wrap gap-2 border-t pt-4">{actions}</div>
+      </div>
+    </SplitDetailPanel>
+  );
+}
+
+function InfoItem({ label, value }: { label: string; value: React.ReactNode }) {
+  return (
+    <div className="rounded-lg border bg-muted/20 p-3">
+      <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+        {label}
+      </p>
+      <div className="mt-1 wrap-break-word text-sm font-medium">{value}</div>
+    </div>
+  );
+}
+
+function formatVehicleType(vehicleType?: string): string {
+  if (vehicleType === "TWO_WHEELER") return "Two wheeler";
+  if (vehicleType === "FOUR_WHEELER") return "Four wheeler";
+  return "-";
 }
 
 function formatDate(value: string): string {

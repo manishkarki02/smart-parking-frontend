@@ -1,9 +1,15 @@
-import { useState } from "react";
+import { useMemo, useState, type ReactNode } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
-import { Check, Trash2 } from "lucide-react";
+import { Check, Search, Trash2 } from "lucide-react";
 import { toast } from "sonner";
-import DataTable, { type ColumnDef } from "@/common/components/DataTable";
+import {
+  DataTablePagination,
+  SplitDataTable,
+  SplitDetailPanel,
+  TableToolbar,
+  type DataTableColumn,
+} from "@/common";
 import { PageHeader } from "@/common/components/PageHeader";
 import { ConfirmDialog } from "@/common/components/ConfirmDialog";
 import useCustomMutation from "@/common/hooks/useCustomMutation";
@@ -11,6 +17,8 @@ import useCustomQuery from "@/common/hooks/useCustomQuery";
 import { useAuthGuard } from "@/common/hooks/use-auth-guard";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Empty, EmptyDescription } from "@/components/ui/empty";
+import { Input } from "@/components/ui/input";
 import { queryKeys } from "@/config/query-keys";
 import {
   approveVendor,
@@ -38,15 +46,28 @@ function canApproveVendor(vendor: AdminUser): boolean {
   return status === "PENDING" || status === "UNAPPROVED";
 }
 
+function InfoItem({ label, value }: { label: string; value?: ReactNode }) {
+  return (
+    <div className="rounded-lg border bg-muted/20 p-3">
+      <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+        {label}
+      </p>
+      <div className="mt-1 break-words text-sm font-medium">{value || "-"}</div>
+    </div>
+  );
+}
+
 function AdminVendorsPage() {
   const { isAuthorized } = useAuthGuard({ allowedRoles: ["ADMIN"] });
   const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [selectedVendorId, setSelectedVendorId] = useState<string | null>(null);
   const [deletingVendorId, setDeletingVendorId] = useState<string | null>(null);
 
   const vendorsKey = queryKeys.admin.vendors({ search, page });
-  const { data, isLoading } = useCustomQuery({
+  const { data, isLoading, isError } = useCustomQuery({
     key: vendorsKey,
     queryFn: () => getAdminVendors({ search, page }),
     options: {
@@ -71,32 +92,73 @@ function AdminVendorsPage() {
     },
   });
 
-  const columns: ColumnDef<AdminUser>[] = [
+  const vendors = useMemo(() => data?.data ?? [], [data?.data]);
+  const selectedVendor =
+    vendors.find((vendor) => String(vendor.id) === selectedVendorId) ?? null;
+
+  const renderVendorActions = (vendor: AdminUser) => (
+    <div data-row-action="true" className="flex items-center gap-2">
+      {canApproveVendor(vendor) && (
+        <Button
+          type="button"
+          size="icon-sm"
+          onClick={() => approveMutation.mutate(vendor.id)}
+          disabled={approveMutation.isPending}
+          aria-label="Approve vendor"
+          title="Approve vendor"
+        >
+          <Check />
+        </Button>
+      )}
+      <Button
+        type="button"
+        size="icon-sm"
+        variant="destructive"
+        onClick={() => setDeletingVendorId(String(vendor.id))}
+        aria-label="Delete vendor"
+        title="Delete vendor"
+      >
+        <Trash2 />
+      </Button>
+    </div>
+  );
+
+  const columns: DataTableColumn<AdminUser>[] = [
     {
-      key: "id",
+      id: "id",
       header: "Vendor ID",
       className: "font-mono",
       cell: (vendor) => String(vendor.id).slice(0, 8),
+      compact: true,
     },
     {
-      key: "businessName",
+      id: "businessName",
       header: "Business name",
       cell: (vendor) => vendor.businessName ?? vendor.name,
+      compact: true,
     },
     {
-      key: "email",
+      id: "email",
       header: "Email",
       cell: (vendor) => vendor.email,
+      compact: true,
     },
     {
-      key: "phone",
+      id: "phone",
       header: "Phone",
       cell: (vendor) => vendor.phone,
     },
     {
-      key: "status",
+      id: "status",
       header: "Status",
       cell: (vendor) => <Badge variant="outline">{getVendorStatus(vendor)}</Badge>,
+      compact: true,
+    },
+    {
+      id: "actions",
+      header: "Actions",
+      cell: renderVendorActions,
+      compact: true,
     },
   ];
 
@@ -107,45 +169,83 @@ function AdminVendorsPage() {
   return (
     <>
       <PageHeader title="Vendors" />
-      <DataTable
+      <SplitDataTable
         columns={columns}
-        data={data?.data ?? []}
-        isLoading={isLoading}
-        searchValue={search}
-        onSearchChange={(value) => {
-          setSearch(value);
-          setPage(1);
-        }}
-        page={page}
-        totalPages={data?.totalPages ?? 1}
-        onPageChange={setPage}
-        emptyMessage="No vendors found"
-        rowActions={(vendor) => (
-          <>
-            {canApproveVendor(vendor) && (
-              <Button
-                type="button"
-                size="icon-sm"
-                onClick={() => approveMutation.mutate(vendor.id)}
-                disabled={approveMutation.isPending}
-                aria-label="Approve vendor"
-                title="Approve vendor"
-              >
-                <Check />
-              </Button>
-            )}
-            <Button
-              type="button"
-              size="icon-sm"
-              variant="destructive"
-              onClick={() => setDeletingVendorId(String(vendor.id))}
-              aria-label="Delete vendor"
-              title="Delete vendor"
+        rows={vendors}
+        getRowId={(vendor) => String(vendor.id)}
+        selectedRowId={selectedVendorId}
+        onRowSelect={(vendor) =>
+          setSelectedVendorId((current) =>
+            current === String(vendor.id) ? null : String(vendor.id),
+          )
+        }
+        onDetailClose={() => setSelectedVendorId(null)}
+        detailTitle={selectedVendor?.businessName ?? selectedVendor?.name ?? "Vendor details"}
+        detailPanel={
+          selectedVendor ? (
+            <SplitDetailPanel
+              title={selectedVendor.businessName ?? selectedVendor.name}
+              subtitle={selectedVendor.email}
+              onClose={() => setSelectedVendorId(null)}
             >
-              <Trash2 />
-            </Button>
-          </>
-        )}
+              <div className="space-y-4">
+                <section className="grid gap-3 sm:grid-cols-2">
+                  <InfoItem label="Name" value={selectedVendor.name} />
+                  <InfoItem label="Business" value={selectedVendor.businessName} />
+                  <InfoItem label="Email" value={selectedVendor.email} />
+                  <InfoItem label="Phone" value={selectedVendor.phone} />
+                  <InfoItem
+                    label="Status"
+                    value={<Badge variant="outline">{getVendorStatus(selectedVendor)}</Badge>}
+                  />
+                  <InfoItem label="Vendor ID" value={String(selectedVendor.id)} />
+                </section>
+                <div className="flex flex-wrap gap-2 border-t pt-4">
+                  {renderVendorActions(selectedVendor)}
+                </div>
+              </div>
+            </SplitDetailPanel>
+          ) : null
+        }
+        isLoading={isLoading}
+        error={isError}
+        emptyState={
+          <Empty className="border-0 py-10">
+            <EmptyDescription>No vendors found.</EmptyDescription>
+          </Empty>
+        }
+        toolbar={
+          <TableToolbar
+            left={
+              <div className="relative max-w-sm">
+                <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  value={search}
+                  onChange={(event) => {
+                    setSearch(event.target.value);
+                    setPage(1);
+                    setSelectedVendorId(null);
+                  }}
+                  placeholder="Search vendors..."
+                  className="pl-9"
+                />
+              </div>
+            }
+          />
+        }
+        pagination={
+          <DataTablePagination
+            page={page}
+            pageSize={pageSize}
+            totalPages={data?.totalPages ?? 1}
+            pageSizeOptions={[10]}
+            onPageChange={setPage}
+            onPageSizeChange={(nextPageSize) => {
+              setPageSize(nextPageSize);
+              setPage(1);
+            }}
+          />
+        }
       />
 
       <ConfirmDialog
