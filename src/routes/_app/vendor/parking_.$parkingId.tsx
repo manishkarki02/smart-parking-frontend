@@ -91,7 +91,7 @@ function VendorParkingDetailsPage() {
         <Button
           type="button"
           variant="ghost"
-          onClick={() => navigate({ to: "/vendor/parking" })}
+          onClick={() => navigate({ to: "/vendor/parkings" })}
         >
           <ArrowLeft className="mr-2 size-4" />
           Back to locations
@@ -114,7 +114,7 @@ function VendorParkingDetailsPage() {
       <Button
         type="button"
         variant="ghost"
-        onClick={() => navigate({ to: "/vendor/parking" })}
+        onClick={() => navigate({ to: "/vendor/parkings" })}
       >
         <ArrowLeft className="mr-2 size-4" />
         Back to locations

@@ -141,7 +141,7 @@ function DriverDashboardPage({
             </p>
           </div>
           <Button asChild variant="outline">
-            <Link to="/parking/map">Open map</Link>
+            <Link to="/parkings/map">Open map</Link>
           </Button>
         </div>
 
@@ -189,7 +189,7 @@ function DriverDashboardPage({
                 <CardFooter>
                   <Button asChild className="w-full">
                     <Link
-                      to="/parking/$id"
+                      to="/parkings/$id"
                       params={{ id: location.id.toString() }}
                     >
                       View Details

@@ -127,7 +127,7 @@ function HomePage() {
                     className="w-full group-hover:bg-primary transition-colors"
                   >
                     <Link
-                      to="/parking/$id"
+                      to="/parkings/$id"
                       params={{ id: location.id.toString() }}
                     >
                       View Details

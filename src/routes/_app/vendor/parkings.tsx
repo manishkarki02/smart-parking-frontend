@@ -19,7 +19,7 @@ import { PageHeader } from "@/common/components/PageHeader";
 import { Card } from "@/components/ui/card";
 import { useAuthGuard } from "@/common/hooks/use-auth-guard";
 
-export const Route = createFileRoute("/_app/vendor/parking")({
+export const Route = createFileRoute("/_app/vendor/parkings")({
   component: VendorParkingPage,
 });
 

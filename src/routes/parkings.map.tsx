@@ -21,7 +21,7 @@ import type { ParkingLocation } from "@/features/parkings/types/parking.types";
 import { useGeolocation } from "@/common/hooks/maps/useGeolocation";
 import { useAuthGuard } from "@/common/hooks/use-auth-guard";
 
-export const Route = createFileRoute("/parking/map")({
+export const Route = createFileRoute("/parkings/map")({
   component: ParkingMapPage,
 });
 
@@ -69,7 +69,7 @@ function ParkingMapPage() {
               Override the shared lp-wrapper / lp-map-area fixed heights so
               ParkingOverviewMap and DirectionsMap stretch to fill the parent.
             */
-            <div
+            (<div
               className="h-full w-full"
               style={{
                 ["--lp-map-height" as string]: "100%",
@@ -106,7 +106,7 @@ function ParkingMapPage() {
                     <ParkingOverviewMap
                       spots={locations ?? []}
                       onBook={(spot) =>
-                        navigate({ to: "/parking/$id", params: { id: spot.id.toString() } })
+                        navigate({ to: "/parkings/$id", params: { id: spot.id.toString() } })
                       }
                     />
                   ) : (
@@ -132,7 +132,7 @@ function ParkingMapPage() {
                   )}
                 </MapProvider>
               </div>
-            </div>
+            </div>)
           )}
         </div>
 
@@ -298,7 +298,7 @@ function ParkingMapPage() {
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   navigate({
-                                    to: "/parking/$id",
+                                    to: "/parkings/$id",
                                     params: { id: spot.id.toString() },
                                   });
                                 }}
@@ -331,5 +331,5 @@ function ParkingMapPage() {
         )}
       </div>
     </AppLayout>
-  );
+  )
 }

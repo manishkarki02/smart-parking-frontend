@@ -16,7 +16,7 @@ import { getParkingSlots } from "@/features/parkings/services/parking.service";
 import type { ParkingSlot } from "@/features/parkings/types/parking.types";
 import { DriverSlotBookingDialog } from "@/features/bookings/components/DriverSlotBookingDialog";
 
-export const Route = createFileRoute("/parking/$id")({
+export const Route = createFileRoute("/parkings/$id")({
   component: ParkingDetailsPage,
 });
 
