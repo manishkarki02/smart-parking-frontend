@@ -65,12 +65,13 @@ function ParkingDetailsPage() {
 
   const handleLoginSuccess = () => {
     setIsLoginModalOpen(false);
+
     if (selectedSlot) {
       setIsBookingDialogOpen(true);
       return;
     }
 
-    navigate({ to: "/bookings/new", search: { parkingLocationId: id } });
+    navigate({ to: "/bookings", search: { parkingLocationId: id } });
   };
 
   if (isLoading) {

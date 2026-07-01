@@ -6,7 +6,15 @@ import { useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { getApiErrorMessage } from "@/common/utils/get-api-error-message";
 
-function useBookingMutation() {
+interface UseBookingMutationOptions {
+  onSuccess?: () => void;
+  navigateOnSuccess?: boolean;
+}
+
+function useBookingMutation({
+  onSuccess,
+  navigateOnSuccess = true,
+}: UseBookingMutationOptions = {}) {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
 
@@ -15,10 +23,15 @@ function useBookingMutation() {
     success: "Booking created successfully!",
     error: "Failed to create booking",
     onSuccess: () => {
-      queryClient.invalidateQueries({
+      void queryClient.invalidateQueries({
         queryKey: queryKeys.bookings.me(),
       });
-      navigate({ to: "/bookings" as string });
+
+      onSuccess?.();
+
+      if (navigateOnSuccess) {
+        void navigate({ to: "/bookings" as string });
+      }
     },
     onError: (error) => {
       const message = getApiErrorMessage(error);

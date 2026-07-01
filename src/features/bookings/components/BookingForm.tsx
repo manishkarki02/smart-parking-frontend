@@ -27,12 +27,21 @@ import {
 } from "@/components/ui/card";
 import { Loader2, Car } from "lucide-react";
 import useBookingMutation from "../hooks/useBookingMutation";
+import { cn } from "@/lib/utils";
 
 interface BookingFormProps {
   preselectedParkingId?: string;
+  onSuccess?: () => void;
+  navigateOnSuccess?: boolean;
+  variant?: "page" | "dialog";
 }
 
-export function BookingForm({ preselectedParkingId }: BookingFormProps) {
+export function BookingForm({
+  preselectedParkingId,
+  onSuccess,
+  navigateOnSuccess = true,
+  variant = "page",
+}: BookingFormProps) {
   const { data: parkingSlots = [], isLoading: slotsLoading } = useQuery({
     queryKey: queryKeys.parking.available(),
     queryFn: getAllSlots,
@@ -58,6 +67,7 @@ export function BookingForm({ preselectedParkingId }: BookingFormProps) {
 
   const selectedParkingId = watch("parkingLocationId");
   const selectedVehicleType = watch("vehicleType");
+
   const { data: availableSlots = [], isLoading: slotsForLocationLoading } =
     useQuery({
       queryKey: queryKeys.parking.slots(
@@ -69,11 +79,15 @@ export function BookingForm({ preselectedParkingId }: BookingFormProps) {
       select: (slots) => slots.filter((slot) => slot.status === "AVAILABLE"),
     });
 
-  const bookingMutation = useBookingMutation();
+  const bookingMutation = useBookingMutation({
+    onSuccess,
+    navigateOnSuccess,
+  });
 
   const onSubmit = (data: BookingFormValues) => {
     const today = new Date().toISOString().split("T")[0];
-    bookingMutation.mutateAsync({
+
+    void bookingMutation.mutateAsync({
       parkingLocationId: data.parkingLocationId,
       slotId: data.slotId,
       vehicleType: data.vehicleType,
@@ -84,21 +98,30 @@ export function BookingForm({ preselectedParkingId }: BookingFormProps) {
   };
 
   return (
-    <Card className="max-w-lg mx-auto w-full bg-card/60 backdrop-blur-sm border shadow-xl sm:rounded-2xl">
-      <CardHeader className="text-center pb-8 border-b bg-muted/20 mb-6">
-        <div className="flex justify-center mb-4">
-          <div className="bg-primary/10 p-3 rounded-full text-primary shadow-inner">
-            <Car className="w-8 h-8" />
+    <Card
+      className={cn(
+        "max-w-lg mx-auto w-full bg-card/60 backdrop-blur-sm border shadow-xl sm:rounded-2xl",
+        variant === "dialog" &&
+          "mx-0 max-w-none border-0 bg-transparent py-0 shadow-none backdrop-blur-none",
+      )}
+    >
+      {variant === "page" ? (
+        <CardHeader className="text-center pb-8 border-b bg-muted/20 mb-6">
+          <div className="flex justify-center mb-4">
+            <div className="bg-primary/10 p-3 rounded-full text-primary shadow-inner">
+              <Car className="w-8 h-8" />
+            </div>
           </div>
-        </div>
-        <CardTitle className="text-2xl font-bold bg-linear-to-r from-primary to-green-600 bg-clip-text text-transparent">
-          Book Your Parking
-        </CardTitle>
-        <CardDescription className="text-base mt-2">
-          Select a location and choose your parking time
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
+          <CardTitle className="text-2xl font-bold bg-linear-to-r from-primary to-green-600 bg-clip-text text-transparent">
+            Book Your Parking
+          </CardTitle>
+          <CardDescription className="text-base mt-2">
+            Select a location and choose your parking time
+          </CardDescription>
+        </CardHeader>
+      ) : null}
+
+      <CardContent className={cn(variant === "dialog" && "px-0")}>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-2">
             <Label>Parking Location</Label>
@@ -109,9 +132,7 @@ export function BookingForm({ preselectedParkingId }: BookingFormProps) {
             ) : (
               <Select
                 defaultValue={
-                  preselectedParkingId
-                    ? preselectedParkingId
-                    : undefined
+                  preselectedParkingId ? preselectedParkingId : undefined
                 }
                 onValueChange={(val) => {
                   setValue("parkingLocationId", val, {
@@ -211,11 +232,7 @@ export function BookingForm({ preselectedParkingId }: BookingFormProps) {
 
           <div className="space-y-2">
             <Label htmlFor="startTime">Start Time</Label>
-            <Input
-              id="startTime"
-              type="time"
-              {...register("startTime")}
-            />
+            <Input id="startTime" type="time" {...register("startTime")} />
             {errors.startTime && (
               <p className="text-sm text-destructive">
                 {errors.startTime.message}
@@ -225,11 +242,7 @@ export function BookingForm({ preselectedParkingId }: BookingFormProps) {
 
           <div className="space-y-2">
             <Label htmlFor="endTime">End Time</Label>
-            <Input
-              id="endTime"
-              type="time"
-              {...register("endTime")}
-            />
+            <Input id="endTime" type="time" {...register("endTime")} />
             {errors.endTime && (
               <p className="text-sm text-destructive">
                 {errors.endTime.message}

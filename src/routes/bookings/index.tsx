@@ -1,5 +1,6 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { z } from "zod/v4";
 import {
   cancelBooking,
   getMyBookings,
@@ -12,35 +13,81 @@ import { initiatePayment } from "@/features/payments/services/payment.service";
 import type { BookingResponse } from "@/features/bookings/types/booking.types";
 import { toast } from "sonner";
 import { AppLayout } from "@/common/components/AppLayout";
+import { PageHeader } from "@/common/components/PageHeader";
 import { useAuthGuard } from "@/common/hooks/use-auth-guard";
 import {
   SplitDataTable,
   SplitDetailPanel,
-  TableEmptyState,
   TableToolbar,
   type DataTableColumn,
 } from "@/common";
 import { Badge } from "@/components/ui/badge";
+import { Empty, EmptyDescription } from "@/components/ui/empty";
 import { Input } from "@/components/ui/input";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ConfirmDialog } from "@/common/components/ConfirmDialog";
 import useCustomMutation from "@/common/hooks/useCustomMutation";
+import { BookingForm } from "@/features/bookings/components/BookingForm";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+
+const bookingsSearchSchema = z.object({
+  parkingLocationId: z.string().optional(),
+});
 
 export const Route = createFileRoute("/bookings/")({
+  validateSearch: bookingsSearchSchema,
   component: BookingsPage,
 });
 
 function BookingsPage() {
   const { isAuthorized } = useAuthGuard({ allowedRoles: ["DRIVER"] });
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
+  const { parkingLocationId } = Route.useSearch();
+
   const [search, setSearch] = useState("");
-  const [selectedBookingId, setSelectedBookingId] = useState<string | null>(null);
+  const [selectedBookingId, setSelectedBookingId] = useState<string | null>(
+    null,
+  );
   const [cancelBookingId, setCancelBookingId] = useState<string | null>(null);
+  const [isAddBookingOpen, setIsAddBookingOpen] = useState(
+    Boolean(parkingLocationId),
+  );
+
   const { data: bookings = [], isLoading } = useQuery({
     queryKey: queryKeys.bookings.me(),
     queryFn: getMyBookings,
     enabled: isAuthorized,
   });
+
+  useEffect(() => {
+    if (parkingLocationId) {
+      setIsAddBookingOpen(true);
+    }
+  }, [parkingLocationId]);
+
+  const closeAddBookingDialog = () => {
+    setIsAddBookingOpen(false);
+
+    if (parkingLocationId) {
+      void navigate({ to: "/bookings", search: {} });
+    }
+  };
+
+  const handleAddBookingOpenChange = (open: boolean) => {
+    if (open) {
+      setIsAddBookingOpen(true);
+      return;
+    }
+
+    closeAddBookingDialog();
+  };
 
   const cancelMutation = useCustomMutation({
     api: cancelBooking,
@@ -92,8 +139,9 @@ function BookingsPage() {
 
   const selectedBooking = useMemo(
     () =>
-      visibleBookings.find((booking) => booking.bookingId === selectedBookingId) ??
-      null,
+      visibleBookings.find(
+        (booking) => booking.bookingId === selectedBookingId,
+      ) ?? null,
     [visibleBookings, selectedBookingId],
   );
 
@@ -209,25 +257,44 @@ function BookingsPage() {
 
   return (
     <AppLayout>
-      <div className="container mx-auto px-4 py-8 max-w-7xl">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
-          <div>
-             <h1 className="text-3xl font-bold tracking-tight text-foreground">My Bookings</h1>
-             <p className="text-muted-foreground mt-1">View and manage your parking reservations</p>
-          </div>
-          <Button asChild size="lg" className="rounded-full shadow-sm">
-            <Link to="/bookings/new">
-              <Plus className="mr-2 h-5 w-5" />
-              New Booking
-            </Link>
+      <PageHeader
+        title="My Bookings"
+        action={
+          <Button type="button" onClick={() => setIsAddBookingOpen(true)}>
+            <Plus className="mr-2 size-4" />
+            Add booking
           </Button>
-        </div>
+        }
+      />
 
+      <div className="container mx-auto max-w-7xl px-4 py-8">
         <div className="bg-card/50 backdrop-blur-sm border rounded-2xl p-6 md:p-8 min-h-[50vh] shadow-sm">
           {isLoading ? (
-             <div className="flex justify-center items-center h-40">
-                <LoadingSpinner />
-             </div>
+            <div className="flex justify-center items-center h-40">
+              <LoadingSpinner />
+            </div>
+          ) : bookings.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-20 text-muted-foreground w-full max-w-md mx-auto text-center">
+              <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mb-4">
+                <Plus className="w-8 h-8 opacity-20" />
+              </div>
+              <p className="text-xl font-semibold text-foreground mb-2">
+                No active bookings
+              </p>
+              <p className="text-sm">
+                You haven't made any parking reservations yet. Find a spot to
+                get started.
+              </p>
+              <div className="mt-6 flex flex-wrap justify-center gap-2">
+                <Button type="button" onClick={() => setIsAddBookingOpen(true)}>
+                  <Plus className="mr-2 size-4" />
+                  Add booking
+                </Button>
+                <Button variant="outline" className="rounded-full" asChild>
+                  <Link to="/">Explore Locations</Link>
+                </Button>
+              </div>
+            </div>
           ) : (
             <SplitDataTable
               columns={columns}
@@ -251,22 +318,9 @@ function BookingsPage() {
                 ) : null
               }
               emptyState={
-                bookings.length === 0 ? (
-                  <TableEmptyState
-                    title="No active bookings"
-                    description="You haven't made any parking reservations yet. Find a spot to get started."
-                    action={
-                      <Button variant="outline" className="rounded-full" asChild>
-                        <Link to="/">Explore Locations</Link>
-                      </Button>
-                    }
-                  />
-                ) : (
-                  <TableEmptyState
-                    title="No bookings found"
-                    description="Try adjusting your search to find a reservation."
-                  />
-                )
+                <Empty className="border-0 py-10">
+                  <EmptyDescription>No bookings found.</EmptyDescription>
+                </Empty>
               }
               toolbar={
                 <TableToolbar
@@ -290,6 +344,24 @@ function BookingsPage() {
           )}
         </div>
       </div>
+
+      <Dialog open={isAddBookingOpen} onOpenChange={handleAddBookingOpenChange}>
+        <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-xl">
+          <DialogHeader>
+            <DialogTitle>Add booking</DialogTitle>
+            <DialogDescription>
+              Select a parking location, slot, vehicle, and booking time.
+            </DialogDescription>
+          </DialogHeader>
+
+          <BookingForm
+            variant="dialog"
+            preselectedParkingId={parkingLocationId}
+            navigateOnSuccess={false}
+            onSuccess={closeAddBookingDialog}
+          />
+        </DialogContent>
+      </Dialog>
 
       <ConfirmDialog
         open={cancelBookingId !== null}
@@ -328,10 +400,17 @@ function DriverBookingDetailPanel({
           <InfoItem label="Location" value={booking.parkingLocationName} />
           <InfoItem label="Slot" value={booking.slotNumber} />
           <InfoItem label="Vehicle" value={booking.vehicleNumber ?? "-"} />
-          <InfoItem label="Vehicle type" value={formatVehicleType(booking.vehicleType)} />
-          <InfoItem label="Amount" value={`Rs. ${Number(booking.totalAmount).toFixed(2)}`} />
+          <InfoItem
+            label="Vehicle type"
+            value={formatVehicleType(booking.vehicleType)}
+          />
+          <InfoItem
+            label="Amount"
+            value={`Rs. ${Number(booking.totalAmount).toFixed(2)}`}
+          />
           <InfoItem label="Payment" value={booking.paymentStatus ?? "-"} />
         </section>
+
         <section className="rounded-lg border p-3">
           <h3 className="text-sm font-medium">Status</h3>
           <div className="mt-3 flex flex-wrap gap-2">
@@ -343,12 +422,34 @@ function DriverBookingDetailPanel({
             ) : null}
           </div>
         </section>
+
         <section className="grid gap-3 sm:grid-cols-2">
-          <InfoItem label="Start" value={`${formatDate(booking.startTime)} ${formatTime(booking.startTime)}`} />
-          <InfoItem label="End" value={`${formatDate(booking.endTime)} ${formatTime(booking.endTime)}`} />
-          <InfoItem label="Payment method" value={booking.paymentMethod ?? "-"} />
-          <InfoItem label="Paid at" value={booking.paidAt ? `${formatDate(booking.paidAt)} ${formatTime(booking.paidAt)}` : "-"} />
+          <InfoItem
+            label="Start"
+            value={`${formatDate(booking.startTime)} ${formatTime(
+              booking.startTime,
+            )}`}
+          />
+          <InfoItem
+            label="End"
+            value={`${formatDate(booking.endTime)} ${formatTime(
+              booking.endTime,
+            )}`}
+          />
+          <InfoItem
+            label="Payment method"
+            value={booking.paymentMethod ?? "-"}
+          />
+          <InfoItem
+            label="Paid at"
+            value={
+              booking.paidAt
+                ? `${formatDate(booking.paidAt)} ${formatTime(booking.paidAt)}`
+                : "-"
+            }
+          />
         </section>
+
         <div className="flex flex-wrap gap-2 border-t pt-4">{actions}</div>
       </div>
     </SplitDetailPanel>

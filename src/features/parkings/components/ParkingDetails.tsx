@@ -55,13 +55,14 @@ export function ParkingDetails({ parkingId }: ParkingDetailsProps) {
 
   const handleLoginSuccess = () => {
     setIsLoginModalOpen(false);
+
     if (selectedSlot) {
       setIsBookingDialogOpen(true);
       return;
     }
 
     navigate({
-      to: "/bookings/new",
+      to: "/bookings",
       search: { parkingLocationId: location?.id },
     });
   };
@@ -129,7 +130,9 @@ export function ParkingDetails({ parkingId }: ParkingDetailsProps) {
                     <div className="flex items-start text-muted-foreground">
                       <MapPin className="mr-3 mt-0.5 h-5 w-5 text-primary" />
                       <div>
-                        <p className="font-semibold text-foreground">Distance</p>
+                        <p className="font-semibold text-foreground">
+                          Distance
+                        </p>
                         <p className="text-sm">
                           {location.distance.toFixed(1)} km from current place
                         </p>

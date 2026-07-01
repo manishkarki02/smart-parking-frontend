@@ -13,10 +13,9 @@ import { Route as RegisterRouteImport } from './routes/register'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as AppRouteImport } from './routes/_app'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as BookingsIndexRouteImport } from './routes/bookings.index'
+import { Route as BookingsIndexRouteImport } from './routes/bookings/index'
 import { Route as ParkingsMapRouteImport } from './routes/parkings.map'
 import { Route as ParkingsIdRouteImport } from './routes/parkings.$id'
-import { Route as BookingsNewRouteImport } from './routes/bookings.new'
 import { Route as AppDashboardRouteImport } from './routes/_app/dashboard'
 import { Route as AppVendorParkingsRouteImport } from './routes/_app/vendor/parkings'
 import { Route as AppVendorDashboardRouteImport } from './routes/_app/vendor/dashboard'
@@ -58,11 +57,6 @@ const ParkingsMapRoute = ParkingsMapRouteImport.update({
 const ParkingsIdRoute = ParkingsIdRouteImport.update({
   id: '/parkings/$id',
   path: '/parkings/$id',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const BookingsNewRoute = BookingsNewRouteImport.update({
-  id: '/bookings/new',
-  path: '/bookings/new',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AppDashboardRoute = AppDashboardRouteImport.update({
@@ -112,7 +106,6 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
   '/dashboard': typeof AppDashboardRoute
-  '/bookings/new': typeof BookingsNewRoute
   '/parkings/$id': typeof ParkingsIdRoute
   '/parkings/map': typeof ParkingsMapRoute
   '/bookings/': typeof BookingsIndexRoute
@@ -129,7 +122,6 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
   '/dashboard': typeof AppDashboardRoute
-  '/bookings/new': typeof BookingsNewRoute
   '/parkings/$id': typeof ParkingsIdRoute
   '/parkings/map': typeof ParkingsMapRoute
   '/bookings': typeof BookingsIndexRoute
@@ -148,7 +140,6 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
   '/_app/dashboard': typeof AppDashboardRoute
-  '/bookings/new': typeof BookingsNewRoute
   '/parkings/$id': typeof ParkingsIdRoute
   '/parkings/map': typeof ParkingsMapRoute
   '/bookings/': typeof BookingsIndexRoute
@@ -167,7 +158,6 @@ export interface FileRouteTypes {
     | '/login'
     | '/register'
     | '/dashboard'
-    | '/bookings/new'
     | '/parkings/$id'
     | '/parkings/map'
     | '/bookings/'
@@ -184,7 +174,6 @@ export interface FileRouteTypes {
     | '/login'
     | '/register'
     | '/dashboard'
-    | '/bookings/new'
     | '/parkings/$id'
     | '/parkings/map'
     | '/bookings'
@@ -202,7 +191,6 @@ export interface FileRouteTypes {
     | '/login'
     | '/register'
     | '/_app/dashboard'
-    | '/bookings/new'
     | '/parkings/$id'
     | '/parkings/map'
     | '/bookings/'
@@ -220,7 +208,6 @@ export interface RootRouteChildren {
   AppRoute: typeof AppRouteWithChildren
   LoginRoute: typeof LoginRoute
   RegisterRoute: typeof RegisterRoute
-  BookingsNewRoute: typeof BookingsNewRoute
   ParkingsIdRoute: typeof ParkingsIdRoute
   ParkingsMapRoute: typeof ParkingsMapRoute
   BookingsIndexRoute: typeof BookingsIndexRoute
@@ -275,13 +262,6 @@ declare module '@tanstack/react-router' {
       path: '/parkings/$id'
       fullPath: '/parkings/$id'
       preLoaderRoute: typeof ParkingsIdRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/bookings/new': {
-      id: '/bookings/new'
-      path: '/bookings/new'
-      fullPath: '/bookings/new'
-      preLoaderRoute: typeof BookingsNewRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_app/dashboard': {
@@ -372,7 +352,6 @@ const rootRouteChildren: RootRouteChildren = {
   AppRoute: AppRouteWithChildren,
   LoginRoute: LoginRoute,
   RegisterRoute: RegisterRoute,
-  BookingsNewRoute: BookingsNewRoute,
   ParkingsIdRoute: ParkingsIdRoute,
   ParkingsMapRoute: ParkingsMapRoute,
   BookingsIndexRoute: BookingsIndexRoute,
