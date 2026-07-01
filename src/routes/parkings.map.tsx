@@ -50,13 +50,12 @@ function ParkingMapPage() {
   }
 
   return (
-    <AppLayout>
+    <AppLayout showHeader={false} mainClassName="p-0 md:p-0">
       {/*
         This wrapper fills exactly the remaining viewport below the sticky 64px header.
         `overflow-hidden` prevents any scroll bleed.
       */}
-      <div className="relative w-full overflow-hidden" style={{ height: "calc(100vh - 64px)" }}>
-
+      <div className="relative h-screen w-full overflow-hidden">
         {/* ── Full-bleed map ── */}
         <div className="absolute inset-0">
           {isLoading ? (
@@ -69,7 +68,7 @@ function ParkingMapPage() {
               Override the shared lp-wrapper / lp-map-area fixed heights so
               ParkingOverviewMap and DirectionsMap stretch to fill the parent.
             */
-            (<div
+            <div
               className="h-full w-full"
               style={{
                 ["--lp-map-height" as string]: "100%",
@@ -106,7 +105,10 @@ function ParkingMapPage() {
                     <ParkingOverviewMap
                       spots={locations ?? []}
                       onBook={(spot) =>
-                        navigate({ to: "/parkings/$id", params: { id: spot.id.toString() } })
+                        navigate({
+                          to: "/parkings/$id",
+                          params: { id: spot.id.toString() },
+                        })
                       }
                     />
                   ) : (
@@ -124,7 +126,9 @@ function ParkingMapPage() {
                         ) : (
                           <div className="h-full flex flex-col items-center justify-center gap-3 text-muted-foreground bg-muted/20">
                             <Loader2 className="w-8 h-8 animate-spin text-primary" />
-                            <p className="text-sm">Waiting for your location...</p>
+                            <p className="text-sm">
+                              Waiting for your location...
+                            </p>
                           </div>
                         )}
                       </div>
@@ -132,7 +136,7 @@ function ParkingMapPage() {
                   )}
                 </MapProvider>
               </div>
-            </div>)
+            </div>
           )}
         </div>
 
@@ -154,7 +158,10 @@ function ParkingMapPage() {
           <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full shadow-md backdrop-blur-sm bg-background/90 border text-sm font-semibold">
             <MapPin className="w-4 h-4 text-primary" />
             {directionsTarget ? (
-              <span>Directions to <span className="text-primary">{directionsTarget.name}</span></span>
+              <span>
+                Directions to{" "}
+                <span className="text-primary">{directionsTarget.name}</span>
+              </span>
             ) : (
               <span>Parking Map</span>
             )}
@@ -183,7 +190,11 @@ function ParkingMapPage() {
             </span>
             <span className="flex items-center gap-1">
               <span className="w-2 h-2 rounded-full bg-orange-500 inline-block" />
-              {locations.filter((l) => l.availableSlots > 0 && l.availableSlots <= 3).length}
+              {
+                locations.filter(
+                  (l) => l.availableSlots > 0 && l.availableSlots <= 3,
+                ).length
+              }
             </span>
             <span className="flex items-center gap-1">
               <span className="w-2 h-2 rounded-full bg-red-500 inline-block" />
@@ -232,13 +243,16 @@ function ParkingMapPage() {
                 </p>
                 <div className="flex items-center gap-2 text-xs text-muted-foreground">
                   <span className="flex items-center gap-1">
-                    <span className="w-2 h-2 rounded-sm bg-green-500 inline-block" /> Available
+                    <span className="w-2 h-2 rounded-sm bg-green-500 inline-block" />{" "}
+                    Available
                   </span>
                   <span className="flex items-center gap-1">
-                    <span className="w-2 h-2 rounded-sm bg-orange-500 inline-block" /> Low
+                    <span className="w-2 h-2 rounded-sm bg-orange-500 inline-block" />{" "}
+                    Low
                   </span>
                   <span className="flex items-center gap-1">
-                    <span className="w-2 h-2 rounded-sm bg-red-500 inline-block" /> Full
+                    <span className="w-2 h-2 rounded-sm bg-red-500 inline-block" />{" "}
+                    Full
                   </span>
                 </div>
               </div>
@@ -258,7 +272,11 @@ function ParkingMapPage() {
                     : isLow
                       ? "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400"
                       : "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400";
-                  const statusText = isFull ? "Full" : isLow ? "Low" : "Available";
+                  const statusText = isFull
+                    ? "Full"
+                    : isLow
+                      ? "Low"
+                      : "Available";
 
                   return (
                     <div
@@ -267,13 +285,17 @@ function ParkingMapPage() {
                       onClick={() => handleGetDirections(spot)}
                     >
                       <div className="flex items-start gap-2">
-                        <span className={`mt-1 w-2 h-2 rounded-full shrink-0 ${dotColor}`} />
+                        <span
+                          className={`mt-1 w-2 h-2 rounded-full shrink-0 ${dotColor}`}
+                        />
                         <div className="flex-1 min-w-0">
                           <div className="flex items-start justify-between gap-1">
                             <p className="font-semibold text-sm truncate leading-tight">
                               {spot.name}
                             </p>
-                            <span className={`shrink-0 text-xs font-semibold px-1.5 py-0.5 rounded-full ${badgeColor}`}>
+                            <span
+                              className={`shrink-0 text-xs font-semibold px-1.5 py-0.5 rounded-full ${badgeColor}`}
+                            >
                               {statusText}
                             </span>
                           </div>
@@ -283,10 +305,15 @@ function ParkingMapPage() {
                           <div className="flex items-center justify-between mt-2 gap-2">
                             <span className="text-xs text-muted-foreground">
                               {isFull ? (
-                                <span className="text-red-500 font-medium">No slots</span>
+                                <span className="text-red-500 font-medium">
+                                  No slots
+                                </span>
                               ) : (
                                 <>
-                                  <span className="text-foreground font-bold">{spot.availableSlots}</span> slots left
+                                  <span className="text-foreground font-bold">
+                                    {spot.availableSlots}
+                                  </span>{" "}
+                                  slots left
                                 </>
                               )}
                             </span>
@@ -331,5 +358,5 @@ function ParkingMapPage() {
         )}
       </div>
     </AppLayout>
-  )
+  );
 }

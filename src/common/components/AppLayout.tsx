@@ -1,8 +1,4 @@
-import {
-  useMemo,
-  useState,
-  type ReactNode,
-} from "react";
+import { useMemo, useState, type ReactNode } from "react";
 import { Link, useLocation } from "@tanstack/react-router";
 import { useAuthStore } from "@/stores/auth-store";
 import {
@@ -36,6 +32,7 @@ import {
   PageHeaderContext,
   type PageHeaderState,
 } from "@/common/components/page-header-context";
+import { cn } from "@/lib/utils";
 
 interface NavItem {
   label: string;
@@ -107,52 +104,69 @@ const navItems: NavItem[] = [
   },
 ];
 
-export function AppLayout({ children }: { children: ReactNode }) {
+export function AppLayout({
+  children,
+  showHeader = true,
+  mainClassName,
+}: {
+  children: ReactNode;
+  showHeader?: boolean;
+  mainClassName?: string;
+}) {
   const [pageHeader, setPageHeader] = useState<PageHeaderState | null>(null);
+
   const pageHeaderValue = useMemo(
     () => ({ pageHeader, setPageHeader }),
-    [pageHeader]
+    [pageHeader],
   );
 
   return (
     <SidebarProvider>
       <PageHeaderContext.Provider value={pageHeaderValue}>
         <AppSidebar />
-        <SidebarInset>
-          <header className="sticky top-0 z-30 flex h-16 shrink-0 items-center border-b bg-background/95 px-4 backdrop-blur supports-backdrop-filter:bg-background/80 md:px-6">
-            <div className="flex min-w-0 flex-1 items-center gap-3">
-              <div className="flex min-w-0 items-center gap-2 md:hidden">
-                <Car className="size-5 shrink-0 text-primary" />
-                <span className="truncate text-sm font-semibold">
-                  Smart
-                  <span className="text-blue-500">Parking</span>
-                </span>
-              </div>
 
-              <div className="flex min-w-0 flex-1 items-center justify-between gap-3">
-                <div className="min-w-0 py-2">
-                  {pageHeader?.content ? (
-                    pageHeader.content
-                  ) : pageHeader ? (
-                    <p className="truncate text-lg font-semibold tracking-tight text-foreground">
-                      {pageHeader.title}
-                    </p>
-                  ) : (
-                    <p className="truncate text-lg font-semibold tracking-tight text-foreground">
-                      Overview
-                    </p>
-                  )}
+        <SidebarInset>
+          {showHeader ? (
+            <header className="sticky top-0 z-30 flex h-16 shrink-0 items-center border-b bg-background/95 px-4 backdrop-blur supports-backdrop-filter:bg-background/80 md:px-6">
+              <div className="flex min-w-0 flex-1 items-center gap-3">
+                <div className="flex min-w-0 items-center gap-2 md:hidden">
+                  <Car className="size-5 shrink-0 text-primary" />
+                  <span className="truncate text-sm font-semibold">
+                    Smart
+                    <span className="text-blue-500">Parking</span>
+                  </span>
                 </div>
 
-                {pageHeader?.action ? (
-                  <div className="flex shrink-0 items-center">
-                    {pageHeader.action}
+                <div className="flex min-w-0 flex-1 items-center justify-between gap-3">
+                  <div className="min-w-0 py-2">
+                    {pageHeader?.content ? (
+                      pageHeader.content
+                    ) : pageHeader ? (
+                      <p className="truncate text-lg font-semibold tracking-tight text-foreground">
+                        {pageHeader.title}
+                      </p>
+                    ) : (
+                      <p className="truncate text-lg font-semibold tracking-tight text-foreground">
+                        Overview
+                      </p>
+                    )}
                   </div>
-                ) : null}
+
+                  {pageHeader?.action ? (
+                    <div className="flex shrink-0 items-center">
+                      {pageHeader.action}
+                    </div>
+                  ) : null}
+                </div>
               </div>
-            </div>
-          </header>
-          <main className="flex-1 overflow-y-auto p-4 md:p-6">{children}</main>
+            </header>
+          ) : null}
+
+          <main
+            className={cn("flex-1 overflow-y-auto p-4 md:p-6", mainClassName)}
+          >
+            {children}
+          </main>
         </SidebarInset>
       </PageHeaderContext.Provider>
     </SidebarProvider>

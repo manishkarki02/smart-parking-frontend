@@ -2,7 +2,13 @@ import { useMemo, useState } from "react";
 import type { ReactNode } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowLeft, Car, Image as ImageIcon, MapPin, Wallet } from "lucide-react";
+import {
+  ArrowLeft,
+  Car,
+  Image as ImageIcon,
+  MapPin,
+  Wallet,
+} from "lucide-react";
 import { LoadingSpinner } from "@/common/components/LoadingSpinner";
 import { useAuthGuard } from "@/common/hooks/use-auth-guard";
 import { queryKeys } from "@/config/query-keys";
@@ -59,7 +65,7 @@ function VendorParkingDetailsPage() {
     enabled: isAuthorized,
   });
 
-  const slots = slotsQuery.data ?? [];
+  const slots = useMemo(() => slotsQuery.data ?? [], [slotsQuery.data]);
   const availableCount = useMemo(
     () => slots.filter((slot) => slot.status === "AVAILABLE").length,
     [slots],
@@ -122,12 +128,12 @@ function VendorParkingDetailsPage() {
 
       <div className="space-y-6 rounded-3xl border border-dashed border-slate-300 bg-background p-4 sm:p-6">
         <div className="grid gap-6 lg:grid-cols-2">
-          <div className="flex min-h-[340px] flex-col items-center justify-center rounded-3xl border bg-muted/30 text-muted-foreground shadow-sm">
+          <div className="flex min-h-85 flex-col items-center justify-center rounded-3xl border bg-muted/30 text-muted-foreground shadow-sm">
             <ImageIcon className="mb-4 size-16 opacity-35" />
             <span className="font-semibold">Parking Place Photo</span>
           </div>
 
-          <Card className="min-h-[340px] rounded-3xl">
+          <Card className="min-h-85 rounded-3xl">
             <CardContent className="flex h-full flex-col justify-center space-y-6 p-6 sm:p-8">
               <div>
                 <h1 className="text-3xl font-black tracking-tight text-foreground">
@@ -236,10 +242,16 @@ function SlotLegend() {
   return (
     <div className="flex flex-wrap gap-5 rounded-2xl bg-muted/20 p-4 text-sm font-semibold">
       <LegendItem className="border-emerald-400 bg-emerald-100" label="Free" />
-      <LegendItem className="border-yellow-400 bg-yellow-100" label="Reserved" />
+      <LegendItem
+        className="border-yellow-400 bg-yellow-100"
+        label="Reserved"
+      />
       <LegendItem className="border-blue-400 bg-blue-100" label="Booked" />
       <LegendItem className="border-red-300 bg-red-100" label="Occupied" />
-      <LegendItem className="border-slate-300 bg-slate-100" label="Maintenance" />
+      <LegendItem
+        className="border-slate-300 bg-slate-100"
+        label="Maintenance"
+      />
     </div>
   );
 }
