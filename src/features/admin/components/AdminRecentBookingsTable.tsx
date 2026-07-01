@@ -35,12 +35,12 @@ export function AdminRecentBookingsTable({
   bookings,
 }: AdminRecentBookingsTableProps) {
   return (
-    <Card className="rounded-lg border shadow-none gap-0 place-self-start">
+    <Card className="min-w-0 w-full gap-0 overflow-hidden rounded-lg border shadow-none self-start">
       <CardHeader className="gap-1 border-b">
         <CardTitle>Recent Bookings</CardTitle>
         <CardDescription>Latest platform bookings and slot activity.</CardDescription>
       </CardHeader>
-      <CardContent className="p-0">
+      <CardContent className="min-w-0 overflow-hidden p-0">
         {bookings.length === 0 ? (
           <TableEmptyState
             title="No recent bookings"
@@ -49,7 +49,7 @@ export function AdminRecentBookingsTable({
             className="min-h-80"
           />
         ) : (
-          <Table>
+          <Table className="min-w-[760px]">
             <TableHeader className="bg-muted/40">
               <TableRow>
                 <TableHead>ID</TableHead>
