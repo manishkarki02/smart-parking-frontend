@@ -3,6 +3,7 @@ import {
   CalendarCheck,
   CalendarDays,
   ClipboardList,
+  CreditCard,
   RefreshCw,
   Users,
 } from "lucide-react";
@@ -151,7 +152,7 @@ export function AdminDashboardPage() {
             Jump into common admin workflows.
           </p>
         </div>
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
           <AdminQuickActionCard
             title="Bookings"
             description="Review platform bookings"
@@ -165,6 +166,13 @@ export function AdminDashboardPage() {
             icon={Users}
             to="/admin/users"
             tone="green"
+          />
+          <AdminQuickActionCard
+            title="Payments"
+            description="Review payment records"
+            icon={CreditCard}
+            to="/admin/payments"
+            tone="purple"
           />
         </div>
       </section>

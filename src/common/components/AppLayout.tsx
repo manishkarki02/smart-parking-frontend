@@ -21,6 +21,7 @@ import {
   Car,
   MapPin,
   CalendarCheck,
+  CreditCard,
   LayoutDashboard,
   Users,
   LogOut,
@@ -93,6 +94,12 @@ const navItems: NavItem[] = [
     label: "Users",
     to: "/admin/users",
     icon: Users,
+    roles: ["ADMIN"],
+  },
+  {
+    label: "Payments",
+    to: "/admin/payments",
+    icon: CreditCard,
     roles: ["ADMIN"],
   },
 ];
