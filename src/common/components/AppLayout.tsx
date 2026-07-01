@@ -1,6 +1,4 @@
 import {
-  createContext,
-  useContext,
   useMemo,
   useState,
   type ReactNode,
@@ -13,7 +11,6 @@ import {
   SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
-  SidebarGroupLabel,
   SidebarHeader,
   SidebarInset,
   SidebarMenu,
@@ -35,37 +32,16 @@ import {
   ParkingCircle,
   type LucideIcon,
 } from "lucide-react";
+import {
+  PageHeaderContext,
+  type PageHeaderState,
+} from "@/common/components/page-header-context";
 
 interface NavItem {
   label: string;
   to: string;
   icon: LucideIcon;
   roles: string[];
-}
-
-interface PageHeaderState {
-  title: string;
-  action?: ReactNode;
-}
-
-interface PageHeaderContextValue {
-  pageHeader: PageHeaderState | null;
-  setPageHeader: (pageHeader: PageHeaderState | null) => void;
-}
-
-const PageHeaderContext = createContext<PageHeaderContextValue | null>(null);
-
-export function usePageHeader() {
-  const context = useContext(PageHeaderContext);
-
-  if (!context) {
-    return {
-      pageHeader: null,
-      setPageHeader: () => undefined,
-    } satisfies PageHeaderContextValue;
-  }
-
-  return context;
 }
 
 const navItems: NavItem[] = [
@@ -82,13 +58,13 @@ const navItems: NavItem[] = [
     roles: ["DRIVER"],
   },
   {
-    label: "Parking Map",
-    to: "/parking/map",
+    label: "Parkings",
+    to: "/parkings/map",
     icon: MapPin,
     roles: ["DRIVER"],
   },
   {
-    label: "My Bookings",
+    label: "Bookings",
     to: "/bookings",
     icon: CalendarCheck,
     roles: ["DRIVER"],
@@ -100,8 +76,8 @@ const navItems: NavItem[] = [
     roles: ["VENDOR"],
   },
   {
-    label: "My Parking Locations",
-    to: "/vendor/parking",
+    label: "Parkings",
+    to: "/vendor/parkings",
     icon: ParkingCircle,
     roles: ["VENDOR"],
   },
@@ -112,7 +88,7 @@ const navItems: NavItem[] = [
     roles: ["VENDOR"],
   },
   {
-    label: "All Bookings",
+    label: "Bookings",
     to: "/admin/bookings",
     icon: CalendarCheck,
     roles: ["ADMIN"],
@@ -155,7 +131,9 @@ export function AppLayout({ children }: { children: ReactNode }) {
 
               <div className="flex min-w-0 flex-1 items-center justify-between gap-3">
                 <div className="min-w-0 py-2">
-                  {pageHeader ? (
+                  {pageHeader?.content ? (
+                    pageHeader.content
+                  ) : pageHeader ? (
                     <p className="truncate text-lg font-semibold tracking-tight text-foreground">
                       {pageHeader.title}
                     </p>
@@ -226,7 +204,6 @@ function AppSidebar() {
 
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Navigation</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {filteredNavItems.map((item) => {

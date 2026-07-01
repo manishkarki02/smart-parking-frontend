@@ -1,22 +1,23 @@
 import { useEffect } from "react";
-import { usePageHeader } from "@/common/components/AppLayout";
+import { usePageHeader } from "@/common/components/page-header-context";
 
 interface PageHeaderProps {
   title: string;
   description?: string;
+  content?: React.ReactNode;
   action?: React.ReactNode;
 }
 
-export function PageHeader({ title, action, description: _description }: PageHeaderProps) {
+export function PageHeader({ title, content, action }: PageHeaderProps) {
   const { setPageHeader } = usePageHeader();
 
   useEffect(() => {
-    setPageHeader({ title, action });
+    setPageHeader({ title, content, action });
 
     return () => {
       setPageHeader(null);
     };
-  }, [action, setPageHeader, title]);
+  }, [action, content, setPageHeader, title]);
 
   return null;
 }

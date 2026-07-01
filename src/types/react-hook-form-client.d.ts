@@ -73,6 +73,14 @@ declare module "react-hook-form" {
     props?: { name?: FieldPath<TFieldValues> },
   ): FormState<TFieldValues>;
 
+  export function useWatch<
+    TFieldValues extends FieldValues = FieldValues,
+    TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
+  >(props: {
+    control?: unknown;
+    name: TName;
+  }): TFieldValues[TName];
+
   export interface ControllerRenderField {
     name: string;
     value: string | undefined;
