@@ -1,12 +1,6 @@
+import { useState } from "react";
+import { SplitDataTable, SplitDetailPanel, type DataTableColumn } from "@/common";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import type { VendorDashboardLocation } from "../types/vendor.types";
 
 function occupancyPct(occupied: number, total: number) {
@@ -68,49 +62,103 @@ interface VendorLocationStatsProps {
 }
 
 export function VendorLocationStats({ locations }: VendorLocationStatsProps) {
+  const [selectedLocationId, setSelectedLocationId] = useState<string | null>(null);
+  const selectedLocation =
+    locations.find((location) => location.id === selectedLocationId) ?? null;
+
+  const columns: DataTableColumn<VendorDashboardLocation>[] = [
+    {
+      id: "location",
+      header: "Location",
+      cell: (location) => location.name,
+      className: "font-medium",
+      compact: true,
+    },
+    {
+      id: "total",
+      header: "Total",
+      align: "center",
+      cell: (location) => location.totalSlots,
+    },
+    {
+      id: "available",
+      header: "Available",
+      align: "center",
+      className: "font-medium text-green-600",
+      cell: (location) => location.availableSlots,
+      compact: true,
+    },
+    {
+      id: "occupied",
+      header: "Occupied",
+      align: "center",
+      className: "font-medium text-red-500",
+      cell: (location) => location.occupiedSlots,
+      compact: true,
+    },
+    {
+      id: "twoWheeler",
+      header: "2-Wheeler (avail/occ)",
+      align: "center",
+      className: "text-muted-foreground",
+      cell: (location) =>
+        `${location.twoWheelerSlots.available} / ${location.twoWheelerSlots.occupied}`,
+    },
+    {
+      id: "fourWheeler",
+      header: "4-Wheeler (avail/occ)",
+      align: "center",
+      className: "text-muted-foreground",
+      cell: (location) =>
+        `${location.fourWheelerSlots.available} / ${location.fourWheelerSlots.occupied}`,
+    },
+    {
+      id: "occupancy",
+      header: "Occupancy",
+      cell: (location) => (
+        <OccupancyBar
+          occupied={location.occupiedSlots}
+          total={location.totalSlots}
+        />
+      ),
+      compact: true,
+    },
+  ];
+
+  const compactColumns = columns.filter((column) =>
+    ["location", "available", "occupied", "occupancy"].includes(column.id),
+  );
+
   return (
     <>
-      {/* Desktop table */}
-      <div className="hidden md:block rounded-md border">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Location</TableHead>
-              <TableHead className="text-center">Total</TableHead>
-              <TableHead className="text-center">Available</TableHead>
-              <TableHead className="text-center">Occupied</TableHead>
-              <TableHead className="text-center">2-Wheeler (avail/occ)</TableHead>
-              <TableHead className="text-center">4-Wheeler (avail/occ)</TableHead>
-              <TableHead>Occupancy</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {locations.map((loc) => (
-              <TableRow key={loc.id}>
-                <TableCell className="font-medium">{loc.name}</TableCell>
-                <TableCell className="text-center">{loc.totalSlots}</TableCell>
-                <TableCell className="text-center text-green-600 font-medium">
-                  {loc.availableSlots}
-                </TableCell>
-                <TableCell className="text-center text-red-500 font-medium">
-                  {loc.occupiedSlots}
-                </TableCell>
-                <TableCell className="text-center text-muted-foreground">
-                  {loc.twoWheelerSlots.available} / {loc.twoWheelerSlots.occupied}
-                </TableCell>
-                <TableCell className="text-center text-muted-foreground">
-                  {loc.fourWheelerSlots.available} / {loc.fourWheelerSlots.occupied}
-                </TableCell>
-                <TableCell>
-                  <OccupancyBar occupied={loc.occupiedSlots} total={loc.totalSlots} />
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+      <div className="hidden md:block">
+        <SplitDataTable
+          rows={locations}
+          columns={columns}
+          compactColumns={compactColumns}
+          getRowId={(location) => location.id}
+          selectedRowId={selectedLocationId}
+          onRowSelect={(location) =>
+            setSelectedLocationId((current) =>
+              current === location.id ? null : location.id,
+            )
+          }
+          onDetailClose={() => setSelectedLocationId(null)}
+          detailTitle={selectedLocation?.name ?? "Location details"}
+          detailPanel={
+            selectedLocation ? (
+              <SplitDetailPanel
+                title={selectedLocation.name}
+                subtitle="Parking location stats"
+                onClose={() => setSelectedLocationId(null)}
+              >
+                <LocationCard location={selectedLocation} />
+              </SplitDetailPanel>
+            ) : null
+          }
+        />
       </div>
 
-      {/* Mobile cards */}
       <div className="grid gap-3 md:hidden">
         {locations.map((loc) => (
           <LocationCard key={loc.id} location={loc} />
