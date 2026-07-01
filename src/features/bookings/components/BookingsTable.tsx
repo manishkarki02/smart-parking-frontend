@@ -1,53 +1,20 @@
 import { useState } from "react";
-import { SplitDataTable, SplitDetailPanel, type DataTableColumn } from "@/common";
+import {
+  InfoItem,
+  SplitDataTable,
+  SplitDetailPanel,
+  type DataTableColumn,
+} from "@/common";
 import type { AdminBooking } from "../types/admin-booking.types";
-import { Badge } from "@/components/ui/badge";
+import { BookingStatusBadge } from "./BookingStatusBadge";
+import {
+  formatBookingAmount,
+  formatBookingCustomerName,
+  formatBookingDateTimeLong,
+} from "../utils/booking-formatters";
 
 interface BookingsTableProps {
   bookings: AdminBooking[];
-}
-
-function getStatusVariant(
-  status: string,
-  slotStatus?: string,
-): "default" | "secondary" | "destructive" | "outline" {
-  if (slotStatus === "BOOKED" || slotStatus === "OCCUPIED") {
-    return "secondary";
-  }
-
-  switch (status?.toUpperCase()) {
-    case "COMPLETED":
-    case "CONFIRMED":
-      return "default";
-    case "PENDING":
-      return "secondary";
-    case "CANCELLED":
-      return "destructive";
-    default:
-      return "outline";
-  }
-}
-
-function formatStatus(status: string, slotStatus?: string): string {
-  if (status === "COMPLETED") return "Completed";
-  if (status === "CANCELLED") return "Cancelled";
-  if (slotStatus === "RESERVED") return "Reserved";
-  if (slotStatus === "BOOKED") return "Booked";
-  if (slotStatus === "OCCUPIED") return "Occupied";
-  return status;
-}
-
-function formatDateTime(dateStr: string): string {
-  return new Date(dateStr).toLocaleString("en-US", {
-    dateStyle: "medium",
-    timeStyle: "short",
-  });
-}
-
-function formatDriverName(booking: AdminBooking): string {
-  if (booking.driverName) return booking.driverName;
-  if (booking.customerName) return booking.customerName;
-  return booking.walkIn ? "Walk-in customer" : "Driver booking";
 }
 
 export function BookingsTable({ bookings }: BookingsTableProps) {
@@ -68,7 +35,9 @@ export function BookingsTable({ bookings }: BookingsTableProps) {
       header: "User",
       cell: (booking) => (
         <div>
-          <p className="text-sm font-medium">{formatDriverName(booking)}</p>
+          <p className="text-sm font-medium">
+            {formatBookingCustomerName(booking)}
+          </p>
           <p className="text-xs text-muted-foreground">
             {booking.vehicleNumber ?? booking.slotNumber}
           </p>
@@ -85,26 +54,27 @@ export function BookingsTable({ bookings }: BookingsTableProps) {
       id: "start",
       header: "Start",
       className: "text-sm",
-      cell: (booking) => formatDateTime(booking.startTime),
+      cell: (booking) => formatBookingDateTimeLong(booking.startTime),
     },
     {
       id: "end",
       header: "End",
       className: "text-sm",
-      cell: (booking) => formatDateTime(booking.endTime),
+      cell: (booking) => formatBookingDateTimeLong(booking.endTime),
     },
     {
       id: "amount",
       header: "Amount",
-      cell: (booking) => `Rs. ${Number(booking.totalAmount).toFixed(2)}`,
+      cell: (booking) => formatBookingAmount(booking.totalAmount),
     },
     {
       id: "status",
       header: "Status",
       cell: (booking) => (
-        <Badge variant={getStatusVariant(booking.status, booking.slotStatus)}>
-          {formatStatus(booking.status, booking.slotStatus)}
-        </Badge>
+        <BookingStatusBadge
+          status={booking.status}
+          slotStatus={booking.slotStatus}
+        />
       ),
       compact: true,
     },
@@ -130,26 +100,40 @@ export function BookingsTable({ bookings }: BookingsTableProps) {
         )
       }
       onDetailClose={() => setSelectedBookingId(null)}
-      detailTitle={selectedBooking ? formatDriverName(selectedBooking) : "Booking details"}
+      detailTitle={
+        selectedBooking
+          ? formatBookingCustomerName(selectedBooking)
+          : "Booking details"
+      }
       detailPanel={
         selectedBooking ? (
           <SplitDetailPanel
-            title={formatDriverName(selectedBooking)}
+            title={formatBookingCustomerName(selectedBooking)}
             subtitle={selectedBooking.bookingId}
             onClose={() => setSelectedBookingId(null)}
           >
             <div className="grid gap-3 sm:grid-cols-2">
               <InfoItem label="Location" value={selectedBooking.parkingLocationName} />
               <InfoItem label="Slot" value={selectedBooking.slotNumber} />
-              <InfoItem label="Start" value={formatDateTime(selectedBooking.startTime)} />
-              <InfoItem label="End" value={formatDateTime(selectedBooking.endTime)} />
-              <InfoItem label="Amount" value={`Rs. ${Number(selectedBooking.totalAmount).toFixed(2)}`} />
+              <InfoItem
+                label="Start"
+                value={formatBookingDateTimeLong(selectedBooking.startTime)}
+              />
+              <InfoItem
+                label="End"
+                value={formatBookingDateTimeLong(selectedBooking.endTime)}
+              />
+              <InfoItem
+                label="Amount"
+                value={formatBookingAmount(selectedBooking.totalAmount)}
+              />
               <InfoItem
                 label="Status"
                 value={
-                  <Badge variant={getStatusVariant(selectedBooking.status, selectedBooking.slotStatus)}>
-                    {formatStatus(selectedBooking.status, selectedBooking.slotStatus)}
-                  </Badge>
+                  <BookingStatusBadge
+                    status={selectedBooking.status}
+                    slotStatus={selectedBooking.slotStatus}
+                  />
                 }
               />
             </div>
@@ -157,16 +141,5 @@ export function BookingsTable({ bookings }: BookingsTableProps) {
         ) : null
       }
     />
-  );
-}
-
-function InfoItem({ label, value }: { label: string; value: React.ReactNode }) {
-  return (
-    <div className="rounded-lg border bg-muted/20 p-3">
-      <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-        {label}
-      </p>
-      <div className="mt-1 break-words text-sm font-medium">{value}</div>
-    </div>
   );
 }
