@@ -2,14 +2,8 @@ import { useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  Eye,
-  EyeOff,
-  Loader2,
-  Mail,
-  Phone,
-  User,
-} from "lucide-react";
+import { Eye, EyeOff, Loader2, Mail, Phone, User } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -65,17 +59,19 @@ export function RegisterForm() {
       phone: data.phone,
       role: data.role,
     };
+
     await registerMutation.mutateAsync(payload);
   };
 
   return (
     <AuthLayout>
-      <Card className="rounded-[2rem] border-[#E2E8F0] bg-white p-0 shadow-[0_18px_60px_rgba(37,99,235,0.10)]">
+      <Card className="rounded-[2rem] border-slate-200 bg-white p-0 shadow-[0_18px_60px_rgba(37,99,235,0.10)]">
         <CardHeader className="px-6 pt-8 text-center sm:px-8">
-          <CardTitle className="text-3xl font-black tracking-tight text-[#0F172A]">
+          <CardTitle className="text-3xl font-black tracking-tight text-slate-900">
             Create your account
           </CardTitle>
-          <CardDescription className="text-sm leading-6 text-[#64748B]">
+
+          <CardDescription className="text-sm leading-6 text-slate-500">
             Register as a driver or vendor for Smart Parking.
           </CardDescription>
         </CardHeader>
@@ -83,19 +79,25 @@ export function RegisterForm() {
         <CardContent className="px-6 pb-8 sm:px-8">
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
             <div className="space-y-2">
-              <Label htmlFor="name" className="text-xs font-bold uppercase tracking-[0.14em] text-muted-foreground">
+              <Label
+                htmlFor="name"
+                className="text-xs font-bold uppercase tracking-[0.14em] text-muted-foreground"
+              >
                 Full Name
               </Label>
+
               <div className="relative">
                 <Input
                   id="name"
                   placeholder="John Doe"
                   autoComplete="name"
-                  className="h-12 rounded-lg border-[#E2E8F0] bg-white pr-12 text-[#0F172A] shadow-sm placeholder:text-[#94A3B8] focus-visible:ring-blue-100"
+                  className="h-12 rounded-lg border-slate-200 bg-white pr-12 text-slate-900 shadow-sm placeholder:text-slate-400 focus-visible:ring-blue-100"
                   {...register("name")}
                 />
-                <User className="absolute right-4 top-1/2 size-5 -translate-y-1/2 text-[#94A3B8]" />
+
+                <User className="absolute right-4 top-1/2 size-5 -translate-y-1/2 text-slate-400" />
               </div>
+
               {errors.name && (
                 <p className="text-sm font-medium text-red-600">
                   {errors.name.message}
@@ -104,20 +106,26 @@ export function RegisterForm() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="email" className="text-xs font-bold uppercase tracking-[0.14em] text-muted-foreground">
+              <Label
+                htmlFor="email"
+                className="text-xs font-bold uppercase tracking-[0.14em] text-muted-foreground"
+              >
                 Email Address
               </Label>
+
               <div className="relative">
                 <Input
                   id="email"
                   type="email"
                   placeholder="you@example.com"
                   autoComplete="email"
-                  className="h-12 rounded-lg border-[#E2E8F0] bg-white pr-12 text-[#0F172A] shadow-sm placeholder:text-[#94A3B8] focus-visible:ring-blue-100"
+                  className="h-12 rounded-lg border-slate-200 bg-white pr-12 text-slate-900 shadow-sm placeholder:text-slate-400 focus-visible:ring-blue-100"
                   {...register("email")}
                 />
-                <Mail className="absolute right-4 top-1/2 size-5 -translate-y-1/2 text-[#94A3B8]" />
+
+                <Mail className="absolute right-4 top-1/2 size-5 -translate-y-1/2 text-slate-400" />
               </div>
+
               {errors.email && (
                 <p className="text-sm font-medium text-red-600">
                   {errors.email.message}
@@ -132,19 +140,21 @@ export function RegisterForm() {
               >
                 Password
               </Label>
+
               <div className="relative">
                 <Input
                   id="password"
                   type={showPassword ? "text" : "password"}
                   placeholder="Create a password"
                   autoComplete="new-password"
-                  className="h-12 rounded-lg border-[#E2E8F0] bg-white pr-12 text-[#0F172A] shadow-sm placeholder:text-[#94A3B8] focus-visible:ring-blue-100"
+                  className="h-12 rounded-lg border-slate-200 bg-white pr-12 text-slate-900 shadow-sm placeholder:text-slate-400 focus-visible:ring-blue-100"
                   {...register("password")}
                 />
+
                 <button
                   type="button"
                   onClick={() => setShowPassword((value) => !value)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 rounded-md p-1 text-[#94A3B8] transition hover:text-[#0F172A] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-200"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 rounded-md p-1 text-slate-400 transition hover:text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-200"
                   aria-label={showPassword ? "Hide password" : "Show password"}
                 >
                   {showPassword ? (
@@ -154,6 +164,7 @@ export function RegisterForm() {
                   )}
                 </button>
               </div>
+
               {errors.password && (
                 <p className="text-sm font-medium text-red-600">
                   {errors.password.message}
@@ -168,19 +179,21 @@ export function RegisterForm() {
               >
                 Confirm Password
               </Label>
+
               <div className="relative">
                 <Input
                   id="confirmPassword"
                   type={showConfirmPassword ? "text" : "password"}
                   placeholder="Confirm your password"
                   autoComplete="new-password"
-                  className="h-12 rounded-lg border-[#E2E8F0] bg-white pr-12 text-[#0F172A] shadow-sm placeholder:text-[#94A3B8] focus-visible:ring-blue-100"
+                  className="h-12 rounded-lg border-slate-200 bg-white pr-12 text-slate-900 shadow-sm placeholder:text-slate-400 focus-visible:ring-blue-100"
                   {...register("confirmPassword")}
                 />
+
                 <button
                   type="button"
                   onClick={() => setShowConfirmPassword((value) => !value)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 rounded-md p-1 text-[#94A3B8] transition hover:text-[#0F172A] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-200"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 rounded-md p-1 text-slate-400 transition hover:text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-200"
                   aria-label={
                     showConfirmPassword ? "Hide password" : "Show password"
                   }
@@ -192,6 +205,7 @@ export function RegisterForm() {
                   )}
                 </button>
               </div>
+
               {errors.confirmPassword && (
                 <p className="text-sm font-medium text-red-600">
                   {errors.confirmPassword.message}
@@ -200,19 +214,25 @@ export function RegisterForm() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="phone" className="text-xs font-bold uppercase tracking-[0.14em] text-muted-foreground">
+              <Label
+                htmlFor="phone"
+                className="text-xs font-bold uppercase tracking-[0.14em] text-muted-foreground"
+              >
                 Phone Number
               </Label>
+
               <div className="relative">
                 <Input
                   id="phone"
                   placeholder="9800000000"
                   autoComplete="tel"
-                  className="h-12 rounded-lg border-[#E2E8F0] bg-white pr-12 text-[#0F172A] shadow-sm placeholder:text-[#94A3B8] focus-visible:ring-blue-100"
+                  className="h-12 rounded-lg border-slate-200 bg-white pr-12 text-slate-900 shadow-sm placeholder:text-slate-400 focus-visible:ring-blue-100"
                   {...register("phone")}
                 />
-                <Phone className="absolute right-4 top-1/2 size-5 -translate-y-1/2 text-[#94A3B8]" />
+
+                <Phone className="absolute right-4 top-1/2 size-5 -translate-y-1/2 text-slate-400" />
               </div>
+
               {errors.phone && (
                 <p className="text-sm font-medium text-red-600">
                   {errors.phone.message}
@@ -221,15 +241,25 @@ export function RegisterForm() {
             </div>
 
             <div className="space-y-2">
-              <Label className="text-xs font-bold uppercase tracking-[0.14em] text-muted-foreground">Role</Label>
+              <Label
+                htmlFor="role"
+                className="text-xs font-bold uppercase tracking-[0.14em] text-muted-foreground"
+              >
+                Role
+              </Label>
+
               <Controller
                 name="role"
                 control={control}
                 render={({ field }) => (
                   <Select value={field.value} onValueChange={field.onChange}>
-                    <SelectTrigger className="h-12 w-full rounded-lg border-[#E2E8F0] bg-white px-4 text-sm text-[#0F172A] shadow-sm focus:ring-4 focus:ring-blue-100">
+                    <SelectTrigger
+                      id="role"
+                      className="h-12 w-full rounded-lg border-slate-200 bg-white px-4 text-sm text-slate-900 shadow-sm focus:ring-4 focus:ring-blue-100"
+                    >
                       <SelectValue placeholder="Select your role" />
                     </SelectTrigger>
+
                     <SelectContent>
                       <SelectItem value={Roles.DRIVER}>Driver</SelectItem>
                       <SelectItem value={Roles.VENDOR}>Vendor</SelectItem>
@@ -237,6 +267,7 @@ export function RegisterForm() {
                   </Select>
                 )}
               />
+
               {errors.role && (
                 <p className="text-sm font-medium text-red-600">
                   {errors.role.message}
@@ -246,7 +277,7 @@ export function RegisterForm() {
 
             <Button
               type="submit"
-              className="h-12 w-full rounded-lg bg-[#2563EB] text-sm font-bold shadow-lg shadow-blue-600/20 hover:bg-blue-700"
+              className="h-12 w-full rounded-lg bg-blue-600 text-sm font-bold shadow-lg shadow-blue-600/20 hover:bg-blue-700"
               disabled={registerMutation.isPending}
             >
               {registerMutation.isPending && (
@@ -255,11 +286,11 @@ export function RegisterForm() {
               Create Account
             </Button>
 
-            <p className="pt-2 text-center text-sm text-[#64748B]">
+            <p className="pt-2 text-center text-sm text-slate-500">
               Already have an account?{" "}
               <Link
                 to="/login"
-                className="font-semibold text-[#2563EB] underline-offset-4 hover:underline"
+                className="font-semibold text-blue-600 underline-offset-4 hover:underline"
               >
                 Sign In
               </Link>
