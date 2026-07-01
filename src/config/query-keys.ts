@@ -66,5 +66,20 @@ export const queryKeys = {
   payment: {
     khaltiInitiate: () => ["PAYMENT", "KHALTI_INITIATE"] as const,
     khaltiVerify: () => ["PAYMENT", "KHALTI_VERIFY"] as const,
+    adminSummary: (params?: {
+      fromDate?: string;
+      toDate?: string;
+    }) => ["PAYMENT", "ADMIN", "SUMMARY", params ?? {}] as const,
+    adminList: (params?: {
+      search?: string;
+      status?: string;
+      method?: string;
+      fromDate?: string;
+      toDate?: string;
+      page?: number;
+      size?: number;
+    }) => ["PAYMENT", "ADMIN", "LIST", params ?? {}] as const,
+    adminDetail: (paymentId?: string | null) =>
+      ["PAYMENT", "ADMIN", "DETAIL", paymentId ?? "NONE"] as const,
   },
 } as const;
