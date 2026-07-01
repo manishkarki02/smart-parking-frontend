@@ -8,8 +8,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Empty, EmptyDescription } from "@/components/ui/empty";
 import { cn } from "@/lib/utils";
+import { TableEmptyState } from "../TableEmptyState";
 import { DataTableToolbar } from "./DataTableToolbar";
 import { DataTablePagination } from "./DataTablePagination";
 
@@ -122,10 +122,11 @@ function DataTable<TData>({
 
             {!isLoading && data.length === 0 && (
               <TableRow>
-                <TableCell colSpan={columnCount}>
-                  <Empty className="border-0 py-10">
-                    <EmptyDescription>{emptyMessage}</EmptyDescription>
-                  </Empty>
+                <TableCell colSpan={columnCount} className="p-0 whitespace-normal">
+                  <TableEmptyState
+                    title={emptyMessage}
+                    description="Try adjusting your search or filters."
+                  />
                 </TableCell>
               </TableRow>
             )}

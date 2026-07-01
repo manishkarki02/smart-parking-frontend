@@ -6,6 +6,7 @@ import {
   DataTablePagination,
   SplitDataTable,
   TableToolbar,
+  TableEmptyState,
   type DataTableColumn,
 } from "@/common";
 import useCustomMutation from "@/common/hooks/useCustomMutation";
@@ -14,7 +15,6 @@ import { useAuthGuard } from "@/common/hooks/use-auth-guard";
 import { getApiErrorMessage } from "@/common/utils/get-api-error-message";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Empty, EmptyDescription } from "@/components/ui/empty";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -356,9 +356,10 @@ export function VendorBookingsPage() {
           isLoading={isLoading}
           error={isError}
           emptyState={
-            <Empty className="border-0 py-10">
-              <EmptyDescription>No bookings found.</EmptyDescription>
-            </Empty>
+            <TableEmptyState
+              title="No bookings found"
+              description="Try adjusting your search or filters to find a booking."
+            />
           }
           toolbar={
             <TableToolbar

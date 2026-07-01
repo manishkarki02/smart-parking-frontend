@@ -5,6 +5,7 @@ import {
   DataTablePagination,
   SplitDataTable,
   SplitDetailPanel,
+  TableEmptyState,
   TableToolbar,
   type DataTableColumn,
 } from "@/common";
@@ -12,7 +13,6 @@ import { PageHeader } from "@/common/components/PageHeader";
 import useCustomQuery from "@/common/hooks/useCustomQuery";
 import { useAuthGuard } from "@/common/hooks/use-auth-guard";
 import { Badge } from "@/components/ui/badge";
-import { Empty, EmptyDescription } from "@/components/ui/empty";
 import { Input } from "@/components/ui/input";
 import { queryKeys } from "@/config/query-keys";
 import { getAdminBookings } from "@/features/bookings/services/admin-bookings.service";
@@ -319,9 +319,10 @@ function AdminBookingsPage() {
         isLoading={isLoading}
         error={isError}
         emptyState={
-          <Empty className="border-0 py-10">
-            <EmptyDescription>No bookings found.</EmptyDescription>
-          </Empty>
+          <TableEmptyState
+            title="No bookings found"
+            description="Try adjusting your search to find a booking."
+          />
         }
         toolbar={
           <TableToolbar

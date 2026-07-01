@@ -12,6 +12,7 @@ export * from "./components/PageHeader";
 export * from "./components/PublicNavbar";
 export * from "./components/PublicShell";
 export * from "./components/StatsCard";
+export * from "./components/TableEmptyState";
 export * from "./components/layout/SplitDetailPanel";
 export * from "./components/maps/DirectionsMap";
 export * from "./components/maps/LeafletDirectionsMap";

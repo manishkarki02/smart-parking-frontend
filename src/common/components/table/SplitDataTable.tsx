@@ -4,7 +4,6 @@ import {
   type PointerEvent as ReactPointerEvent,
   type ReactNode,
 } from "react";
-import { Empty, EmptyDescription } from "@/components/ui/empty";
 import {
   Sheet,
   SheetContent,
@@ -22,6 +21,7 @@ import {
 } from "@/components/ui/table";
 import { useMediaQuery } from "@/common/hooks/use-media-query";
 import { cn } from "@/lib/utils";
+import { TableEmptyState } from "../TableEmptyState";
 import type { DataTableColumn } from "./table-types";
 
 export type SplitDataTableProps<T> = {
@@ -151,11 +151,12 @@ function DataTableCard<T>({
 
             {!isLoading && !error && rows.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={columnCount}>
+                <TableCell colSpan={columnCount} className="p-0 whitespace-normal">
                   {emptyState ?? (
-                    <Empty className="border-0 py-10">
-                      <EmptyDescription>No results found.</EmptyDescription>
-                    </Empty>
+                    <TableEmptyState
+                      title="No results found"
+                      description="Try adjusting your search or filters."
+                    />
                   )}
                 </TableCell>
               </TableRow>

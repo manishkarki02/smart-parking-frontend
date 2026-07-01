@@ -16,11 +16,11 @@ import { useAuthGuard } from "@/common/hooks/use-auth-guard";
 import {
   SplitDataTable,
   SplitDetailPanel,
+  TableEmptyState,
   TableToolbar,
   type DataTableColumn,
 } from "@/common";
 import { Badge } from "@/components/ui/badge";
-import { Empty, EmptyDescription } from "@/components/ui/empty";
 import { Input } from "@/components/ui/input";
 import { useMemo, useState } from "react";
 import { ConfirmDialog } from "@/common/components/ConfirmDialog";
@@ -228,17 +228,6 @@ function BookingsPage() {
              <div className="flex justify-center items-center h-40">
                 <LoadingSpinner />
              </div>
-          ) : bookings.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-20 text-muted-foreground w-full max-w-md mx-auto text-center">
-              <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mb-4">
-                 <Plus className="w-8 h-8 opacity-20" />
-              </div>
-              <p className="text-xl font-semibold text-foreground mb-2">No active bookings</p>
-              <p className="text-sm">You haven't made any parking reservations yet. Find a spot to get started.</p>
-              <Button variant="outline" className="mt-6 rounded-full" asChild>
-                 <Link to="/">Explore Locations</Link>
-              </Button>
-            </div>
           ) : (
             <SplitDataTable
               columns={columns}
@@ -262,9 +251,22 @@ function BookingsPage() {
                 ) : null
               }
               emptyState={
-                <Empty className="border-0 py-10">
-                  <EmptyDescription>No bookings found.</EmptyDescription>
-                </Empty>
+                bookings.length === 0 ? (
+                  <TableEmptyState
+                    title="No active bookings"
+                    description="You haven't made any parking reservations yet. Find a spot to get started."
+                    action={
+                      <Button variant="outline" className="rounded-full" asChild>
+                        <Link to="/">Explore Locations</Link>
+                      </Button>
+                    }
+                  />
+                ) : (
+                  <TableEmptyState
+                    title="No bookings found"
+                    description="Try adjusting your search to find a reservation."
+                  />
+                )
               }
               toolbar={
                 <TableToolbar

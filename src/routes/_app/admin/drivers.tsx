@@ -7,6 +7,7 @@ import {
   DataTablePagination,
   SplitDataTable,
   SplitDetailPanel,
+  TableEmptyState,
   TableToolbar,
   type DataTableColumn,
 } from "@/common";
@@ -17,7 +18,6 @@ import useCustomQuery from "@/common/hooks/useCustomQuery";
 import { useAuthGuard } from "@/common/hooks/use-auth-guard";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Empty, EmptyDescription } from "@/components/ui/empty";
 import { Input } from "@/components/ui/input";
 import { queryKeys } from "@/config/query-keys";
 import {
@@ -231,9 +231,10 @@ function AdminDriversPage() {
         isLoading={isLoading}
         error={isError}
         emptyState={
-          <Empty className="border-0 py-10">
-            <EmptyDescription>No drivers found.</EmptyDescription>
-          </Empty>
+          <TableEmptyState
+            title="No drivers found"
+            description="Try adjusting your search to find a driver."
+          />
         }
         toolbar={
           <TableToolbar
