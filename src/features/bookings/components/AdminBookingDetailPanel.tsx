@@ -50,7 +50,7 @@ export function AdminBookingDetailPanel({
   if (!booking) {
     return (
       <div className="rounded-lg border bg-card">
-        <Empty className="min-h-[420px] border-0">
+        <Empty className="min-h-105 border-0">
           <EmptyHeader>
             <EmptyMedia variant="icon">
               <UserRound aria-hidden="true" />
@@ -285,7 +285,7 @@ function DetailRow({
     <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1.35fr)] items-start gap-4 text-sm">
       <p className="text-muted-foreground">{label}</p>
       <div
-        className="min-w-0 justify-self-end break-words text-right font-semibold"
+        className="min-w-0 justify-self-end wrap-break-word text-right font-semibold"
         title={title}
       >
         {value || "-"}

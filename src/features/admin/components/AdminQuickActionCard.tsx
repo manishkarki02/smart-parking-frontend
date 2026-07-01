@@ -30,7 +30,7 @@ export function AdminQuickActionCard({
       <CardContent className="p-0">
         <Link
           to={to}
-          className="flex h-full items-center justify-between gap-4 rounded-lg p-5 outline-none transition-colors focus-visible:ring-[3px] focus-visible:ring-ring/50"
+          className="flex h-full items-center justify-between gap-4 rounded-lg p-4 outline-none transition-colors focus-visible:ring-[3px] focus-visible:ring-ring/50"
         >
           <span className="flex min-w-0 items-center gap-3">
             <span

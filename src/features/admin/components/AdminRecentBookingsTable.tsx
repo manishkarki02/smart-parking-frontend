@@ -35,8 +35,8 @@ export function AdminRecentBookingsTable({
   bookings,
 }: AdminRecentBookingsTableProps) {
   return (
-    <Card className="rounded-lg border shadow-none">
-      <CardHeader className="gap-1 border-b pb-4">
+    <Card className="rounded-lg border shadow-none gap-0 place-self-start">
+      <CardHeader className="gap-1 border-b">
         <CardTitle>Recent Bookings</CardTitle>
         <CardDescription>Latest platform bookings and slot activity.</CardDescription>
       </CardHeader>
@@ -46,7 +46,7 @@ export function AdminRecentBookingsTable({
             title="No recent bookings"
             description="New platform bookings will appear here."
             icon={<CalendarClock className="size-8 opacity-40" />}
-            className="min-h-[320px]"
+            className="min-h-80"
           />
         ) : (
           <Table>

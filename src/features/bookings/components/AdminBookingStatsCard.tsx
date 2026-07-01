@@ -26,7 +26,7 @@ export function AdminBookingStatsCard({
 }: AdminBookingStatsCardProps) {
   return (
     <Card className="rounded-lg border shadow-none">
-      <CardContent className="flex items-start justify-between gap-4 p-5">
+      <CardContent className="flex items-start justify-between gap-4">
         <div className="min-w-0 space-y-2">
           <p className="text-sm font-medium text-muted-foreground">{title}</p>
           <p className="text-3xl font-semibold tracking-tight">{value}</p>

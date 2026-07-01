@@ -41,7 +41,7 @@ export function AdminBookingStatusCard({ counts }: AdminBookingStatusCardProps) 
 
   return (
     <Card className="rounded-lg border shadow-none">
-      <CardHeader className="gap-1 pb-3">
+      <CardHeader className="gap-1 pb-2">
         <CardTitle>Booking Status</CardTitle>
         <CardDescription>Operational status summary.</CardDescription>
       </CardHeader>
@@ -63,7 +63,7 @@ export function AdminBookingStatusCard({ counts }: AdminBookingStatusCardProps) 
 
             return (
               <div key={row.label} className="space-y-2">
-                <div className="flex items-center justify-between gap-3 text-sm">
+                <div className="flex items-center justify-between gap-2 text-sm">
                   <span className="font-medium">{row.label}</span>
                   <span className="text-muted-foreground">{row.value}</span>
                 </div>
