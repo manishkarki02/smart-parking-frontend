@@ -9,13 +9,13 @@ function useParkingSlots() {
     queryFn: getAllSlots,
   });
 
-  const mergedLocations = [
+  const mergedLocations = import.meta.env.DEV ? [
     ...(locations ?? []),
     ...mockParkingLocations.filter(
       (mockLocation) =>
         !locations?.some((location) => location.id === mockLocation.id),
     ),
-  ];
+  ] : (locations ?? []);
 
   return {
     locations: mergedLocations,

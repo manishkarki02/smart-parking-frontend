@@ -99,6 +99,15 @@ export async function getMyBookings(): Promise<BookingResponse[]> {
   return response.data.data ?? [];
 }
 
+export async function getBookingById(
+  id: number | string,
+): Promise<BookingResponse> {
+  const response = await bookingApi.get<ApiResponse<BookingResponse>>(
+    BOOKING_ROUTES.BY_ID(id),
+  );
+  return response.data.data;
+}
+
 export async function getVendorBookings(
   params: BookingListParams = {},
 ): Promise<PaginatedBookings<VendorBooking>> {

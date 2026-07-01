@@ -3,7 +3,6 @@ import type { AuthUser } from "@/stores/auth-store";
 export type AuthHomePath = "/dashboard" | "/vendor/dashboard";
 
 export function getAuthHomePath(user: AuthUser | null): AuthHomePath {
-  console.log("Determining home path for user:", user);
   if (user?.role === "ADMIN") {
     return "/dashboard";
   }

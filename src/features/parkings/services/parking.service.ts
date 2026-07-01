@@ -81,7 +81,6 @@ export async function getSingleNearestParking(
     },
   });
   const data = response.data.data;
-  console.log("Nearest Parking Location:", data);
   return data ? [data] : [];
 }
 
@@ -97,7 +96,6 @@ export async function getNearbyParking(
       limit,
     },
   });
-  console.log("Nearby Parking Locations:", response.data.data);
   return response.data.data ?? [];
 }
 
@@ -113,7 +111,6 @@ export async function getNearbyGPSParking(
       limit,
     },
   });
-  console.log("Nearby GPS Parking Locations:", response.data.data);
   return response.data.data ?? [];
 }
 
@@ -129,6 +126,5 @@ export async function getThamelNearbyParking(
       limit,
     },
   });
-  console.log("Thamel Nearby Parking Locations:", response.data.data);
   return response.data.data ?? [];
 }

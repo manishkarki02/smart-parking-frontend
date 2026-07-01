@@ -4,7 +4,6 @@ import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { ConfirmDialog } from "@/common/components/ConfirmDialog";
 import useCustomMutation from "@/common/hooks/useCustomMutation";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -15,45 +14,12 @@ import {
 import { CalendarCheck, Clock, DollarSign } from "lucide-react";
 import { queryKeys } from "@/config/query-keys";
 import { cancelBooking } from "../services/booking.service";
+import { BookingStatusBadge } from "./BookingStatusBadge";
+import { formatBookingDateTimeLong } from "../utils/booking-formatters";
 
 interface BookingCardProps {
   booking: BookingResponse;
   onPay?: (booking: BookingResponse) => void;
-}
-
-function getStatusVariant(
-  status: string,
-  slotStatus?: string,
-): "default" | "secondary" | "destructive" | "outline" {
-  switch (status?.toUpperCase()) {
-    case "COMPLETED":
-      return "default";
-    case "PENDING":
-    case "CONFIRMED":
-      return "secondary";
-    case "CANCELLED":
-      return "destructive";
-    default:
-      return slotStatus === "BOOKED" || slotStatus === "OCCUPIED"
-        ? "secondary"
-        : "outline";
-  }
-}
-
-function formatStatus(status: string, slotStatus?: string): string {
-  if (status === "COMPLETED") return "Completed";
-  if (status === "CANCELLED") return "Cancelled";
-  if (slotStatus === "RESERVED") return "Reserved";
-  if (slotStatus === "BOOKED") return "Booked";
-  if (slotStatus === "OCCUPIED") return "Occupied";
-  return status;
-}
-
-function formatDateTime(dateStr: string): string {
-  return new Date(dateStr).toLocaleString("en-US", {
-    dateStyle: "medium",
-    timeStyle: "short",
-  });
 }
 
 export function BookingCard({ booking, onPay }: BookingCardProps) {
@@ -82,12 +48,10 @@ export function BookingCard({ booking, onPay }: BookingCardProps) {
         <CardHeader className="pb-3 bg-muted/20 border-b">
           <div className="flex items-start justify-between">
             <CardTitle className="text-lg font-bold group-hover:text-primary transition-colors">{booking.parkingLocationName}</CardTitle>
-            <Badge
-              variant={getStatusVariant(booking.status, booking.slotStatus)}
-              className="shadow-sm"
-            >
-              {formatStatus(booking.status, booking.slotStatus)}
-            </Badge>
+            <BookingStatusBadge
+              status={booking.status}
+              slotStatus={booking.slotStatus}
+            />
           </div>
         </CardHeader>
         <CardContent className="space-y-3 pt-4">
@@ -103,8 +67,8 @@ export function BookingCard({ booking, onPay }: BookingCardProps) {
                <Clock className="h-4 w-4" />
             </div>
             <span>
-              {formatDateTime(booking.startTime)} –{" "}
-              {formatDateTime(booking.endTime)}
+              {formatBookingDateTimeLong(booking.startTime)} –{" "}
+              {formatBookingDateTimeLong(booking.endTime)}
             </span>
           </div>
 

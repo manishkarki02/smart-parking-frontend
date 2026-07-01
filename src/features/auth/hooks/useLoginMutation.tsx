@@ -29,12 +29,6 @@ function useLoginMutation({
         approved: data.approved,
       });
 
-      console.log("Login successful, user data:", {
-        name: data.name,
-        email: data.email,
-        role: data.role,
-      });
-
       toast.success("Login successful!");
 
       // Redirect based on role
