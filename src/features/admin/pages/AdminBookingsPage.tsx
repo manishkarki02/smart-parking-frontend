@@ -16,6 +16,7 @@ import {
 } from "@/common";
 import { PageHeader } from "@/common/components/PageHeader";
 import { useAuthGuard } from "@/common/hooks/use-auth-guard";
+import useDebounce from "@/common/hooks/useDebounce";
 import { getApiErrorMessage } from "@/common/utils/get-api-error-message";
 import { AdminBookingDetailPanel } from "@/features/bookings/components/AdminBookingDetailPanel";
 import { AdminBookingFiltersBar } from "@/features/bookings/components/AdminBookingFiltersBar";
@@ -48,6 +49,7 @@ const DEFAULT_FILTERS: AdminBookingFilters = {
 export function AdminBookingsPage() {
   const { isAuthorized } = useAuthGuard({ allowedRoles: ["ADMIN"] });
   const [filters, setFilters] = useState<AdminBookingFilters>(DEFAULT_FILTERS);
+  const debouncedSearch = useDebounce(filters.search, 300);
   const [selectedBookingId, setSelectedBookingId] = useState<string | null>(null);
   const {
     data,
@@ -60,9 +62,16 @@ export function AdminBookingsPage() {
 
   const bookings = useMemo(() => data?.data ?? [], [data?.data]);
   const stats = useMemo(() => getAdminBookingStats(bookings), [bookings]);
+  const listFilters = useMemo(
+    () => ({
+      ...filters,
+      search: debouncedSearch,
+    }),
+    [filters, debouncedSearch],
+  );
   const filteredBookings = useMemo(
-    () => filterAdminBookings(bookings, filters),
-    [bookings, filters],
+    () => filterAdminBookings(bookings, listFilters),
+    [bookings, listFilters],
   );
   const pageCount = Math.max(
     1,

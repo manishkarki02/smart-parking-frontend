@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import useCustomQuery from "@/common/hooks/useCustomQuery";
 import { useAuthGuard } from "@/common/hooks/use-auth-guard";
+import useDebounce from "@/common/hooks/useDebounce";
 import { PageHeader } from "@/common/components/PageHeader";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -246,6 +247,7 @@ export function VendorEarningsPage() {
   const [dateRangeFilter, setDateRangeFilter] =
     useState<DateRangeFilter>("LAST_7_DAYS");
   const [transactionSearch, setTransactionSearch] = useState("");
+  const debouncedTransactionSearch = useDebounce(transactionSearch, 300);
   const [transactionStatus, setTransactionStatus] =
     useState<TransactionStatusFilter>("ALL");
   const [page, setPage] = useState(1);
@@ -371,7 +373,7 @@ export function VendorEarningsPage() {
   }, [paidBookings, periodRevenue]);
 
   const filteredTransactions = useMemo(() => {
-    const normalizedSearch = transactionSearch.trim().toLowerCase();
+    const normalizedSearch = debouncedTransactionSearch.trim().toLowerCase();
 
     return periodBookings.filter((booking) => {
       const haystack = [
@@ -391,7 +393,7 @@ export function VendorEarningsPage() {
         transactionStatusMatches(booking, transactionStatus)
       );
     });
-  }, [periodBookings, transactionSearch, transactionStatus]);
+  }, [periodBookings, debouncedTransactionSearch, transactionStatus]);
 
   const totalPages = Math.max(
     1,

@@ -10,6 +10,7 @@ import {
 import { ConfirmDialog } from "@/common/components/ConfirmDialog";
 import { PageHeader } from "@/common/components/PageHeader";
 import { useAuthGuard } from "@/common/hooks/use-auth-guard";
+import useDebounce from "@/common/hooks/useDebounce";
 import { getApiErrorMessage } from "@/common/utils/get-api-error-message";
 import { AdminUserDetailsPanel } from "@/features/admin/components/AdminUserDetailsPanel";
 import { AdminUsersFilterBar } from "@/features/admin/components/AdminUsersFilterBar";
@@ -60,6 +61,7 @@ export function AdminUsersPage({ initialRole = "ALL" }: AdminUsersPageProps) {
     role: initialRole,
     status: "ALL",
   });
+  const debouncedSearch = useDebounce(filters.search, 300);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
   const [selection, setSelection] = useState<SelectionState>({ mode: "auto" });
@@ -76,10 +78,17 @@ export function AdminUsersPage({ initialRole = "ALL" }: AdminUsersPageProps) {
   const banUserMutation = useBanAdminUser();
   const unbanUserMutation = useUnbanAdminUser();
   const deleteUserMutation = useDeleteAdminUser();
+  const listFilters = useMemo(
+    () => ({
+      ...filters,
+      search: debouncedSearch,
+    }),
+    [filters, debouncedSearch],
+  );
 
   const filteredUsers = useMemo(
-    () => filterAdminUsers(users, filters),
-    [filters, users],
+    () => filterAdminUsers(users, listFilters),
+    [listFilters, users],
   );
   const pageCount = Math.max(1, Math.ceil(filteredUsers.length / pageSize));
   const currentPage = Math.min(page, pageCount);

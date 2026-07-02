@@ -16,6 +16,7 @@ import { ConfirmDialog } from "@/common/components/ConfirmDialog";
 import useCustomMutation from "@/common/hooks/useCustomMutation";
 import useCustomQuery from "@/common/hooks/useCustomQuery";
 import { useAuthGuard } from "@/common/hooks/use-auth-guard";
+import useDebounce from "@/common/hooks/useDebounce";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -46,15 +47,16 @@ export function AdminVendorsPage() {
   const { isAuthorized } = useAuthGuard({ allowedRoles: ["ADMIN"] });
   const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
+  const debouncedSearch = useDebounce(search, 300);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [selectedVendorId, setSelectedVendorId] = useState<string | null>(null);
   const [deletingVendorId, setDeletingVendorId] = useState<string | null>(null);
 
-  const vendorsKey = queryKeys.admin.vendors({ search, page });
+  const vendorsKey = queryKeys.admin.vendors({ search: debouncedSearch, page });
   const { data, isLoading, isError } = useCustomQuery({
     key: vendorsKey,
-    queryFn: () => getAdminVendors({ search, page }),
+    queryFn: () => getAdminVendors({ search: debouncedSearch, page }),
     options: {
       enabled: isAuthorized,
     },

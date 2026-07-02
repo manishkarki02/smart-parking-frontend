@@ -49,6 +49,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useMemo, useState, type ComponentType, type ReactNode } from "react";
 import { ConfirmDialog } from "@/common/components/ConfirmDialog";
 import useCustomMutation from "@/common/hooks/useCustomMutation";
+import useDebounce from "@/common/hooks/useDebounce";
 import { BookingForm } from "@/features/bookings/components/BookingForm";
 import { BookingStatusBadge } from "@/features/bookings/components/BookingStatusBadge";
 import {
@@ -90,6 +91,7 @@ export function DriverBookingsPage({
   const navigate = useNavigate();
 
   const [search, setSearch] = useState("");
+  const debouncedSearch = useDebounce(search, 300);
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("ALL");
   const [paymentFilter, setPaymentFilter] = useState<PaymentFilter>("ALL");
   const [dateFilter, setDateFilter] = useState<DateFilter>("ALL");
@@ -176,7 +178,7 @@ export function DriverBookingsPage({
   const visibleBookings = useMemo(
     () =>
       bookings.filter((booking) => {
-        const keyword = search.trim().toLowerCase();
+        const keyword = debouncedSearch.trim().toLowerCase();
         const matchesSearch =
           !keyword ||
           [
@@ -203,7 +205,7 @@ export function DriverBookingsPage({
 
         return matchesSearch && matchesStatus && matchesPayment && matchesDate;
       }),
-    [bookings, dateFilter, paymentFilter, search, statusFilter],
+    [bookings, dateFilter, paymentFilter, debouncedSearch, statusFilter],
   );
 
   const pageCount = Math.max(1, Math.ceil(visibleBookings.length / PAGE_SIZE));

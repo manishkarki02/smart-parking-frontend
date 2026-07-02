@@ -16,6 +16,7 @@ import { ConfirmDialog } from "@/common/components/ConfirmDialog";
 import useCustomMutation from "@/common/hooks/useCustomMutation";
 import useCustomQuery from "@/common/hooks/useCustomQuery";
 import { useAuthGuard } from "@/common/hooks/use-auth-guard";
+import useDebounce from "@/common/hooks/useDebounce";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -39,14 +40,15 @@ export function AdminDriversPage() {
   const { isAuthorized } = useAuthGuard({ allowedRoles: ["ADMIN"] });
   const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
+  const debouncedSearch = useDebounce(search, 300);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [selectedDriverId, setSelectedDriverId] = useState<string | null>(null);
   const [deletingDriverId, setDeletingDriverId] = useState<string | null>(null);
 
   const { data, isLoading, isError } = useCustomQuery({
-    key: queryKeys.admin.drivers({ search, page }),
-    queryFn: () => getAdminDrivers({ search, page }),
+    key: queryKeys.admin.drivers({ search: debouncedSearch, page }),
+    queryFn: () => getAdminDrivers({ search: debouncedSearch, page }),
     options: {
       enabled: isAuthorized,
     },

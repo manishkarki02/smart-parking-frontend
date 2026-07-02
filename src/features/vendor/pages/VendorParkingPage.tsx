@@ -36,6 +36,7 @@ import {
 } from "@/components/ui/dialog";
 import { PageHeader } from "@/common/components/PageHeader";
 import { useAuthGuard } from "@/common/hooks/use-auth-guard";
+import useDebounce from "@/common/hooks/useDebounce";
 import type { ParkingLocation } from "@/features/parkings/types/parking.types";
 import { cn } from "@/lib/utils";
 
@@ -91,6 +92,7 @@ export function VendorParkingPage() {
   const { isAuthorized } = useAuthGuard({ allowedRoles: ["VENDOR"] });
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+  const debouncedSearchTerm = useDebounce(searchTerm, 300);
   const [activeOnly, setActiveOnly] = useState(true);
 
   const {
@@ -106,8 +108,8 @@ export function VendorParkingPage() {
 
   const metrics = useMemo(() => getLocationMetrics(locations), [locations]);
   const filteredLocations = useMemo(
-    () => filterLocations(locations, searchTerm),
-    [locations, searchTerm],
+    () => filterLocations(locations, debouncedSearchTerm),
+    [locations, debouncedSearchTerm],
   );
   const hasSearch = searchTerm.trim().length > 0;
   const hasLocations = locations.length > 0;

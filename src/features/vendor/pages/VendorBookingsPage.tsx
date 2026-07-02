@@ -17,6 +17,7 @@ import { toast } from "sonner";
 import useCustomMutation from "@/common/hooks/useCustomMutation";
 import useCustomQuery from "@/common/hooks/useCustomQuery";
 import { useAuthGuard } from "@/common/hooks/use-auth-guard";
+import useDebounce from "@/common/hooks/useDebounce";
 import { getApiErrorMessage } from "@/common/utils/get-api-error-message";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -88,6 +89,7 @@ export function VendorBookingsPage() {
   const queryClient = useQueryClient();
   const [locationId, setLocationId] = useState("ALL");
   const [search, setSearch] = useState("");
+  const debouncedSearch = useDebounce(search, 300);
   const [statusFilter, setStatusFilter] =
     useState<VendorBookingStatusFilter>("ALL");
   const [paymentMethodFilter, setPaymentMethodFilter] =
@@ -108,7 +110,7 @@ export function VendorBookingsPage() {
 
   const { data, isLoading, isError } = useCustomQuery({
     key: queryKeys.bookings.vendor({
-      search,
+      search: debouncedSearch,
       page,
       locationId: vendorLocationId,
       status: statusFilter,
@@ -120,7 +122,7 @@ export function VendorBookingsPage() {
   const bookings = useMemo(() => data?.data ?? [], [data?.data]);
 
   const filteredBookings = useMemo(() => {
-    const normalizedSearch = search.trim().toLowerCase();
+    const normalizedSearch = debouncedSearch.trim().toLowerCase();
 
     return bookings.filter((booking) => {
       const haystack = [
@@ -148,7 +150,7 @@ export function VendorBookingsPage() {
         matchesPayment
       );
     });
-  }, [bookings, paymentMethodFilter, search, statusFilter]);
+  }, [bookings, paymentMethodFilter, debouncedSearch, statusFilter]);
 
   const totalPages = Math.max(
     1,
