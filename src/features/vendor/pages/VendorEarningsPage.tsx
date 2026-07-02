@@ -412,9 +412,15 @@ export function VendorEarningsPage() {
       <PageHeader
         title="Revenue"
         content={
-          <h1 className="truncate text-lg font-semibold tracking-tight text-slate-950">
-            Revenue
-          </h1>
+          <div className="min-w-0 py-1">
+            <h1 className="truncate text-lg font-semibold tracking-tight text-slate-950">
+              Revenue
+            </h1>
+            <p className="truncate text-sm text-slate-500">
+              Track paid bookings, payouts, and location-level revenue
+              performance.
+            </p>
+          </div>
         }
         action={
           <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-center">
@@ -459,15 +465,7 @@ export function VendorEarningsPage() {
         }
       />
 
-      <main className="mx-auto w-full max-w-7xl space-y-4 p-4 md:p-5">
-        <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
-          <div className="min-w-0">
-            <h2 className="text-xl font-bold tracking-tight text-slate-950">
-              Revenue overview
-            </h2>
-          </div>
-        </div>
-
+      <main className="mx-auto w-full max-w-7xl space-y-4">
         {isError ? (
           <Card className="border-red-100 bg-white shadow-none">
             <CardContent className="flex flex-col items-start gap-4 p-6 sm:flex-row sm:items-center sm:justify-between">
@@ -523,7 +521,7 @@ export function VendorEarningsPage() {
               />
             </section>
 
-            <section className="grid min-w-0 items-start grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1.75fr)_minmax(300px,0.95fr)]">
+            <section className="grid min-w-0 grid-cols-1 items-start gap-4 xl:grid-cols-[minmax(0,1.55fr)_minmax(340px,0.95fr)]">
               <DailyRevenueCard
                 items={dailyRevenue}
                 rangeLabel={range.label}
@@ -531,7 +529,7 @@ export function VendorEarningsPage() {
               <RevenueByLocationCard items={revenueByLocation} />
             </section>
 
-            <section className="grid min-w-0 items-start grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1.45fr)_minmax(300px,0.9fr)]">
+            <section className="grid min-w-0 grid-cols-1 items-start gap-4 xl:grid-cols-[minmax(0,1.55fr)_minmax(340px,0.95fr)]">
               <TransactionsCard
                 transactions={pagedTransactions}
                 totalTransactions={filteredTransactions.length}
