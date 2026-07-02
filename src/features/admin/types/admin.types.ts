@@ -15,6 +15,8 @@ export interface AdminUser {
   approved?: boolean;
   banned?: boolean;
   businessName?: string;
+  joinedAt?: string;
+  createdAt?: string;
 }
 
 export type AdminDashboardSummary = {

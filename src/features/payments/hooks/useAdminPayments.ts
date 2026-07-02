@@ -1,3 +1,4 @@
+import { keepPreviousData } from "@tanstack/react-query";
 import useCustomQuery from "@/common/hooks/useCustomQuery";
 import { queryKeys } from "@/config/query-keys";
 import { getAdminPayments } from "@/features/payments/services/payment.service";
@@ -12,6 +13,7 @@ export function useAdminPayments(
     queryFn: () => getAdminPayments(params),
     options: {
       enabled,
+      placeholderData: keepPreviousData,
     },
   });
 }

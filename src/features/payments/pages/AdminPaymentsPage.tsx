@@ -9,6 +9,7 @@ import {
 } from "@/common";
 import { PageHeader } from "@/common/components/PageHeader";
 import { useAuthGuard } from "@/common/hooks/use-auth-guard";
+import useDebounce from "@/common/hooks/useDebounce";
 import { getApiErrorMessage } from "@/common/utils/get-api-error-message";
 import { AdminPaymentDetailPanel } from "@/features/payments/components/AdminPaymentDetailPanel";
 import {
@@ -35,7 +36,6 @@ import {
 } from "@/features/payments/utils/payment.utils";
 
 type SelectionState =
-  | { mode: "auto" }
   | { mode: "closed" }
   | { mode: "selected"; id: string };
 
@@ -52,12 +52,20 @@ const DEFAULT_PAGE_SIZE = 10;
 export function AdminPaymentsPage() {
   const { isAuthorized } = useAuthGuard({ allowedRoles: ["ADMIN"] });
   const [filters, setFilters] = useState<AdminPaymentFilterState>(DEFAULT_FILTERS);
+  const debouncedSearch = useDebounce(filters.search, 300);
   const [page, setPage] = useState(0);
   const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
-  const [selection, setSelection] = useState<SelectionState>({ mode: "auto" });
+  const [selection, setSelection] = useState<SelectionState>({ mode: "closed" });
+  const listFilters = useMemo(
+    () => ({
+      ...filters,
+      search: debouncedSearch,
+    }),
+    [filters, debouncedSearch],
+  );
   const listParams = useMemo(
-    () => buildListParams(filters, page, pageSize),
-    [filters, page, pageSize],
+    () => buildListParams(listFilters, page, pageSize),
+    [listFilters, page, pageSize],
   );
   const summaryParams = useMemo(
     () => ({
@@ -102,7 +110,7 @@ export function AdminPaymentsPage() {
   function updateFilters(nextFilters: AdminPaymentFilterState) {
     setFilters(nextFilters);
     setPage(0);
-    setSelection({ mode: "auto" });
+    setSelection({ mode: "closed" });
   }
 
   if (!isAuthorized) {
@@ -233,12 +241,12 @@ export function AdminPaymentsPage() {
             pageSizeOptions={[10, 20, 50]}
             onPageChange={(nextPage) => {
               setPage(nextPage - 1);
-              setSelection({ mode: "auto" });
+              setSelection({ mode: "closed" });
             }}
             onPageSizeChange={(nextPageSize) => {
               setPageSize(nextPageSize);
               setPage(0);
-              setSelection({ mode: "auto" });
+              setSelection({ mode: "closed" });
             }}
           />
         }
@@ -284,12 +292,8 @@ function getSelectedPaymentId(
     return null;
   }
 
-  if (selection.mode === "selected") {
-    return (
-      payments.find((payment) => payment.paymentId === selection.id)
-        ?.paymentId ?? payments[0]?.paymentId ?? null
-    );
-  }
-
-  return payments[0]?.paymentId ?? null;
+  return (
+    payments.find((payment) => payment.paymentId === selection.id)
+      ?.paymentId ?? null
+  );
 }

@@ -7,8 +7,6 @@ import {
 import {
   Sheet,
   SheetContent,
-  SheetHeader,
-  SheetTitle,
 } from "@/components/ui/sheet";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -215,7 +213,6 @@ export function SplitDataTable<T>({
   onRowSelect,
   onDetailClose,
   detailPanel,
-  detailTitle,
   toolbar,
   pagination,
   isLoading = false,
@@ -329,13 +326,12 @@ export function SplitDataTable<T>({
           if (!open) onDetailClose?.();
         }}
       >
-        <SheetContent side="right" className="w-full overflow-y-auto sm:max-w-xl">
-          {detailTitle ? (
-            <SheetHeader>
-              <SheetTitle>{detailTitle}</SheetTitle>
-            </SheetHeader>
-          ) : null}
-          <div className="min-h-0 flex-1 overflow-y-auto p-4 pt-0">
+        <SheetContent
+          side="right"
+          showCloseButton={false}
+          className="w-full max-w-full overflow-y-auto p-3 sm:max-w-xl"
+        >
+          <div className="min-h-0 flex-1 overflow-y-auto">
             {detailPanel}
           </div>
         </SheetContent>

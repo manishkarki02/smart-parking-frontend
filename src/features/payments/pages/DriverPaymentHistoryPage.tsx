@@ -25,6 +25,7 @@ import {
 } from "@/common";
 import useCustomMutation from "@/common/hooks/useCustomMutation";
 import { useAuthGuard } from "@/common/hooks/use-auth-guard";
+import useDebounce from "@/common/hooks/useDebounce";
 import { getApiErrorMessage } from "@/common/utils/get-api-error-message";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -89,13 +90,21 @@ export function DriverPaymentHistoryPage() {
   const { isAuthorized } = useAuthGuard({ allowedRoles: ["DRIVER"] });
   const navigate = useNavigate();
   const [filters, setFilters] = useState(DEFAULT_FILTERS);
+  const debouncedSearch = useDebounce(filters.search, 300);
   const [page, setPage] = useState(0);
   const [selection, setSelection] = useState<SelectionState>({ mode: "auto" });
   const [receiptPayment, setReceiptPayment] =
     useState<DriverPaymentHistoryItem | null>(null);
+  const listFilters = useMemo(
+    () => ({
+      ...filters,
+      search: debouncedSearch,
+    }),
+    [filters, debouncedSearch],
+  );
   const listParams = useMemo(
-    () => buildListParams(filters, page),
-    [filters, page],
+    () => buildListParams(listFilters, page),
+    [listFilters, page],
   );
   const {
     data: paymentPage,

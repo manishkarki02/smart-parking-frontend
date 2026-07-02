@@ -85,20 +85,23 @@ export function AdminPaymentDetailPanel({
       }
       onClose={onClose}
     >
-      <div className="space-y-6">
+      <div className="space-y-5 sm:space-y-6">
         <section className="rounded-lg bg-muted/40 p-4">
-          <div className="flex items-start justify-between gap-4">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
             <div className="min-w-0">
               <p className="text-xs font-semibold text-muted-foreground">
                 Amount Paid
               </p>
-              <p className="mt-1 text-3xl font-semibold tracking-tight">
+              <p className="mt-1 text-2xl font-semibold tracking-tight sm:text-3xl">
                 {formatPaymentCurrency(payment.amount)}
               </p>
             </div>
             <Badge
               variant={getPaymentMethodBadgeVariant(payment.method)}
-              className={getMethodBadgeClassName(payment.method)}
+              className={cn(
+                "w-fit",
+                getMethodBadgeClassName(payment.method),
+              )}
             >
               {formatPaymentMethod(payment.method)}
             </Badge>
@@ -255,10 +258,10 @@ function DetailRow({
   title?: string;
 }) {
   return (
-    <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)] items-start gap-3 text-sm">
+    <div className="grid gap-1 text-sm sm:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)] sm:gap-3">
       <p className="text-muted-foreground">{label}</p>
       <div
-        className="min-w-0 justify-self-end break-words text-right font-medium"
+        className="min-w-0 break-words font-medium sm:justify-self-end sm:text-right"
         title={title}
       >
         {value || "-"}
