@@ -15,6 +15,7 @@ import {
   CreditCard,
   MapIcon,
   MapPinned,
+  Plus,
   ReceiptText,
   Search,
   WalletCards,
@@ -29,6 +30,13 @@ import { PageHeader } from "@/common/components/PageHeader";
 import { useAuthGuard } from "@/common/hooks/use-auth-guard";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -41,6 +49,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useMemo, useState, type ComponentType, type ReactNode } from "react";
 import { ConfirmDialog } from "@/common/components/ConfirmDialog";
 import useCustomMutation from "@/common/hooks/useCustomMutation";
+import { BookingForm } from "@/features/bookings/components/BookingForm";
 import { BookingStatusBadge } from "@/features/bookings/components/BookingStatusBadge";
 import {
   formatBookingAmount,
@@ -73,6 +82,7 @@ type DateFilter = "ALL" | "TODAY" | "UPCOMING" | "PAST";
 const PAGE_SIZE = 7;
 
 export function DriverBookingsPage({
+  parkingLocationId,
   payment,
 }: DriverBookingsPageProps) {
   const { isAuthorized } = useAuthGuard({ allowedRoles: ["DRIVER"] });
@@ -84,6 +94,7 @@ export function DriverBookingsPage({
   const [paymentFilter, setPaymentFilter] = useState<PaymentFilter>("ALL");
   const [dateFilter, setDateFilter] = useState<DateFilter>("ALL");
   const [page, setPage] = useState(1);
+  const [isAddBookingOpen, setIsAddBookingOpen] = useState(false);
   const [selectedBookingId, setSelectedBookingId] = useState<string | null>(
     null,
   );
@@ -210,6 +221,7 @@ export function DriverBookingsPage({
     [visibleBookings, selectedBookingId],
   );
   const isPaymentTicketOpen = Boolean(payment?.paymentSuccess || receiptPayment);
+  const isAddBookingDialogOpen = Boolean(parkingLocationId) || isAddBookingOpen;
 
   const tableColumns = useMemo<DataTableColumn<BookingResponse>[]>(
     () => [
@@ -313,6 +325,22 @@ export function DriverBookingsPage({
     void navigate({ to: "/bookings", search: {} });
   };
 
+  const closeAddBookingDialog = () => {
+    setIsAddBookingOpen(false);
+    if (parkingLocationId) {
+      void navigate({ to: "/bookings", search: {} });
+    }
+  };
+
+  const handleAddBookingOpenChange = (open: boolean) => {
+    if (open) {
+      setIsAddBookingOpen(true);
+      return;
+    }
+
+    closeAddBookingDialog();
+  };
+
   if (!isAuthorized) {
     return null;
   }
@@ -332,16 +360,27 @@ export function DriverBookingsPage({
           </div>
         }
         action={
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            className="h-9 gap-2 bg-white shadow-none"
-            onClick={() => navigate({ to: "/parkings/map" })}
-          >
-            <MapIcon className="size-4" />
-            Find Parking
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="h-9 gap-2 bg-white shadow-none"
+              onClick={() => navigate({ to: "/parkings/map" })}
+            >
+              <MapIcon className="size-4" />
+              Find Parking
+            </Button>
+            <Button
+              type="button"
+              size="sm"
+              className="h-9 gap-2 bg-blue-600 hover:bg-blue-700"
+              onClick={() => setIsAddBookingOpen(true)}
+            >
+              <Plus className="size-4" />
+              Add Booking
+            </Button>
+          </div>
         }
       />
 
@@ -435,6 +474,32 @@ export function DriverBookingsPage({
         }}
         isLoading={cancelMutation.isPending}
       />
+
+      <Dialog
+        open={isAddBookingDialogOpen}
+        onOpenChange={handleAddBookingOpenChange}
+      >
+        <DialogContent
+          className="max-h-[92vh] gap-0 overflow-hidden p-0 sm:max-w-[560px]"
+          showCloseButton
+        >
+          <DialogHeader className="border-b border-slate-200 px-6 py-5">
+            <DialogTitle className="text-lg font-bold text-slate-950">
+              Add Booking
+            </DialogTitle>
+            <DialogDescription className="text-sm text-slate-500">
+              Select a parking location, slot, vehicle, and booking time.
+            </DialogDescription>
+          </DialogHeader>
+
+          <BookingForm
+            variant="dialog"
+            preselectedParkingId={parkingLocationId}
+            navigateOnSuccess={false}
+            onSuccess={closeAddBookingDialog}
+          />
+        </DialogContent>
+      </Dialog>
 
       <PaymentSuccessTicketDialog
         open={isPaymentTicketOpen}
