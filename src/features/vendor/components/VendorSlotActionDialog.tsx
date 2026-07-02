@@ -1,9 +1,17 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2 } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
-import type { ReactNode } from "react";
-import { useForm } from "react-hook-form";
+import { useNavigate } from "@tanstack/react-router";
+import {
+  Bike,
+  Car,
+  CheckCircle2,
+  Eye,
+  Loader2,
+  Wrench,
+} from "lucide-react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useForm, useWatch } from "react-hook-form";
 import { toast } from "sonner";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -33,6 +41,7 @@ import type {
   ParkingSlotVehicleType,
 } from "@/features/parkings/types/parking.types";
 import { useUpdateSlotStatusMutation } from "@/features/parkings/hooks/use-update-slot-status-mutation";
+import { cn } from "@/lib/utils";
 import { useCreateWalkInBooking } from "../hooks/use-create-walk-in-booking";
 import { useVendorBookingStatusMutation } from "../hooks/use-vendor-booking-status-mutation";
 
@@ -44,11 +53,27 @@ interface VendorSlotActionDialogProps {
 }
 
 const statusLabels: Record<ParkingSlot["status"], string> = {
-  AVAILABLE: "Free",
+  AVAILABLE: "Available",
   RESERVED: "Reserved",
   BOOKED: "Booked",
   OCCUPIED: "Occupied",
   MAINTENANCE: "Maintenance",
+};
+
+const statusHelpers: Record<ParkingSlot["status"], string> = {
+  AVAILABLE: "Ready for a new booking",
+  RESERVED: "Pending booking confirmation",
+  BOOKED: "Upcoming vehicle booking",
+  OCCUPIED: "Active vehicle parked",
+  MAINTENANCE: "Slot is under repair",
+};
+
+const statusBadgeClasses: Record<ParkingSlot["status"], string> = {
+  AVAILABLE: "border-green-200 bg-green-50 text-green-700",
+  RESERVED: "border-amber-200 bg-amber-50 text-amber-700",
+  BOOKED: "border-blue-200 bg-blue-50 text-blue-700",
+  OCCUPIED: "border-red-200 bg-red-50 text-red-700",
+  MAINTENANCE: "border-slate-200 bg-slate-100 text-slate-700",
 };
 
 const vehicleLabels: Record<ParkingSlotVehicleType, string> = {
@@ -68,11 +93,29 @@ function getDefaultEndTime(): string {
 }
 
 function formatDateTime(value?: string): string {
-  if (!value) {
-    return "Not available";
-  }
+  if (!value) return "Not available";
 
-  return new Date(value).toLocaleString();
+  return new Date(value).toLocaleString(undefined, {
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  });
+}
+
+function formatMoney(value?: number) {
+  if (value == null) return "Rs 0";
+
+  return `Rs ${Number(value).toLocaleString(undefined, {
+    maximumFractionDigits: 2,
+  })}`;
+}
+
+function formatPaymentStatus(status?: string) {
+  if (status === "SUCCESS") return "Paid";
+  if (status === "FAILED") return "Failed";
+  if (status === "PENDING") return "Pending";
+  return "Payment unknown";
 }
 
 export function VendorSlotActionDialog({
@@ -81,6 +124,7 @@ export function VendorSlotActionDialog({
   slot,
   parkingLocation,
 }: VendorSlotActionDialogProps) {
+  const navigate = useNavigate();
   const [showWalkInForm, setShowWalkInForm] = useState(false);
   const parkingLocationId = parkingLocation.id;
   const slotStatusMutation = useUpdateSlotStatusMutation(parkingLocationId);
@@ -99,9 +143,13 @@ export function VendorSlotActionDialog({
     },
   });
 
+  const paymentMethod = useWatch<WalkInBookingFormValues, "paymentMethod">({
+    control: form.control,
+    name: "paymentMethod",
+  });
+
   useEffect(() => {
     if (open) {
-      setShowWalkInForm(false);
       form.reset({
         customerName: "",
         customerPhone: "",
@@ -120,18 +168,18 @@ export function VendorSlotActionDialog({
     bookingStatusMutation.isPending;
 
   const hourlyRate = useMemo(() => {
-    if (!slot) {
-      return undefined;
-    }
+    if (!slot) return undefined;
 
     return slot.vehicleType === "FOUR_WHEELER"
       ? parkingLocation.fourWheelerRatePerHour
       : parkingLocation.twoWheelerRatePerHour;
-  }, [parkingLocation.fourWheelerRatePerHour, parkingLocation.twoWheelerRatePerHour, slot]);
+  }, [
+    parkingLocation.fourWheelerRatePerHour,
+    parkingLocation.twoWheelerRatePerHour,
+    slot,
+  ]);
 
-  if (!slot) {
-    return null;
-  }
+  if (!slot) return null;
 
   const closeAfterSuccess = () => {
     setShowWalkInForm(false);
@@ -181,47 +229,73 @@ export function VendorSlotActionDialog({
     closeAfterSuccess();
   };
 
+  const viewBooking = () => {
+    onOpenChange(false);
+    void navigate({ to: "/vendor/bookings" });
+  };
+
+  const handleOpenChange = (nextOpen: boolean) => {
+    if (!nextOpen) {
+      setShowWalkInForm(false);
+    }
+    onOpenChange(nextOpen);
+  };
+
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-xl">
-        <DialogHeader>
-          <DialogTitle>
-            Slot {slot.slotNumber}
+    <Dialog open={open} onOpenChange={handleOpenChange}>
+      <DialogContent className="max-h-[90vh] gap-0 overflow-hidden p-0 sm:max-w-md">
+        <DialogHeader className="border-b px-5 py-4 text-left">
+          <DialogTitle className="text-base font-semibold text-slate-950">
+            Slot Details
           </DialogTitle>
-          <DialogDescription>
-            {vehicleLabels[slot.vehicleType]} · Status: {statusLabels[slot.status]}
+          <DialogDescription className="text-xs text-slate-500">
+            {parkingLocation.name} · {vehicleLabels[slot.vehicleType]}
             {hourlyRate ? ` · Rs ${hourlyRate}/hr` : ""}
           </DialogDescription>
         </DialogHeader>
 
         {showWalkInForm ? (
           <form
-            className="space-y-4"
+            className="max-h-[calc(90vh-76px)] space-y-4 overflow-y-auto p-5"
             onSubmit={form.handleSubmit(createWalkInBooking)}
           >
-            <div className="rounded-lg border bg-muted/20 p-3 text-sm">
-              <p className="font-semibold">Create Walk-in Booking</p>
-              <p className="text-muted-foreground">
-                Slot: {slot.slotNumber} · Vehicle Type: {vehicleLabels[slot.vehicleType]}
+            <div className="rounded-lg border bg-slate-50 p-3 text-sm">
+              <p className="font-semibold text-slate-950">
+                Create Walk-in Booking
+              </p>
+              <p className="text-slate-500">
+                Slot: {slot.slotNumber} · {vehicleLabels[slot.vehicleType]}
               </p>
             </div>
 
             <div className="grid gap-4 sm:grid-cols-2">
-              <FieldError label="Customer Name" error={form.formState.errors.customerName?.message}>
+              <FieldError
+                label="Customer Name"
+                error={form.formState.errors.customerName?.message}
+              >
                 <Input {...form.register("customerName")} disabled={isPending} />
               </FieldError>
 
-              <FieldError label="Customer Phone" error={form.formState.errors.customerPhone?.message}>
+              <FieldError
+                label="Customer Phone"
+                error={form.formState.errors.customerPhone?.message}
+              >
                 <Input {...form.register("customerPhone")} disabled={isPending} />
               </FieldError>
             </div>
 
-            <FieldError label="Vehicle Number" error={form.formState.errors.vehicleNumber?.message}>
+            <FieldError
+              label="Vehicle Number"
+              error={form.formState.errors.vehicleNumber?.message}
+            >
               <Input {...form.register("vehicleNumber")} disabled={isPending} />
             </FieldError>
 
             <div className="grid gap-4 sm:grid-cols-2">
-              <FieldError label="Start Time" error={form.formState.errors.startTime?.message}>
+              <FieldError
+                label="Start Time"
+                error={form.formState.errors.startTime?.message}
+              >
                 <Input
                   type="datetime-local"
                   {...form.register("startTime")}
@@ -229,7 +303,10 @@ export function VendorSlotActionDialog({
                 />
               </FieldError>
 
-              <FieldError label="Expected End Time" error={form.formState.errors.endTime?.message}>
+              <FieldError
+                label="Expected End Time"
+                error={form.formState.errors.endTime?.message}
+              >
                 <Input
                   type="datetime-local"
                   {...form.register("endTime")}
@@ -238,9 +315,12 @@ export function VendorSlotActionDialog({
               </FieldError>
             </div>
 
-            <FieldError label="Payment Method" error={form.formState.errors.paymentMethod?.message}>
+            <FieldError
+              label="Payment Method"
+              error={form.formState.errors.paymentMethod?.message}
+            >
               <Select
-                value={form.watch("paymentMethod")}
+                value={paymentMethod}
                 onValueChange={(value) =>
                   form.setValue(
                     "paymentMethod",
@@ -261,7 +341,7 @@ export function VendorSlotActionDialog({
               </Select>
             </FieldError>
 
-            <DialogFooter>
+            <DialogFooter className="gap-2 sm:gap-2">
               <Button
                 type="button"
                 variant="outline"
@@ -272,99 +352,147 @@ export function VendorSlotActionDialog({
               </Button>
               <Button type="submit" disabled={isPending}>
                 {walkInMutation.isPending && (
-                  <Loader2 className="mr-2 size-4 animate-spin" />
+                  <Loader2 className="size-4 animate-spin" />
                 )}
                 Create Booking
               </Button>
             </DialogFooter>
           </form>
         ) : (
-          <div className="space-y-5">
-            {(slot.status === "RESERVED" ||
-              slot.status === "BOOKED" ||
-              slot.status === "OCCUPIED") && (
-              <BookingSummary slot={slot} />
-            )}
+          <div className="max-h-[calc(90vh-76px)] overflow-y-auto">
+            <div className="space-y-4 p-5">
+              <SlotSummaryPanel slot={slot} />
 
-            {slot.status === "AVAILABLE" && (
-              <div className="grid gap-3 sm:grid-cols-2">
+              {(slot.status === "RESERVED" ||
+                slot.status === "BOOKED" ||
+                slot.status === "OCCUPIED") && <BookingSummary slot={slot} />}
+
+              {slot.status === "AVAILABLE" && (
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <Button
+                    type="button"
+                    onClick={() => setShowWalkInForm(true)}
+                    disabled={isPending}
+                  >
+                    Create Booking
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => updateSlotStatus("MAINTENANCE")}
+                    disabled={isPending}
+                  >
+                    {slotStatusMutation.isPending ? (
+                      <Loader2 className="size-4 animate-spin" />
+                    ) : (
+                      <Wrench className="size-4" />
+                    )}
+                    Mark Maintenance
+                  </Button>
+                </div>
+              )}
+
+              {slot.status === "MAINTENANCE" && (
                 <Button
                   type="button"
-                  onClick={() => setShowWalkInForm(true)}
-                  disabled={isPending}
-                >
-                  Create Walk-in Booking
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => updateSlotStatus("MAINTENANCE")}
+                  className="w-full"
+                  onClick={() => updateSlotStatus("AVAILABLE")}
                   disabled={isPending}
                 >
                   {slotStatusMutation.isPending && (
-                    <Loader2 className="mr-2 size-4 animate-spin" />
+                    <Loader2 className="size-4 animate-spin" />
                   )}
-                  Mark as Maintenance
+                  Mark Available
                 </Button>
-              </div>
-            )}
+              )}
+            </div>
 
-            {slot.status === "BOOKED" && (
-              <Button
-                type="button"
-                className="w-full"
-                onClick={() => updateBookingStatus("CHECK_IN")}
-                disabled={isPending || !activeBooking?.bookingId}
-              >
-                {bookingStatusMutation.isPending && (
-                  <Loader2 className="mr-2 size-4 animate-spin" />
-                )}
-                Check In
-              </Button>
-            )}
+            <DialogFooter className="gap-2 border-t bg-white px-5 py-4 sm:gap-2">
+              {(slot.status === "RESERVED" ||
+                slot.status === "BOOKED" ||
+                slot.status === "OCCUPIED") && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={viewBooking}
+                  disabled={isPending}
+                >
+                  <Eye className="size-4" />
+                  View Booking
+                </Button>
+              )}
 
-            {slot.status === "OCCUPIED" && (
-              <Button
-                type="button"
-                className="w-full"
-                onClick={() => updateBookingStatus("COMPLETE")}
-                disabled={isPending || !activeBooking?.bookingId}
-              >
-                {bookingStatusMutation.isPending && (
-                  <Loader2 className="mr-2 size-4 animate-spin" />
-                )}
-                Complete Booking
-              </Button>
-            )}
+              {slot.status === "BOOKED" && (
+                <Button
+                  type="button"
+                  onClick={() => updateBookingStatus("CHECK_IN")}
+                  disabled={isPending || !activeBooking?.bookingId}
+                >
+                  {bookingStatusMutation.isPending && (
+                    <Loader2 className="size-4 animate-spin" />
+                  )}
+                  Check In
+                </Button>
+              )}
 
-            {slot.status === "MAINTENANCE" && (
-              <Button
-                type="button"
-                className="w-full"
-                onClick={() => updateSlotStatus("AVAILABLE")}
-                disabled={isPending}
-              >
-                {slotStatusMutation.isPending && (
-                  <Loader2 className="mr-2 size-4 animate-spin" />
-                )}
-                Mark as Available
-              </Button>
-            )}
+              {slot.status === "OCCUPIED" && (
+                <Button
+                  type="button"
+                  className="bg-green-600 hover:bg-green-700"
+                  onClick={() => updateBookingStatus("COMPLETE")}
+                  disabled={isPending || !activeBooking?.bookingId}
+                >
+                  {bookingStatusMutation.isPending ? (
+                    <Loader2 className="size-4 animate-spin" />
+                  ) : (
+                    <CheckCircle2 className="size-4" />
+                  )}
+                  Mark Complete
+                </Button>
+              )}
 
-            <DialogFooter>
               <Button
                 type="button"
                 variant="outline"
                 onClick={() => onOpenChange(false)}
                 disabled={isPending}
               >
-                Cancel
+                Close
               </Button>
             </DialogFooter>
           </div>
         )}
       </DialogContent>
     </Dialog>
+  );
+}
+
+function SlotSummaryPanel({ slot }: { slot: ParkingSlot }) {
+  const VehicleIcon = slot.vehicleType === "TWO_WHEELER" ? Bike : Car;
+
+  return (
+    <div className="flex items-center justify-between gap-4 rounded-lg bg-slate-100 p-4">
+      <div className="min-w-0">
+        <div className="flex items-center gap-3">
+          <p className="text-xl font-bold text-slate-950">{slot.slotNumber}</p>
+          <Badge
+            className={cn(
+              "rounded-full px-3 py-1 text-xs font-semibold shadow-none",
+              statusBadgeClasses[slot.status],
+            )}
+          >
+            {statusLabels[slot.status]}
+          </Badge>
+        </div>
+        <p className="mt-2 text-xs font-bold uppercase tracking-wide text-slate-500">
+          {slot.vehicleType.replace("_", " ")}
+        </p>
+      </div>
+      <div className="text-right">
+        <VehicleIcon className="ml-auto size-4 text-slate-500" />
+        <p className="mt-2 text-xs text-slate-500">{statusHelpers[slot.status]}</p>
+      </div>
+    </div>
   );
 }
 
@@ -391,39 +519,76 @@ function BookingSummary({ slot }: { slot: ParkingSlot }) {
 
   if (!booking) {
     return (
-      <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-4 text-sm text-destructive">
-        Active booking not found for this slot. Refresh the page or check the booking list.
+      <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-700">
+        No active booking details available.
       </div>
     );
   }
 
   const customer = booking.customerName ?? booking.driverName ?? "Not available";
+  const initials = customer
+    .split(" ")
+    .map((part) => part[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
 
   return (
-    <div className="space-y-3 rounded-lg border bg-muted/20 p-4 text-sm">
-      <div>
-        <p className="text-xs font-medium uppercase text-muted-foreground">
-          Booking
+    <div className="space-y-4">
+      <div className="space-y-1">
+        <p className="text-xs font-bold uppercase tracking-wide text-slate-500">
+          Active Booking
         </p>
-        <p className="font-mono text-xs">{booking.bookingId}</p>
+        <SummaryRow label="Booking ID" value={`#${booking.bookingId.slice(0, 8)}`} />
+        <SummaryRow label="Start Time" value={formatDateTime(booking.startTime)} />
+        <SummaryRow label="Expected End" value={formatDateTime(booking.endTime)} />
+        <SummaryRow
+          label="Payment"
+          value={`${formatPaymentStatus(booking.paymentStatus)} · ${formatMoney(
+            booking.totalAmount,
+          )}`}
+          valueClassName={
+            booking.paymentStatus === "SUCCESS" ? "text-green-700" : undefined
+          }
+        />
       </div>
-      <div className="grid gap-3 sm:grid-cols-2">
-        <SummaryItem label="Customer / Driver" value={customer} />
-        <SummaryItem label="Phone" value={booking.customerPhone ?? "Not available"} />
-        <SummaryItem label="Vehicle Number" value={booking.vehicleNumber ?? "Not available"} />
-        <SummaryItem label="Status" value={booking.status} />
-        <SummaryItem label="Start Time" value={formatDateTime(booking.startTime)} />
-        <SummaryItem label="End Time" value={formatDateTime(booking.endTime)} />
+
+      <div className="space-y-2">
+        <p className="text-xs font-bold uppercase tracking-wide text-slate-500">
+          Customer
+        </p>
+        <div className="flex items-center gap-3 rounded-lg bg-slate-100 p-3">
+          <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-white text-sm font-bold text-slate-700">
+            {initials || "C"}
+          </span>
+          <div className="min-w-0">
+            <p className="truncate font-semibold text-slate-950">{customer}</p>
+            <p className="truncate text-xs text-slate-500">
+              {booking.customerPhone ?? "No phone"} ·{" "}
+              {booking.vehicleNumber ?? "No vehicle number"}
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   );
 }
 
-function SummaryItem({ label, value }: { label: string; value: string }) {
+function SummaryRow({
+  label,
+  value,
+  valueClassName,
+}: {
+  label: string;
+  value: string;
+  valueClassName?: string;
+}) {
   return (
-    <div>
-      <p className="text-xs font-medium text-muted-foreground">{label}</p>
-      <p className="font-semibold text-foreground">{value}</p>
+    <div className="flex items-center justify-between gap-4 border-b py-2 text-sm last:border-b-0">
+      <span className="text-slate-500">{label}</span>
+      <span className={cn("text-right font-semibold text-slate-950", valueClassName)}>
+        {value}
+      </span>
     </div>
   );
 }

@@ -1,4 +1,4 @@
-import { Plus } from "lucide-react";
+import { MapPin, Plus } from "lucide-react";
 import { PageHeader } from "@/common/components/PageHeader";
 import { Button } from "@/components/ui/button";
 import {
@@ -31,7 +31,8 @@ export function VendorBookingsPageHeader({
           </h1>
           <div className="hidden h-8 w-px bg-border sm:block" />
           <Select value={locationId} onValueChange={onLocationChange}>
-            <SelectTrigger className="h-10 w-full sm:w-65">
+            <SelectTrigger className="h-10 w-full border-slate-200 bg-white shadow-none sm:w-65">
+              <MapPin className="size-4 text-slate-500" />
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -46,9 +47,13 @@ export function VendorBookingsPageHeader({
         </div>
       }
       action={
-        <Button type="button" onClick={onAddBooking}>
-          <Plus className="mr-2 size-4" />
-          Add booking
+        <Button
+          type="button"
+          className="bg-blue-600 hover:bg-blue-700"
+          onClick={onAddBooking}
+        >
+          <Plus className="size-4" />
+          Add on-site booking
         </Button>
       }
     />
