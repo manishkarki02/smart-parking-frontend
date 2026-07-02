@@ -26,6 +26,7 @@ import {
   LayoutDashboard,
   Users,
   LogOut,
+  Settings as SettingsIcon,
   Wallet,
   type LucideIcon,
 } from "lucide-react";
@@ -56,13 +57,13 @@ const navItems: NavItem[] = [
     roles: ["DRIVER"],
   },
   {
-    label: "Parkings",
+    label: "Find Parking",
     to: "/parkings/map",
     icon: MapPin,
     roles: ["DRIVER"],
   },
   {
-    label: "Bookings",
+    label: "My Bookings",
     to: "/bookings",
     icon: CalendarCheck,
     roles: ["DRIVER"],
@@ -89,6 +90,12 @@ const navItems: NavItem[] = [
     label: "Revenue",
     to: "/vendor/earnings",
     icon: Wallet,
+    roles: ["VENDOR"],
+  },
+  {
+    label: "Settings",
+    to: "/vendor/settings",
+    icon: SettingsIcon,
     roles: ["VENDOR"],
   },
   {

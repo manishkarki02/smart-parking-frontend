@@ -10,6 +10,7 @@ export const API_BASE = {
   VENDORS: "/vendors",
   ADMIN: "/admin",
   PAYMENT: "/payments",
+  USERS: "/users",
 } as const;
 
 // ─── Auth ─────────────────────────────────────────────────────────────────────
@@ -19,6 +20,11 @@ export const AUTH_ROUTES = {
   REFRESH: "/refresh",
   LOGOUT: "/logout",
   LOGOUT_ALL: "/logout-all",
+} as const;
+
+// ─── Users ───────────────────────────────────────────────────────────────────
+export const USER_ROUTES = {
+  ME: "/me",
 } as const;
 
 // ─── Parking ──────────────────────────────────────────────────────────────────

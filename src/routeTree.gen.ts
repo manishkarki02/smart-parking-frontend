@@ -17,6 +17,7 @@ import { Route as BookingsIndexRouteImport } from './routes/bookings/index'
 import { Route as ParkingsMapRouteImport } from './routes/parkings.map'
 import { Route as ParkingsIdRouteImport } from './routes/parkings.$id'
 import { Route as AppDashboardRouteImport } from './routes/_app/dashboard'
+import { Route as AppVendorSettingsRouteImport } from './routes/_app/vendor/settings'
 import { Route as AppVendorParkingsRouteImport } from './routes/_app/vendor/parkings'
 import { Route as AppVendorEarningsRouteImport } from './routes/_app/vendor/earnings'
 import { Route as AppVendorDashboardRouteImport } from './routes/_app/vendor/dashboard'
@@ -65,6 +66,11 @@ const ParkingsIdRoute = ParkingsIdRouteImport.update({
 const AppDashboardRoute = AppDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppVendorSettingsRoute = AppVendorSettingsRouteImport.update({
+  id: '/vendor/settings',
+  path: '/vendor/settings',
   getParentRoute: () => AppRoute,
 } as any)
 const AppVendorParkingsRoute = AppVendorParkingsRouteImport.update({
@@ -136,6 +142,7 @@ export interface FileRoutesByFullPath {
   '/vendor/dashboard': typeof AppVendorDashboardRoute
   '/vendor/earnings': typeof AppVendorEarningsRoute
   '/vendor/parkings': typeof AppVendorParkingsRoute
+  '/vendor/settings': typeof AppVendorSettingsRoute
   '/vendor/parking/$parkingId': typeof AppVendorParkingParkingIdRoute
 }
 export interface FileRoutesByTo {
@@ -155,6 +162,7 @@ export interface FileRoutesByTo {
   '/vendor/dashboard': typeof AppVendorDashboardRoute
   '/vendor/earnings': typeof AppVendorEarningsRoute
   '/vendor/parkings': typeof AppVendorParkingsRoute
+  '/vendor/settings': typeof AppVendorSettingsRoute
   '/vendor/parking/$parkingId': typeof AppVendorParkingParkingIdRoute
 }
 export interface FileRoutesById {
@@ -176,6 +184,7 @@ export interface FileRoutesById {
   '/_app/vendor/dashboard': typeof AppVendorDashboardRoute
   '/_app/vendor/earnings': typeof AppVendorEarningsRoute
   '/_app/vendor/parkings': typeof AppVendorParkingsRoute
+  '/_app/vendor/settings': typeof AppVendorSettingsRoute
   '/_app/vendor/parking_/$parkingId': typeof AppVendorParkingParkingIdRoute
 }
 export interface FileRouteTypes {
@@ -197,6 +206,7 @@ export interface FileRouteTypes {
     | '/vendor/dashboard'
     | '/vendor/earnings'
     | '/vendor/parkings'
+    | '/vendor/settings'
     | '/vendor/parking/$parkingId'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -216,6 +226,7 @@ export interface FileRouteTypes {
     | '/vendor/dashboard'
     | '/vendor/earnings'
     | '/vendor/parkings'
+    | '/vendor/settings'
     | '/vendor/parking/$parkingId'
   id:
     | '__root__'
@@ -236,6 +247,7 @@ export interface FileRouteTypes {
     | '/_app/vendor/dashboard'
     | '/_app/vendor/earnings'
     | '/_app/vendor/parkings'
+    | '/_app/vendor/settings'
     | '/_app/vendor/parking_/$parkingId'
   fileRoutesById: FileRoutesById
 }
@@ -305,6 +317,13 @@ declare module '@tanstack/react-router' {
       path: '/dashboard'
       fullPath: '/dashboard'
       preLoaderRoute: typeof AppDashboardRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/vendor/settings': {
+      id: '/_app/vendor/settings'
+      path: '/vendor/settings'
+      fullPath: '/vendor/settings'
+      preLoaderRoute: typeof AppVendorSettingsRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/vendor/parkings': {
@@ -391,6 +410,7 @@ interface AppRouteChildren {
   AppVendorDashboardRoute: typeof AppVendorDashboardRoute
   AppVendorEarningsRoute: typeof AppVendorEarningsRoute
   AppVendorParkingsRoute: typeof AppVendorParkingsRoute
+  AppVendorSettingsRoute: typeof AppVendorSettingsRoute
   AppVendorParkingParkingIdRoute: typeof AppVendorParkingParkingIdRoute
 }
 
@@ -405,6 +425,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppVendorDashboardRoute: AppVendorDashboardRoute,
   AppVendorEarningsRoute: AppVendorEarningsRoute,
   AppVendorParkingsRoute: AppVendorParkingsRoute,
+  AppVendorSettingsRoute: AppVendorSettingsRoute,
   AppVendorParkingParkingIdRoute: AppVendorParkingParkingIdRoute,
 }
 
