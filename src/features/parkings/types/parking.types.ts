@@ -13,7 +13,9 @@ export interface ParkingLocation {
   twoWheelerRatePerHour?: number;
   fourWheelerRatePerHour?: number;
   distance?: number;
+  vendorId?: string;
   vendorName: string;
+  imageUrl?: string | null;
 }
 
 export type ParkingSlotStatus =
@@ -46,4 +48,7 @@ export interface ActiveBookingSummary {
   startTime: string;
   endTime: string;
   status: BookingStatus;
+  totalAmount?: number;
+  paymentStatus?: "PENDING" | "SUCCESS" | "FAILED";
+  paymentMethod?: "CASH" | "KHALTI" | "ESEWA";
 }

@@ -1,20 +1,26 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, type ComponentType } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { Search } from "lucide-react";
-import { toast } from "sonner";
 import {
-  DataTablePagination,
-  SplitDataTable,
-  TableToolbar,
-  TableEmptyState,
-  type DataTableColumn,
-} from "@/common";
+  Banknote,
+  Car,
+  CheckCircle2,
+  ChevronLeft,
+  ChevronRight,
+  ClipboardList,
+  Eye,
+  Filter,
+  LogIn,
+  Minus,
+  Search,
+} from "lucide-react";
+import { toast } from "sonner";
 import useCustomMutation from "@/common/hooks/useCustomMutation";
 import useCustomQuery from "@/common/hooks/useCustomQuery";
 import { useAuthGuard } from "@/common/hooks/use-auth-guard";
 import { getApiErrorMessage } from "@/common/utils/get-api-error-message";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -23,13 +29,23 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { queryKeys } from "@/config/query-keys";
-import { getVendorBookings, type VendorBooking } from "@/features/bookings/services/booking.service";
+import {
+  getVendorBookings,
+  type VendorBooking,
+} from "@/features/bookings/services/booking.service";
 import type { VendorBookingAction } from "@/features/bookings/types/booking.types";
 import { AddOnSiteBookingDialog } from "@/features/vendor/components/AddOnSiteBookingDialog";
 import { VendorBookingDetailPanel } from "@/features/vendor/components/VendorBookingDetailPanel";
 import { VendorBookingStatusBadge } from "@/features/vendor/components/VendorBookingStatusBadge";
-import { VendorBookingSummaryCards } from "@/features/vendor/components/VendorBookingSummaryCards";
 import { VendorBookingsPageHeader } from "@/features/vendor/components/VendorBookingsPageHeader";
 import {
   getMyParkingLocations,
@@ -55,6 +71,17 @@ import {
   matchesStatusFilter,
   VENDOR_BOOKINGS_PAGE_SIZE,
 } from "@/features/vendor/utils/vendor-booking.utils";
+import { cn } from "@/lib/utils";
+
+type PaymentMethodFilter = "ALL" | "CASH" | "KHALTI" | "ESEWA";
+type StatAccent = "blue" | "orange" | "green" | "purple";
+
+const statAccentStyles: Record<StatAccent, string> = {
+  blue: "bg-blue-50 text-blue-600",
+  orange: "bg-orange-50 text-orange-600",
+  green: "bg-green-50 text-green-600",
+  purple: "bg-purple-50 text-purple-600",
+};
 
 export function VendorBookingsPage() {
   const { isAuthorized } = useAuthGuard({ allowedRoles: ["VENDOR"] });
@@ -63,8 +90,12 @@ export function VendorBookingsPage() {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] =
     useState<VendorBookingStatusFilter>("ALL");
+  const [paymentMethodFilter, setPaymentMethodFilter] =
+    useState<PaymentMethodFilter>("ALL");
   const [page, setPage] = useState(1);
-  const [selectedBookingId, setSelectedBookingId] = useState<string | null>(null);
+  const [selectedBookingId, setSelectedBookingId] = useState<string | null>(
+    null,
+  );
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
 
   const vendorLocationId = locationId === "ALL" ? undefined : locationId;
@@ -90,6 +121,7 @@ export function VendorBookingsPage() {
 
   const filteredBookings = useMemo(() => {
     const normalizedSearch = search.trim().toLowerCase();
+
     return bookings.filter((booking) => {
       const haystack = [
         getBookingId(booking),
@@ -106,28 +138,33 @@ export function VendorBookingsPage() {
         .join(" ")
         .toLowerCase();
 
+      const matchesPayment =
+        paymentMethodFilter === "ALL" ||
+        booking.paymentMethod?.toUpperCase() === paymentMethodFilter;
+
       return (
         (!normalizedSearch || haystack.includes(normalizedSearch)) &&
-        matchesStatusFilter(booking, statusFilter)
+        matchesStatusFilter(booking, statusFilter) &&
+        matchesPayment
       );
     });
-  }, [bookings, search, statusFilter]);
+  }, [bookings, paymentMethodFilter, search, statusFilter]);
 
+  const totalPages = Math.max(
+    1,
+    Math.ceil(filteredBookings.length / VENDOR_BOOKINGS_PAGE_SIZE),
+  );
+  const currentPage = Math.min(page, totalPages);
   const pagedBookings = filteredBookings.slice(
-    (page - 1) * VENDOR_BOOKINGS_PAGE_SIZE,
-    page * VENDOR_BOOKINGS_PAGE_SIZE,
+    (currentPage - 1) * VENDOR_BOOKINGS_PAGE_SIZE,
+    currentPage * VENDOR_BOOKINGS_PAGE_SIZE,
   );
   const selectedBooking =
-    filteredBookings.find((booking) => getBookingId(booking) === selectedBookingId) ?? null;
+    filteredBookings.find(
+      (booking) => getBookingId(booking) === selectedBookingId,
+    ) ?? null;
 
   const summary = useMemo<VendorBookingSummary>(() => {
-    const today = new Date().toDateString();
-    const completedToday = filteredBookings.filter(
-      (booking) =>
-        booking.status === "COMPLETED" &&
-        booking.endTime &&
-        new Date(booking.endTime).toDateString() === today,
-    ).length;
     const completedTotal = filteredBookings.filter(
       (booking) => booking.status === "COMPLETED",
     ).length;
@@ -136,7 +173,11 @@ export function VendorBookingsPage() {
         (booking) =>
           booking.paymentStatus === "SUCCESS" || booking.status === "COMPLETED",
       )
-      .reduce((total, booking) => total + Number(booking.totalAmount ?? booking.amount ?? 0), 0);
+      .reduce(
+        (total, booking) =>
+          total + Number(booking.totalAmount ?? booking.amount ?? 0),
+        0,
+      );
 
     return {
       total: filteredBookings.length,
@@ -146,9 +187,9 @@ export function VendorBookingsPage() {
           booking.slotStatus === "BOOKED" ||
           booking.slotStatus === "OCCUPIED",
       ).length,
-      completed: completedToday || completedTotal,
+      completed: completedTotal,
       revenue,
-      completedHelper: completedToday ? "Today" : "Current filter",
+      completedHelper: "Current filter",
     };
   }, [filteredBookings]);
 
@@ -156,8 +197,12 @@ export function VendorBookingsPage() {
     api: updateVendorBookingStatus,
     onSuccess: (updatedBooking) => {
       toast.success("Booking updated");
-      void queryClient.invalidateQueries({ queryKey: queryKeys.bookings.vendor() });
-      void queryClient.invalidateQueries({ queryKey: queryKeys.vendor.dashboard() });
+      void queryClient.invalidateQueries({
+        queryKey: queryKeys.bookings.vendor(),
+      });
+      void queryClient.invalidateQueries({
+        queryKey: queryKeys.vendor.dashboard(),
+      });
       void queryClient.invalidateQueries({
         queryKey: queryKeys.parking.vendorSlots(updatedBooking.parkingLocationId),
       });
@@ -174,7 +219,9 @@ export function VendorBookingsPage() {
       toast.error(message || "Booking update failed");
       if (selectedBooking?.parkingLocationId) {
         void queryClient.invalidateQueries({
-          queryKey: queryKeys.parking.vendorSlots(selectedBooking.parkingLocationId),
+          queryKey: queryKeys.parking.vendorSlots(
+            selectedBooking.parkingLocationId,
+          ),
         });
       }
     },
@@ -199,193 +246,80 @@ export function VendorBookingsPage() {
     setSelectedBookingId(null);
   }
 
-  const columns: DataTableColumn<VendorBooking>[] = [
-    {
-      id: "booking",
-      header: "ID",
-      className: "font-mono text-sm",
-      compact: true,
-      cell: (booking) => getBookingId(booking).slice(0, 8),
-    },
-    {
-      id: "customer",
-      header: "Customer",
-      compact: true,
-      cell: (booking) => (
-        <div className="min-w-0">
-          <p className="truncate font-medium">{getCustomerName(booking)}</p>
-          <p className="truncate text-xs text-muted-foreground">
-            {getCustomerPhone(booking)}
-          </p>
-        </div>
-      ),
-    },
-    {
-      id: "source",
-      header: "Source",
-      cell: (booking) => (
-        <Badge variant="outline">{getSourceLabel(booking)}</Badge>
-      ),
-    },
-    {
-      id: "location",
-      header: "Location",
-      cell: (booking) => (
-        <span className="rounded-md border bg-muted/30 px-2 py-1 text-sm">
-          {booking.parkingLocationName ?? "-"}
-        </span>
-      ),
-    },
-    {
-      id: "slot",
-      header: "Slot",
-      cell: (booking) => (
-        <span className="rounded-md bg-primary/10 px-2 py-1 font-mono text-sm font-semibold text-primary">
-          {getSlot(booking)}
-        </span>
-      ),
-    },
-    {
-      id: "time",
-      header: "Time",
-      cell: (booking) => (
-        <div className="min-w-32.5">
-          <p className="font-medium">
-            {formatTime(booking.startTime)}-{formatTime(booking.endTime)}
-          </p>
-          <p className="text-xs text-muted-foreground">
-            {formatDate(booking.startTime)}
-          </p>
-        </div>
-      ),
-    },
-    {
-      id: "amount",
-      header: "Amount",
-      className: "font-semibold",
-      cell: (booking) => formatAmount(booking),
-    },
-    {
-      id: "payment",
-      header: "Payment",
-      cell: (booking) => (
-        <div className="flex min-w-30 flex-col gap-1">
-          <span>{booking.paymentMethod ?? "-"}</span>
-          <Badge
-            className="w-fit"
-            variant={getPaymentStatusVariant(booking.paymentStatus)}
-          >
-            {booking.paymentStatus ?? "-"}
-          </Badge>
-        </div>
-      ),
-    },
-    {
-      id: "status",
-      header: "Status",
-      compact: true,
-      cell: (booking) => <VendorBookingStatusBadge booking={booking} />,
-    },
-    {
-      id: "action",
-      header: "Action",
-      compact: true,
-      cell: (booking) => (
-        <div data-row-action="true">
-          {canCheckIn(booking) && (
-            <Button
-              type="button"
-              size="sm"
-              disabled={statusMutation.isPending}
-              onClick={() => runAction(booking, "CHECK_IN")}
-            >
-              Check in
-            </Button>
-          )}
-          {canComplete(booking) && (
-            <Button
-              type="button"
-              size="sm"
-              disabled={statusMutation.isPending}
-              onClick={() => runAction(booking, "COMPLETE")}
-            >
-              Mark complete
-            </Button>
-          )}
-          {!canCheckIn(booking) && !canComplete(booking) && (
-            <span className="text-muted-foreground">-</span>
-          )}
-        </div>
-      ),
-    },
-  ];
+  function resetFilters() {
+    setSearch("");
+    setStatusFilter("ALL");
+    setPaymentMethodFilter("ALL");
+    setPage(1);
+  }
 
   if (!isAuthorized) {
     return null;
   }
 
   return (
-    <div className="min-h-full bg-muted/20">
+    <div className="min-h-full min-w-0 overflow-x-hidden bg-slate-50">
       <VendorBookingsPageHeader
         locationId={locationId}
         locations={locations}
         onLocationChange={selectLocation}
         onAddBooking={() => setIsAddDialogOpen(true)}
       />
-      <div className="space-y-6 p-6">
-        <VendorBookingSummaryCards summary={summary} />
 
-        <SplitDataTable
-          rows={pagedBookings}
-          columns={columns}
-          getRowId={getBookingId}
-          selectedRowId={selectedBookingId}
-          onRowSelect={selectBooking}
-          onDetailClose={() => setSelectedBookingId(null)}
-          detailTitle="Booking details"
-          detailPanel={
-            selectedBooking ? (
-              <VendorBookingDetailPanel
-                booking={selectedBooking}
-                isMutating={statusMutation.isPending}
-                onClose={() => setSelectedBookingId(null)}
-                onAction={runAction}
-              />
-            ) : null
-          }
-          isLoading={isLoading}
-          error={isError}
-          emptyState={
-            <TableEmptyState
-              title="No bookings found"
-              description="Try adjusting your search or filters to find a booking."
-            />
-          }
-          toolbar={
-            <TableToolbar
-              left={
-                <div className="flex flex-col gap-3 xl:flex-row xl:items-center">
-                  <h2 className="text-xl font-semibold">
-                    {locationId === "ALL"
-                      ? "All Bookings"
-                      : locations.find((location) => location.id === locationId)
-                          ?.name ?? "Bookings"}
-                  </h2>
-                  <div className="relative max-w-sm">
-                    <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-                    <Input
-                      className="pl-9 sm:w-[260px]"
-                      placeholder="Search..."
-                      value={search}
-                      onChange={(event) => {
-                        setSearch(event.target.value);
-                        setPage(1);
-                      }}
-                    />
-                  </div>
+      <main className="mx-auto w-full max-w-7xl space-y-5 p-4 md:p-6">
+        <section className="grid min-w-0 grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+          <SummaryCard
+            label="Total"
+            value={summary.total}
+            helper="Bookings"
+            icon={ClipboardList}
+            accent="blue"
+          />
+          <SummaryCard
+            label="Active now"
+            value={summary.active}
+            helper="Reserved + Booked + Occupied"
+            icon={Car}
+            accent="orange"
+          />
+          <SummaryCard
+            label="Completed"
+            value={summary.completed}
+            helper={summary.completedHelper}
+            icon={CheckCircle2}
+            accent="green"
+          />
+          <SummaryCard
+            label="Revenue"
+            value={`Rs ${summary.revenue.toFixed(0)}`}
+            helper="Paid / completed"
+            icon={Banknote}
+            accent="purple"
+          />
+        </section>
+
+        <Card className="min-w-0 overflow-hidden border-slate-200 bg-white shadow-none">
+          <CardContent className="p-0">
+            <div className="flex flex-col gap-3 border-b border-slate-200 p-4 lg:flex-row lg:items-center lg:justify-between">
+              <div className="flex min-w-0 flex-col gap-3 sm:flex-row sm:items-center">
+                <h2 className="shrink-0 text-base font-semibold text-slate-950">
+                  All Bookings
+                </h2>
+                <div className="relative min-w-0 sm:w-72">
+                  <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
+                  <Input
+                    value={search}
+                    onChange={(event) => {
+                      setSearch(event.target.value);
+                      setPage(1);
+                    }}
+                    placeholder="Search customer, slot, vehicle..."
+                    className="h-9 border-slate-200 pl-9 text-sm shadow-none"
+                  />
                 </div>
-              }
-              right={
+              </div>
+
+              <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-center">
                 <Select
                   value={statusFilter}
                   onValueChange={(value: VendorBookingStatusFilter) => {
@@ -393,7 +327,7 @@ export function VendorBookingsPage() {
                     setPage(1);
                   }}
                 >
-                  <SelectTrigger className="w-full sm:w-47.5">
+                  <SelectTrigger className="h-9 w-full border-slate-200 text-sm shadow-none sm:w-36">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -403,29 +337,379 @@ export function VendorBookingsPage() {
                     <SelectItem value="CHECKED_IN">Checked in</SelectItem>
                     <SelectItem value="COMPLETED">Completed</SelectItem>
                     <SelectItem value="CANCELLED">Cancelled</SelectItem>
-                    <SelectItem value="PAYMENT_PENDING">Payment pending</SelectItem>
+                    <SelectItem value="PAYMENT_PENDING">
+                      Payment pending
+                    </SelectItem>
                   </SelectContent>
                 </Select>
-              }
-            />
-          }
-          pagination={
-            <DataTablePagination
-              page={page}
-              pageSize={VENDOR_BOOKINGS_PAGE_SIZE}
-              totalItems={filteredBookings.length}
-              pageSizeOptions={[VENDOR_BOOKINGS_PAGE_SIZE]}
-              onPageChange={setPage}
-              onPageSizeChange={() => setPage(1)}
-            />
-          }
-        />
-      </div>
+
+                <Select
+                  value={paymentMethodFilter}
+                  onValueChange={(value: PaymentMethodFilter) => {
+                    setPaymentMethodFilter(value);
+                    setPage(1);
+                  }}
+                >
+                  <SelectTrigger className="h-9 w-full border-slate-200 text-sm shadow-none sm:w-40">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="ALL">Payment method</SelectItem>
+                    <SelectItem value="CASH">Cash</SelectItem>
+                    <SelectItem value="KHALTI">Khalti</SelectItem>
+                    <SelectItem value="ESEWA">Esewa</SelectItem>
+                  </SelectContent>
+                </Select>
+
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="h-9 border-slate-200 shadow-none"
+                  onClick={resetFilters}
+                >
+                  <Filter className="size-4" />
+                  Filter
+                </Button>
+              </div>
+            </div>
+
+            <div
+              className={cn(
+                "grid min-w-0",
+                selectedBooking
+                  ? "xl:grid-cols-[minmax(0,1fr)_360px]"
+                  : "grid-cols-1",
+              )}
+            >
+              <div className="min-w-0">
+                <div className="max-w-full overflow-x-auto">
+                  <Table className="min-w-[920px]">
+                    <TableHeader className="bg-slate-100/80">
+                      <TableRow className="hover:bg-transparent">
+                        {[
+                          "ID",
+                          "Customer",
+                          "Source",
+                          "Location",
+                          "Slot",
+                          "Time",
+                          "Amount",
+                          "Payment",
+                          "Status",
+                          "Action",
+                        ].map((header) => (
+                          <TableHead
+                            key={header}
+                            className="h-9 px-4 text-xs font-bold uppercase tracking-wider text-slate-500"
+                          >
+                            {header}
+                          </TableHead>
+                        ))}
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {isLoading ? (
+                        <TableMessageRow message="Loading bookings..." />
+                      ) : isError ? (
+                        <TableMessageRow message="Unable to load bookings." />
+                      ) : pagedBookings.length === 0 ? (
+                        <TableMessageRow message="No bookings found." />
+                      ) : (
+                        pagedBookings.map((booking) => (
+                          <BookingTableRow
+                            key={getBookingId(booking)}
+                            booking={booking}
+                            selected={
+                              getBookingId(booking) === selectedBookingId
+                            }
+                            isMutating={statusMutation.isPending}
+                            onSelect={() => selectBooking(booking)}
+                            onAction={runAction}
+                          />
+                        ))
+                      )}
+                    </TableBody>
+                  </Table>
+                </div>
+              </div>
+
+              {selectedBooking ? (
+                <VendorBookingDetailPanel
+                  booking={selectedBooking}
+                  isMutating={statusMutation.isPending}
+                  onClose={() => setSelectedBookingId(null)}
+                  onAction={runAction}
+                />
+              ) : null}
+            </div>
+
+            <div className="flex flex-col gap-3 border-t border-slate-200 px-4 py-3 text-sm text-slate-500 sm:flex-row sm:items-center sm:justify-between">
+              <p>
+                Showing {pagedBookings.length} of {filteredBookings.length}{" "}
+                bookings
+              </p>
+              <div className="flex items-center gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  disabled={currentPage <= 1}
+                  onClick={() => setPage((value) => Math.max(1, value - 1))}
+                >
+                  <ChevronLeft className="size-4" />
+                  Prev
+                </Button>
+                <Button type="button" size="sm" className="w-9 px-0">
+                  {currentPage}
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  disabled={currentPage >= totalPages}
+                  onClick={() =>
+                    setPage((value) => Math.min(totalPages, value + 1))
+                  }
+                >
+                  Next
+                  <ChevronRight className="size-4" />
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </main>
 
       <AddOnSiteBookingDialog
         open={isAddDialogOpen}
         onOpenChange={setIsAddDialogOpen}
       />
     </div>
+  );
+}
+
+function SummaryCard({
+  label,
+  value,
+  helper,
+  icon: Icon,
+  accent,
+}: {
+  label: string;
+  value: string | number;
+  helper: string;
+  icon: ComponentType<{ className?: string }>;
+  accent: StatAccent;
+}) {
+  return (
+    <Card className="border-slate-200 bg-white shadow-none">
+      <CardContent className="p-5">
+        <span
+          className={cn(
+            "flex size-9 items-center justify-center rounded-md",
+            statAccentStyles[accent],
+          )}
+        >
+          <Icon className="size-4.5" />
+        </span>
+        <p className="mt-4 text-xs font-bold uppercase tracking-wider text-slate-500">
+          {label}
+        </p>
+        <p className="mt-2 text-2xl font-bold tracking-tight text-slate-950">
+          {value}
+        </p>
+        <p className="mt-1 text-sm text-slate-500">{helper}</p>
+      </CardContent>
+    </Card>
+  );
+}
+
+function BookingTableRow({
+  booking,
+  selected,
+  isMutating,
+  onSelect,
+  onAction,
+}: {
+  booking: VendorBooking;
+  selected: boolean;
+  isMutating: boolean;
+  onSelect: () => void;
+  onAction: (booking: VendorBooking, action: VendorBookingAction) => void;
+}) {
+  return (
+    <TableRow
+      data-state={selected ? "selected" : undefined}
+      className="cursor-pointer border-slate-200 data-[state=selected]:bg-blue-50/80"
+      onClick={onSelect}
+    >
+      <TableCell className="px-4 font-mono text-xs font-semibold text-slate-500">
+        {getBookingId(booking).slice(0, 8)}
+      </TableCell>
+      <TableCell className="px-4">
+        <div className="min-w-0">
+          <p className="truncate text-sm font-semibold text-slate-950">
+            {getCustomerName(booking)}
+          </p>
+          <p className="truncate font-mono text-xs text-slate-500">
+            {getCustomerPhone(booking)}
+          </p>
+        </div>
+      </TableCell>
+      <TableCell className="px-4">
+        <SourceBadge booking={booking} />
+      </TableCell>
+      <TableCell className="max-w-38 px-4">
+        <span className="block truncate text-sm font-medium text-slate-950">
+          {booking.parkingLocationName ?? "-"}
+        </span>
+      </TableCell>
+      <TableCell className="px-4">
+        <SlotBadge booking={booking} />
+      </TableCell>
+      <TableCell className="px-4">
+        <div className="min-w-30">
+          <p className="text-xs font-bold text-slate-950">
+            {formatTime(booking.startTime)} - {formatTime(booking.endTime)}
+          </p>
+          <p className="mt-1 text-xs text-slate-500">
+            {formatDate(booking.startTime)}
+          </p>
+        </div>
+      </TableCell>
+      <TableCell className="px-4 text-sm font-bold text-slate-950">
+        {formatAmount(booking)}
+      </TableCell>
+      <TableCell className="px-4">
+        <div className="flex flex-col items-start gap-1">
+          <PaymentMethodBadge method={booking.paymentMethod} />
+          <PaymentStatusBadge status={booking.paymentStatus} />
+        </div>
+      </TableCell>
+      <TableCell className="px-4">
+        <VendorBookingStatusBadge booking={booking} />
+      </TableCell>
+      <TableCell className="px-4">
+        <div data-row-action="true" onClick={(event) => event.stopPropagation()}>
+          {canCheckIn(booking) ? (
+            <Button
+              type="button"
+              size="sm"
+              disabled={isMutating}
+              className="h-8 bg-blue-600 text-xs hover:bg-blue-700"
+              onClick={() => onAction(booking, "CHECK_IN")}
+            >
+              <LogIn className="size-3.5" />
+              Check in
+            </Button>
+          ) : null}
+          {canComplete(booking) ? (
+            <Button
+              type="button"
+              size="sm"
+              disabled={isMutating}
+              className="h-8 bg-green-600 text-xs hover:bg-green-700"
+              onClick={() => onAction(booking, "COMPLETE")}
+            >
+              <CheckCircle2 className="size-3.5" />
+              Complete
+            </Button>
+          ) : null}
+          {!canCheckIn(booking) && !canComplete(booking) ? (
+            booking.status === "COMPLETED" || booking.status === "CANCELLED" ? (
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                disabled
+                className="h-8 w-10 text-xs"
+              >
+                <Minus className="size-3.5" />
+              </Button>
+            ) : (
+              <Button type="button" size="sm" variant="outline" className="h-8">
+                <Eye className="size-3.5" />
+                View
+              </Button>
+            )
+          ) : null}
+        </div>
+      </TableCell>
+    </TableRow>
+  );
+}
+
+function TableMessageRow({ message }: { message: string }) {
+  return (
+    <TableRow>
+      <TableCell
+        colSpan={10}
+        className="h-52 px-4 text-center text-sm text-slate-500"
+      >
+        {message}
+      </TableCell>
+    </TableRow>
+  );
+}
+
+function SourceBadge({ booking }: { booking: VendorBooking }) {
+  const isWalkIn = booking.walkIn;
+  return (
+    <Badge
+      className={cn(
+        "border-0 px-2.5 py-1 text-xs font-bold shadow-none",
+        isWalkIn
+          ? "bg-purple-50 text-purple-700 hover:bg-purple-50"
+          : "bg-blue-50 text-blue-700 hover:bg-blue-50",
+      )}
+    >
+      {getSourceLabel(booking)}
+    </Badge>
+  );
+}
+
+function SlotBadge({ booking }: { booking: VendorBooking }) {
+  const isFourWheeler = booking.vehicleType === "FOUR_WHEELER";
+  return (
+    <Badge
+      className={cn(
+        "border-0 px-2.5 py-1 font-mono text-xs font-bold shadow-none",
+        isFourWheeler
+          ? "bg-emerald-100 text-emerald-700 hover:bg-emerald-100"
+          : "bg-blue-100 text-blue-700 hover:bg-blue-100",
+      )}
+    >
+      {getSlot(booking)}
+    </Badge>
+  );
+}
+
+function PaymentMethodBadge({ method }: { method?: string | null }) {
+  const normalized = method?.toUpperCase();
+  return (
+    <Badge
+      className={cn(
+        "border px-2.5 py-0.5 text-xs font-bold shadow-none",
+        normalized === "CASH"
+          ? "border-green-200 bg-green-50 text-green-700 hover:bg-green-50"
+          : "border-purple-200 bg-purple-700 text-white hover:bg-purple-700",
+      )}
+    >
+      {normalized ?? "-"}
+    </Badge>
+  );
+}
+
+function PaymentStatusBadge({ status }: { status?: string | null }) {
+  const label =
+    status?.toUpperCase() === "SUCCESS"
+      ? "Paid"
+      : status
+        ? status.charAt(0).toUpperCase() + status.slice(1).toLowerCase()
+        : "-";
+  return (
+    <Badge className="w-fit" variant={getPaymentStatusVariant(status)}>
+      {label}
+    </Badge>
   );
 }

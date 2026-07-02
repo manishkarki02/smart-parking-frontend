@@ -2,7 +2,7 @@ import { useEffect, useMemo } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate } from "@tanstack/react-router";
 import { Loader2 } from "lucide-react";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
@@ -45,6 +45,15 @@ function toBackendLocalDateTime(value: string) {
   return value.length === 16 ? `${value}:00` : value;
 }
 
+function getDefaultBookingTimes() {
+  const now = new Date();
+
+  return {
+    startTime: toDateTimeLocalValue(now),
+    endTime: toDateTimeLocalValue(new Date(now.getTime() + 60 * 60_000)),
+  };
+}
+
 function vehicleTypeLabel(vehicleType: ParkingSlotVehicleType) {
   return vehicleType === "TWO_WHEELER" ? "Two Wheeler" : "Four Wheeler";
 }
@@ -66,39 +75,42 @@ export function DriverSlotBookingDialog({
 }: DriverSlotBookingDialogProps) {
   const navigate = useNavigate();
   const createBooking = useCreateDriverBooking(parkingLocation.id);
-  const now = useMemo(() => new Date(), [open, slot?.id]);
-  const defaultStartTime = toDateTimeLocalValue(now);
-  const defaultEndTime = toDateTimeLocalValue(
-    new Date(now.getTime() + 60 * 60_000),
-  );
+  const defaultTimes = getDefaultBookingTimes();
 
   const {
+    control,
     register,
     handleSubmit,
     reset,
-    watch,
     formState: { errors },
   } = useForm<DriverBookingFormValues>({
     resolver: zodResolver(driverBookingSchema),
     defaultValues: {
       vehicleNumber: "",
-      startTime: defaultStartTime,
-      endTime: defaultEndTime,
+      startTime: defaultTimes.startTime,
+      endTime: defaultTimes.endTime,
     },
     mode: "onChange",
   });
 
   useEffect(() => {
     if (!open) return;
+    const nextDefaultTimes = getDefaultBookingTimes();
     reset({
       vehicleNumber: "",
-      startTime: defaultStartTime,
-      endTime: defaultEndTime,
+      startTime: nextDefaultTimes.startTime,
+      endTime: nextDefaultTimes.endTime,
     });
-  }, [defaultEndTime, defaultStartTime, open, reset]);
+  }, [open, reset, slot?.id]);
 
-  const startTime = watch("startTime");
-  const endTime = watch("endTime");
+  const startTime = useWatch<DriverBookingFormValues, "startTime">({
+    control,
+    name: "startTime",
+  });
+  const endTime = useWatch<DriverBookingFormValues, "endTime">({
+    control,
+    name: "endTime",
+  });
   const rate = slot ? getRate(parkingLocation, slot.vehicleType) : 0;
   const estimatedAmount = useMemo(() => {
     if (!startTime || !endTime) return 0;
@@ -226,7 +238,7 @@ export function DriverSlotBookingDialog({
                 <Input
                   id="driver-start-time"
                   type="datetime-local"
-                  min={defaultStartTime}
+                  min={defaultTimes.startTime}
                   {...register("startTime")}
                 />
                 {errors.startTime && (
@@ -241,7 +253,7 @@ export function DriverSlotBookingDialog({
                 <Input
                   id="driver-end-time"
                   type="datetime-local"
-                  min={startTime || defaultStartTime}
+                  min={startTime || defaultTimes.startTime}
                   {...register("endTime")}
                 />
                 {errors.endTime && (

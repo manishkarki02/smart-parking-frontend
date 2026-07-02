@@ -1,6 +1,12 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { AdminDriversPage } from "@/features/admin/pages/AdminDriversPage";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/_app/admin/drivers")({
-  component: AdminDriversPage,
+  beforeLoad: () => {
+    throw redirect({
+      to: "/admin/users",
+      search: {
+        role: "DRIVER",
+      },
+    });
+  },
 });

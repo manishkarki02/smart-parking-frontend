@@ -41,6 +41,7 @@ export type SplitDataTableProps<T> = {
   emptyState?: ReactNode;
   loadingRowCount?: number;
   rowClassName?: (row: T) => string;
+  splitContainerClassName?: string;
 };
 
 function shouldIgnoreRowClick(target: EventTarget | null) {
@@ -222,6 +223,7 @@ export function SplitDataTable<T>({
   emptyState,
   loadingRowCount = 5,
   rowClassName,
+  splitContainerClassName,
 }: SplitDataTableProps<T>) {
   const [tableWidth, setTableWidth] = useState(60);
   const isDesktop = useMediaQuery("(min-width: 1024px)");
@@ -280,7 +282,12 @@ export function SplitDataTable<T>({
       {toolbar}
 
       {hasDetail && isDesktop ? (
-        <div className="flex min-h-155 w-full overflow-hidden rounded-lg">
+        <div
+          className={cn(
+            "flex min-h-155 w-full overflow-hidden rounded-lg",
+            splitContainerClassName,
+          )}
+        >
           <div
             className="h-full min-w-0 shrink-0 overflow-hidden pr-4"
             style={{ width: `${tableWidth}%` }}

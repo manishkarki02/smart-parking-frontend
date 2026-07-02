@@ -10,6 +10,7 @@ export const API_BASE = {
   VENDORS: "/vendors",
   ADMIN: "/admin",
   PAYMENT: "/payments",
+  USERS: "/users",
 } as const;
 
 // ─── Auth ─────────────────────────────────────────────────────────────────────
@@ -19,6 +20,11 @@ export const AUTH_ROUTES = {
   REFRESH: "/refresh",
   LOGOUT: "/logout",
   LOGOUT_ALL: "/logout-all",
+} as const;
+
+// ─── Users ───────────────────────────────────────────────────────────────────
+export const USER_ROUTES = {
+  ME: "/me",
 } as const;
 
 // ─── Parking ──────────────────────────────────────────────────────────────────
@@ -60,6 +66,9 @@ export const ADMIN_ROUTES = {
   BOOKINGS: "/bookings",
   USERS: "/users",
   VENDORS: "/vendors",
+  PAYMENTS: "/payments",
+  PAYMENT_SUMMARY: "/payments/summary",
+  PAYMENT_BY_ID: (id: number | string) => `/payments/${id}`,
   VENDOR_APPROVE: (id: number | string) => `/vendors/${id}/approve`,
   VENDOR_BY_ID: (id: number | string) => `/vendors/${id}`,
   USER_BAN: (id: number | string) => `/users/${id}/ban`,
@@ -71,4 +80,6 @@ export const ADMIN_ROUTES = {
 export const PAYMENT_ROUTES = {
   KHALTI_INITIATE: "/khalti/initiate",
   KHALTI_VERIFY: "/khalti/verify",
+  ME: "/me",
+  ME_BY_ID: (id: number | string) => `/me/${id}`,
 } as const;

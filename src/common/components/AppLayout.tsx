@@ -21,11 +21,13 @@ import {
   Car,
   MapPin,
   CalendarCheck,
+  CalendarClock,
+  CreditCard,
   LayoutDashboard,
   Users,
-  Building2,
   LogOut,
-  ParkingCircle,
+  Settings as SettingsIcon,
+  Wallet,
   type LucideIcon,
 } from "lucide-react";
 import {
@@ -55,15 +57,27 @@ const navItems: NavItem[] = [
     roles: ["DRIVER"],
   },
   {
-    label: "Parkings",
+    label: "Find Parking",
     to: "/parkings/map",
     icon: MapPin,
     roles: ["DRIVER"],
   },
   {
-    label: "Bookings",
+    label: "My Bookings",
     to: "/bookings",
     icon: CalendarCheck,
+    roles: ["DRIVER"],
+  },
+  {
+    label: "Payment History",
+    to: "/payments",
+    icon: CreditCard,
+    roles: ["DRIVER"],
+  },
+  {
+    label: "Profile / Settings",
+    to: "/profile",
+    icon: SettingsIcon,
     roles: ["DRIVER"],
   },
   {
@@ -73,15 +87,27 @@ const navItems: NavItem[] = [
     roles: ["VENDOR"],
   },
   {
-    label: "Parkings",
+    label: "My Locations",
     to: "/vendor/parkings",
-    icon: ParkingCircle,
+    icon: MapPin,
     roles: ["VENDOR"],
   },
   {
     label: "Bookings",
     to: "/vendor/bookings",
-    icon: CalendarCheck,
+    icon: CalendarClock,
+    roles: ["VENDOR"],
+  },
+  {
+    label: "Revenue",
+    to: "/vendor/earnings",
+    icon: Wallet,
+    roles: ["VENDOR"],
+  },
+  {
+    label: "Settings",
+    to: "/vendor/settings",
+    icon: SettingsIcon,
     roles: ["VENDOR"],
   },
   {
@@ -91,15 +117,15 @@ const navItems: NavItem[] = [
     roles: ["ADMIN"],
   },
   {
-    label: "Vendors",
-    to: "/admin/vendors",
-    icon: Building2,
+    label: "Users",
+    to: "/admin/users",
+    icon: Users,
     roles: ["ADMIN"],
   },
   {
-    label: "Drivers",
-    to: "/admin/drivers",
-    icon: Users,
+    label: "Payments",
+    to: "/admin/payments",
+    icon: CreditCard,
     roles: ["ADMIN"],
   },
 ];
@@ -125,9 +151,9 @@ export function AppLayout({
       <PageHeaderContext.Provider value={pageHeaderValue}>
         <AppSidebar />
 
-        <SidebarInset>
+        <SidebarInset className="min-w-0 overflow-x-hidden">
           {showHeader ? (
-            <header className="sticky top-0 z-30 flex h-16 shrink-0 items-center border-b bg-background/95 px-4 backdrop-blur supports-backdrop-filter:bg-background/80 md:px-6">
+            <header className="sticky top-0 z-30 flex min-h-16 shrink-0 items-center border-b bg-white px-4 backdrop-blur supports-backdrop-filter:bg-white/90 md:px-6">
               <div className="flex min-w-0 flex-1 items-center gap-3">
                 <div className="flex min-w-0 items-center gap-2 md:hidden">
                   <Car className="size-5 shrink-0 text-primary" />
@@ -163,7 +189,10 @@ export function AppLayout({
           ) : null}
 
           <main
-            className={cn("flex-1 overflow-y-auto p-4 md:p-6", mainClassName)}
+            className={cn(
+              "min-w-0 flex-1 overflow-x-hidden overflow-y-auto p-4 md:p-6",
+              mainClassName,
+            )}
           >
             {children}
           </main>
@@ -225,11 +254,16 @@ function AppSidebar() {
                 const Icon = item.icon;
 
                 return (
-                  <SidebarMenuItem key={item.to}>
+                  <SidebarMenuItem key={`${item.label}-${item.to}`}>
                     <SidebarMenuButton
                       asChild
                       isActive={isActive}
                       tooltip={item.label}
+                      className={cn(
+                        "text-slate-600 hover:bg-slate-50 hover:text-slate-950",
+                        isActive &&
+                          "bg-blue-50 text-blue-600 hover:bg-blue-50 hover:text-blue-600",
+                      )}
                     >
                       <Link to={item.to} onClick={() => setOpenMobile(false)}>
                         <Icon />

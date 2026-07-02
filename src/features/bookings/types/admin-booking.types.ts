@@ -23,3 +23,34 @@ export interface AdminBooking {
   vehicleType: "TWO_WHEELER" | "FOUR_WHEELER";
   walkIn: boolean;
 }
+
+export type AdminBookingStatusFilter =
+  | "ALL"
+  | "PENDING"
+  | "CONFIRMED"
+  | "OCCUPIED"
+  | "COMPLETED"
+  | "CANCELLED";
+
+export type AdminPaymentStatusFilter =
+  | "ALL"
+  | "PENDING"
+  | "SUCCESS"
+  | "FAILED"
+  | "N_A";
+
+export type AdminBookingFilters = {
+  search: string;
+  status: AdminBookingStatusFilter;
+  paymentStatus: AdminPaymentStatusFilter;
+  date: string | null;
+  page: number;
+  pageSize: number;
+};
+
+export type AdminBookingStats = {
+  totalBookings: number;
+  occupied: number;
+  completed: number;
+  cancelled: number;
+};

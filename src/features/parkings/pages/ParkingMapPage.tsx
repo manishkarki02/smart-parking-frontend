@@ -1,358 +1,728 @@
-import { Link, useNavigate } from "@tanstack/react-router";
-import { AppLayout } from "@/common/components/AppLayout";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "@tanstack/react-router";
 import {
-  ArrowLeft,
+  AdvancedMarker,
+  InfoWindow,
+  Map,
+  MapControl,
+  ControlPosition,
+  useMap,
+} from "@vis.gl/react-google-maps";
+import {
+  Bike,
+  Car,
   ChevronLeft,
   ChevronRight,
+  CircleParking,
+  Crosshair,
   Loader2,
+  Minus,
   MapPin,
   Navigation,
-  X,
+  Plus,
+  RefreshCcw,
+  UserRound,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import useParkingSlots from "@/features/parkings/hooks/useParkingSlots";
-// import { LeafletParkingOverviewMap } from "@/common/components/maps/LeafletParkingOverviewMap";
-// import { LeafletDirectionsMap } from "@/common/components/maps/LeafletDirectionsMap";
-import { ParkingOverviewMap } from "@/common/components/maps/ParkingOverviewMap";
-import { DirectionsMap } from "@/common/components/maps/DirectionsMap";
+
+import { AppLayout } from "@/common/components/AppLayout";
+import { PageHeader } from "@/common/components/PageHeader";
 import { MapProvider } from "@/common/components/maps/MapProvider";
-import type { ParkingLocation } from "@/features/parkings/types/parking.types";
 import { useGeolocation } from "@/common/hooks/maps/useGeolocation";
+import useCustomQuery from "@/common/hooks/useCustomQuery";
 import { useAuthGuard } from "@/common/hooks/use-auth-guard";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+import { queryKeys } from "@/config/query-keys";
+import { getAllSlots } from "@/features/parkings/services/parking.service";
+import type { ParkingLocation } from "@/features/parkings/types/parking.types";
+import { cn } from "@/lib/utils";
+
+const DEFAULT_CENTER = { lat: 27.7172, lng: 85.324 };
+
+type LatLng = {
+  lat: number;
+  lng: number;
+};
+
+type AvailabilityState = "available" | "almostFull" | "full";
+
+type EnrichedParkingLocation = ParkingLocation & {
+  displayDistance?: number;
+};
+
+const availabilityStyles: Record<
+  AvailabilityState,
+  {
+    label: string;
+    badge: string;
+    marker: string;
+    markerRing: string;
+  }
+> = {
+  available: {
+    label: "Available",
+    badge: "border-green-200 bg-green-50 text-green-700",
+    marker: "bg-green-600 text-white",
+    markerRing: "ring-green-200",
+  },
+  almostFull: {
+    label: "Almost Full",
+    badge: "border-amber-200 bg-amber-50 text-amber-700",
+    marker: "bg-amber-600 text-white",
+    markerRing: "ring-amber-200",
+  },
+  full: {
+    label: "Full",
+    badge: "border-red-200 bg-red-50 text-red-700",
+    marker: "bg-slate-500 text-white",
+    markerRing: "ring-slate-200",
+  },
+};
 
 export function ParkingMapPage() {
   const { isAuthorized } = useAuthGuard({ allowedRoles: ["DRIVER"] });
-  const { locations, isLoading } = useParkingSlots();
-  const { state: geoState, locate } = useGeolocation();
   const navigate = useNavigate();
+  const { state: geoState, locate } = useGeolocation();
+  const [selectedParkingId, setSelectedParkingId] = useState<string | null>(
+    null,
+  );
+  const [listOpen, setListOpen] = useState(true);
 
-  const [directionsTarget, setDirectionsTarget] =
-    useState<ParkingLocation | null>(null);
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const {
+    data: locations = [],
+    isLoading,
+    isError,
+    refetch,
+  } = useCustomQuery({
+    key: queryKeys.parking.available(),
+    queryFn: getAllSlots,
+    options: {
+      enabled: isAuthorized,
+    },
+  });
 
-  const userCoords =
-    geoState.status === "located"
-      ? { lat: geoState.lat, lng: geoState.lng }
-      : null;
+  const userLocation = getUserLocation(geoState);
+  const enrichedLocations = useMemo(
+    () =>
+      locations.map((location) => ({
+        ...location,
+        displayDistance:
+          location.distance ??
+          (userLocation
+            ? calculateDistanceKm(userLocation, {
+                lat: location.latitude,
+                lng: location.longitude,
+              })
+            : undefined),
+      })),
+    [locations, userLocation],
+  );
 
-  const handleGetDirections = (spot: ParkingLocation) => {
-    locate();
-    setDirectionsTarget(spot);
-  };
+  const selectedLocation =
+    enrichedLocations.find((location) => location.id === selectedParkingId) ??
+    null;
 
   if (!isAuthorized) {
     return null;
   }
 
+  function viewParking(location: ParkingLocation) {
+    navigate({
+      to: "/parkings/$id",
+      params: { id: location.id },
+    });
+  }
+
   return (
-    <AppLayout showHeader={false} mainClassName="p-0 md:p-0">
-      {/*
-        This wrapper fills exactly the remaining viewport below the sticky 64px header.
-        `overflow-hidden` prevents any scroll bleed.
-      */}
-      <div className="relative h-screen w-full overflow-hidden">
-        {/* ── Full-bleed map ── */}
-        <div className="absolute inset-0">
-          {isLoading ? (
-            <div className="flex flex-col items-center justify-center h-full gap-3 text-muted-foreground bg-muted/20">
-              <Loader2 className="w-10 h-10 animate-spin text-primary" />
-              <p className="text-sm font-medium">Loading parking locations…</p>
-            </div>
-          ) : (
-            /*
-              Override the shared lp-wrapper / lp-map-area fixed heights so
-              ParkingOverviewMap and DirectionsMap stretch to fill the parent.
-            */
-            <div
-              className="h-full w-full"
-              style={{
-                ["--lp-map-height" as string]: "100%",
-              }}
-            >
-              <style>{`
-                .lp-map-fullscreen .lp-wrapper {
-                  height: 100%;
-                  border-radius: 0;
-                  gap: 0;
-                }
-                .lp-map-fullscreen .lp-map-area {
-                  height: 100%;
-                  flex: 1;
-                  border-radius: 0;
-                  border: none;
-                }
-                .lp-map-fullscreen .lp-footer {
-                  position: absolute;
-                  bottom: 8px;
-                  left: 12px;
-                  background: rgba(255,255,255,0.85);
-                  backdrop-filter: blur(6px);
-                  padding: 4px 10px;
-                  border-radius: 999px;
-                  font-size: 0.75rem;
-                  box-shadow: 0 1px 6px rgba(0,0,0,0.12);
-                  z-index: 5;
-                }
-              `}</style>
-              <div className="lp-map-fullscreen h-full">
-                <MapProvider>
-                  {!directionsTarget ? (
-                    <ParkingOverviewMap
-                      spots={locations ?? []}
-                      onBook={(spot) =>
-                        navigate({
-                          to: "/parkings/$id",
-                          params: { id: spot.id.toString() },
-                        })
-                      }
-                    />
-                  ) : (
-                    <div className="h-full flex flex-col">
-                      <div className="flex-1 min-h-0">
-                        {userCoords ? (
-                          <DirectionsMap
-                            origin={userCoords}
-                            destination={{
-                              lat: directionsTarget.latitude,
-                              lng: directionsTarget.longitude,
-                            }}
-                            destinationName={directionsTarget.name}
-                          />
-                        ) : (
-                          <div className="h-full flex flex-col items-center justify-center gap-3 text-muted-foreground bg-muted/20">
-                            <Loader2 className="w-8 h-8 animate-spin text-primary" />
-                            <p className="text-sm">
-                              Waiting for your location...
-                            </p>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  )}
-                </MapProvider>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* ── Floating top-left controls ── */}
-        <div className="absolute top-3 left-3 z-10 flex items-center gap-2">
-          {/* Back button */}
-          <Link to="/">
-            <Button
-              size="sm"
-              variant="secondary"
-              className="gap-1.5 shadow-md backdrop-blur-sm bg-background/90 border"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              Back
-            </Button>
-          </Link>
-
-          {/* Page title pill */}
-          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full shadow-md backdrop-blur-sm bg-background/90 border text-sm font-semibold">
-            <MapPin className="w-4 h-4 text-primary" />
-            {directionsTarget ? (
-              <span>
-                Directions to{" "}
-                <span className="text-primary">{directionsTarget.name}</span>
-              </span>
-            ) : (
-              <span>Parking Map</span>
-            )}
+    <AppLayout mainClassName="overflow-hidden bg-slate-50 p-0 md:p-0">
+      <PageHeader
+        title="Find Parking"
+        content={
+          <div className="min-w-0 py-1">
+            <h1 className="truncate text-lg font-semibold tracking-tight text-slate-950">
+              Find Parking
+            </h1>
+            <p className="truncate text-sm text-slate-500">
+              View available parking locations near you
+            </p>
           </div>
+        }
+      />
 
-          {/* Clear directions */}
-          {directionsTarget && (
-            <Button
-              size="sm"
-              variant="secondary"
-              className="gap-1.5 shadow-md backdrop-blur-sm bg-background/90 border"
-              onClick={() => setDirectionsTarget(null)}
-            >
-              <X className="w-4 h-4" />
-              Clear
-            </Button>
-          )}
-        </div>
-
-        {/* ── Floating stats pill (top-right) ── */}
-        {!isLoading && locations && !directionsTarget && (
-          <div className="absolute top-3 right-3 z-10 flex items-center gap-3 px-3 py-1.5 rounded-full shadow-md backdrop-blur-sm bg-background/90 border text-xs font-medium">
-            <span className="flex items-center gap-1">
-              <span className="w-2 h-2 rounded-full bg-green-500 inline-block" />
-              {locations.filter((l) => l.availableSlots > 3).length}
-            </span>
-            <span className="flex items-center gap-1">
-              <span className="w-2 h-2 rounded-full bg-orange-500 inline-block" />
-              {
-                locations.filter(
-                  (l) => l.availableSlots > 0 && l.availableSlots <= 3,
-                ).length
-              }
-            </span>
-            <span className="flex items-center gap-1">
-              <span className="w-2 h-2 rounded-full bg-red-500 inline-block" />
-              {locations.filter((l) => l.availableSlots === 0).length}
-            </span>
-          </div>
+      <div
+        className={cn(
+          "relative grid min-h-[calc(100vh-4rem)] min-w-0 grid-cols-1 overflow-hidden transition-[grid-template-columns] duration-300 lg:grid-cols-[minmax(320px,400px)_minmax(0,1fr)]",
+          !listOpen && "lg:grid-cols-[0px_minmax(0,1fr)]",
         )}
-
-        {/* ── Floating directions info bar ── */}
-        {directionsTarget && (
-          <div className="absolute top-3 right-3 z-10 flex items-center gap-2 px-3 py-1.5 rounded-full shadow-md backdrop-blur-sm bg-background/90 border text-xs font-medium">
-            <Navigation className="w-3.5 h-3.5 text-primary" />
-            <span className="text-muted-foreground">Getting directions…</span>
-          </div>
-        )}
-
-        {/* ── Collapsible floating sidebar ── */}
-        {!isLoading && !directionsTarget && (
-          <>
-            {/* Toggle tab */}
-            <button
-              onClick={() => setSidebarOpen((o) => !o)}
-              className="absolute bottom-1/2 translate-y-1/2 z-20 flex items-center justify-center w-6 h-12 rounded-r-lg bg-background/95 border border-l-0 shadow-md transition-all"
-              style={{ left: sidebarOpen ? "320px" : "0px" }}
-              title={sidebarOpen ? "Hide list" : "Show list"}
-            >
-              {sidebarOpen ? (
-                <ChevronLeft className="w-4 h-4 text-muted-foreground" />
-              ) : (
-                <ChevronRight className="w-4 h-4 text-muted-foreground" />
-              )}
-            </button>
-
-            {/* Sidebar panel */}
-            <div
-              className="absolute top-0 left-0 bottom-0 z-10 flex flex-col bg-background/95 backdrop-blur-md border-r shadow-xl transition-transform duration-300"
-              style={{
-                width: "320px",
-                transform: sidebarOpen ? "translateX(0)" : "translateX(-320px)",
-              }}
-            >
-              {/* Sidebar header */}
-              <div className="flex items-center justify-between px-4 py-3 border-b shrink-0">
-                <p className="text-sm font-bold">
-                  {locations?.length ?? 0} Parking Spots
+      >
+        <aside
+          className={cn(
+            "min-w-0 overflow-hidden border-b border-slate-200 bg-white transition-opacity duration-200 lg:border-b-0 lg:border-r",
+            !listOpen && "pointer-events-none opacity-0 lg:border-r-0",
+          )}
+          aria-hidden={!listOpen}
+        >
+          <div className="flex h-full max-h-[46vh] min-h-[360px] min-w-0 flex-col lg:max-h-none">
+            <div className="border-b border-slate-200 px-4 py-4">
+              <MapLegend userLocation={Boolean(userLocation)} />
+              {geoState.status === "error" ? (
+                <p className="mt-2 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-700">
+                  {geoState.message}
                 </p>
-                <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                  <span className="flex items-center gap-1">
-                    <span className="w-2 h-2 rounded-sm bg-green-500 inline-block" />{" "}
-                    Available
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <span className="w-2 h-2 rounded-sm bg-orange-500 inline-block" />{" "}
-                    Low
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <span className="w-2 h-2 rounded-sm bg-red-500 inline-block" />{" "}
-                    Full
-                  </span>
-                </div>
-              </div>
-
-              {/* Spot list */}
-              <div className="flex-1 overflow-y-auto p-3 space-y-2">
-                {locations?.map((spot) => {
-                  const isFull = spot.availableSlots === 0;
-                  const isLow = spot.availableSlots <= 3 && !isFull;
-                  const dotColor = isFull
-                    ? "bg-red-500"
-                    : isLow
-                      ? "bg-orange-500"
-                      : "bg-green-500";
-                  const badgeColor = isFull
-                    ? "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
-                    : isLow
-                      ? "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400"
-                      : "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400";
-                  const statusText = isFull
-                    ? "Full"
-                    : isLow
-                      ? "Low"
-                      : "Available";
-
-                  return (
-                    <div
-                      key={spot.id}
-                      className="rounded-xl border p-3 cursor-pointer hover:border-primary/50 hover:shadow-sm bg-card transition-all group"
-                      onClick={() => handleGetDirections(spot)}
-                    >
-                      <div className="flex items-start gap-2">
-                        <span
-                          className={`mt-1 w-2 h-2 rounded-full shrink-0 ${dotColor}`}
-                        />
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-start justify-between gap-1">
-                            <p className="font-semibold text-sm truncate leading-tight">
-                              {spot.name}
-                            </p>
-                            <span
-                              className={`shrink-0 text-xs font-semibold px-1.5 py-0.5 rounded-full ${badgeColor}`}
-                            >
-                              {statusText}
-                            </span>
-                          </div>
-                          <p className="text-xs text-muted-foreground truncate mt-0.5">
-                            {spot.address}
-                          </p>
-                          <div className="flex items-center justify-between mt-2 gap-2">
-                            <span className="text-xs text-muted-foreground">
-                              {isFull ? (
-                                <span className="text-red-500 font-medium">
-                                  No slots
-                                </span>
-                              ) : (
-                                <>
-                                  <span className="text-foreground font-bold">
-                                    {spot.availableSlots}
-                                  </span>{" "}
-                                  slots left
-                                </>
-                              )}
-                            </span>
-                            <div className="flex items-center gap-1.5">
-                              <Button
-                                size="sm"
-                                variant="ghost"
-                                className="text-xs h-6 px-2"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  navigate({
-                                    to: "/parkings/$id",
-                                    params: { id: spot.id.toString() },
-                                  });
-                                }}
-                              >
-                                Details
-                              </Button>
-                              <Button
-                                size="sm"
-                                variant="default"
-                                className="text-xs h-6 px-2 gap-1"
-                                disabled={isFull}
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleGetDirections(spot);
-                                }}
-                              >
-                                <Navigation className="w-3 h-3" />
-                                Go
-                              </Button>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
+              ) : null}
             </div>
-          </>
-        )}
+
+            <div className="min-h-0 flex-1 space-y-3 overflow-y-auto p-4">
+              {isLoading ? (
+                <ParkingListSkeleton />
+              ) : isError ? (
+                <ParkingErrorState onRetry={() => void refetch()} />
+              ) : enrichedLocations.length === 0 ? (
+                <ParkingEmptyState />
+              ) : (
+                enrichedLocations.map((location) => (
+                  <DriverParkingListCard
+                    key={location.id}
+                    location={location}
+                    selected={location.id === selectedLocation?.id}
+                    onSelect={() => setSelectedParkingId(location.id)}
+                    onView={() => viewParking(location)}
+                  />
+                ))
+              )}
+            </div>
+          </div>
+        </aside>
+
+        <Button
+          type="button"
+          variant="outline"
+          size="icon"
+          className={cn(
+            "absolute left-3 top-3 z-20 size-8 rounded-full bg-white shadow-sm lg:left-[calc(min(400px,100%-1rem)-1rem)]",
+            !listOpen && "lg:left-3",
+          )}
+          onClick={() => setListOpen((open) => !open)}
+          aria-label={listOpen ? "Collapse parking list" : "Expand parking list"}
+        >
+          {listOpen ? (
+            <ChevronLeft className="size-4" />
+          ) : (
+            <ChevronRight className="size-4" />
+          )}
+        </Button>
+
+        <section className="relative min-h-[420px] min-w-0 overflow-hidden bg-slate-100 lg:min-h-0">
+          <MapProvider>
+            <DriverParkingMap
+              locations={enrichedLocations}
+              selectedLocation={selectedLocation}
+              userLocation={userLocation}
+              isLoading={isLoading}
+              onSelect={setSelectedParkingId}
+              onView={viewParking}
+              onLocate={locate}
+              locating={geoState.status === "locating"}
+            />
+          </MapProvider>
+        </section>
       </div>
     </AppLayout>
   );
+}
+
+function DriverParkingMap({
+  locations,
+  selectedLocation,
+  userLocation,
+  isLoading,
+  onSelect,
+  onView,
+  onLocate,
+  locating,
+}: {
+  locations: EnrichedParkingLocation[];
+  selectedLocation: EnrichedParkingLocation | null;
+  userLocation: LatLng | null;
+  isLoading: boolean;
+  onSelect: (id: string | null) => void;
+  onView: (location: ParkingLocation) => void;
+  onLocate: () => void;
+  locating: boolean;
+}) {
+  return (
+    <div className="h-full min-h-[420px] w-full overflow-hidden lg:min-h-full">
+      <Map
+        style={{ width: "100%", height: "100%" }}
+        defaultCenter={DEFAULT_CENTER}
+        defaultZoom={14}
+        mapId="driver-find-parking"
+        disableDefaultUI
+        gestureHandling="greedy"
+      >
+        <MapViewportSync
+          selectedLocation={selectedLocation}
+          userLocation={userLocation}
+          locations={locations}
+        />
+
+        {userLocation ? <UserLocationMarker location={userLocation} /> : null}
+
+        {locations.map((location) => (
+          <AdvancedMarker
+            key={location.id}
+            position={{ lat: location.latitude, lng: location.longitude }}
+            onClick={() => onSelect(location.id)}
+          >
+            <ParkingMapMarker
+              location={location}
+              selected={location.id === selectedLocation?.id}
+            />
+          </AdvancedMarker>
+        ))}
+
+        {selectedLocation ? (
+          <InfoWindow
+            position={{
+              lat: selectedLocation.latitude,
+              lng: selectedLocation.longitude,
+            }}
+            pixelOffset={[0, -44]}
+            onCloseClick={() => onSelect(null)}
+          >
+            <ParkingMapPopup
+              location={selectedLocation}
+              onView={() => onView(selectedLocation)}
+            />
+          </InfoWindow>
+        ) : null}
+
+        <MapControl position={ControlPosition.RIGHT_TOP}>
+          <MapControlButtons onLocate={onLocate} locating={locating} />
+        </MapControl>
+      </Map>
+
+      {isLoading ? (
+        <div className="absolute inset-0 z-10 flex items-center justify-center bg-white/70 backdrop-blur-sm">
+          <div className="flex items-center gap-2 rounded-lg border bg-white px-4 py-2 text-sm font-medium text-slate-600 shadow-sm">
+            <Loader2 className="size-4 animate-spin text-blue-600" />
+            Loading parking locations...
+          </div>
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+function MapControlButtons({
+  onLocate,
+  locating,
+}: {
+  onLocate: () => void;
+  locating: boolean;
+}) {
+  const map = useMap();
+
+  function zoomBy(delta: number) {
+    if (!map) return;
+    map.setZoom((map.getZoom() ?? 14) + delta);
+  }
+
+  return (
+    <div className="m-3 flex flex-col overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+      <button
+        type="button"
+        className="flex size-9 items-center justify-center border-b border-slate-200 text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-70"
+        onClick={() => zoomBy(1)}
+        title="Zoom in"
+      >
+        <Plus className="size-4" />
+      </button>
+      <button
+        type="button"
+        className="flex size-9 items-center justify-center border-b border-slate-200 text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-70"
+        onClick={() => zoomBy(-1)}
+        title="Zoom out"
+      >
+        <Minus className="size-4" />
+      </button>
+      <button
+        type="button"
+        className="flex size-9 items-center justify-center text-blue-600 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-70"
+        onClick={onLocate}
+        disabled={locating}
+        title="Use current location"
+      >
+        {locating ? (
+          <Loader2 className="size-4 animate-spin" />
+        ) : (
+          <Crosshair className="size-4" />
+        )}
+      </button>
+    </div>
+  );
+}
+
+function MapViewportSync({
+  selectedLocation,
+  userLocation,
+  locations,
+}: {
+  selectedLocation: EnrichedParkingLocation | null;
+  userLocation: LatLng | null;
+  locations: EnrichedParkingLocation[];
+}) {
+  const map = useMap();
+
+  useEffect(() => {
+    if (!map) return;
+
+    if (selectedLocation) {
+      map.panTo({
+        lat: selectedLocation.latitude,
+        lng: selectedLocation.longitude,
+      });
+      map.setZoom(Math.max(map.getZoom() ?? 14, 15));
+      return;
+    }
+
+    if (userLocation) {
+      map.panTo(userLocation);
+      map.setZoom(14);
+      return;
+    }
+
+    if (locations.length > 0) {
+      map.panTo({
+        lat: locations[0].latitude,
+        lng: locations[0].longitude,
+      });
+    }
+  }, [locations, map, selectedLocation, userLocation]);
+
+  return null;
+}
+
+function DriverParkingListCard({
+  location,
+  selected,
+  onSelect,
+  onView,
+}: {
+  location: EnrichedParkingLocation;
+  selected: boolean;
+  onSelect: () => void;
+  onView: () => void;
+}) {
+  const availability = getAvailability(location);
+  const isFull = availability === "full";
+
+  return (
+    <div
+      role="button"
+      tabIndex={0}
+      className={cn(
+        "w-full rounded-lg border bg-white p-4 text-left transition hover:border-blue-200 hover:shadow-sm",
+        selected && "border-blue-500 bg-blue-50/70 shadow-sm",
+        isFull && "bg-slate-50 text-slate-500",
+      )}
+      onClick={onSelect}
+      onKeyDown={(event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          onSelect();
+        }
+      }}
+    >
+      <div className="flex min-w-0 items-start justify-between gap-3">
+        <div className="min-w-0">
+          <p className="truncate text-sm font-semibold text-slate-950">
+            {location.name}
+          </p>
+          <p className="mt-2 flex min-w-0 items-center gap-1.5 text-xs text-slate-500">
+            <MapPin className="size-3.5 shrink-0" />
+            <span className="truncate">{location.address}</span>
+          </p>
+        </div>
+        <AvailabilityBadge state={availability} />
+      </div>
+
+      <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-slate-600">
+        <span className="inline-flex items-center gap-1.5">
+          <Bike className="size-3.5" />
+          {formatSlotCount(location.availableTwoWheelerSlots)} avail.
+        </span>
+        <span className="inline-flex items-center gap-1.5">
+          <Car className="size-3.5" />
+          {formatSlotCount(location.availableFourWheelerSlots)} avail.
+        </span>
+        {location.displayDistance != null ? (
+          <span className="ml-auto inline-flex items-center gap-1.5">
+            <Navigation className="size-3.5" />
+            {formatDistance(location.displayDistance)}
+          </span>
+        ) : null}
+      </div>
+
+      <div className="mt-3 flex items-center justify-between gap-3">
+        <p className="min-w-0 truncate text-xs text-slate-600">
+          {formatRates(location)}
+        </p>
+        <Button
+          type="button"
+          size="sm"
+          className="h-8 shrink-0 gap-1.5 px-3"
+          variant={isFull ? "outline" : "default"}
+          onClick={(event) => {
+            event.stopPropagation();
+            onView();
+          }}
+        >
+          View
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+function ParkingMapMarker({
+  location,
+  selected,
+}: {
+  location: EnrichedParkingLocation;
+  selected: boolean;
+}) {
+  const availability = getAvailability(location);
+  const styles = availabilityStyles[availability];
+
+  return (
+    <div
+      className={cn(
+        "flex size-10 cursor-pointer items-center justify-center rounded-full border-2 border-white shadow-lg ring-4",
+        styles.marker,
+        styles.markerRing,
+        selected && "scale-110 bg-blue-600 ring-blue-200",
+      )}
+    >
+      <CircleParking className="size-5" />
+    </div>
+  );
+}
+
+function UserLocationMarker({ location }: { location: LatLng }) {
+  return (
+    <AdvancedMarker position={location}>
+      <div className="relative flex flex-col items-center">
+        <div className="flex size-10 items-center justify-center rounded-full border-2 border-white bg-blue-600 text-white shadow-lg ring-4 ring-blue-200">
+          <UserRound className="size-5" />
+        </div>
+        <span className="-mt-1 size-3 rotate-45 border-b-2 border-r-2 border-white bg-blue-600 shadow-md" />
+      </div>
+    </AdvancedMarker>
+  );
+}
+
+function ParkingMapPopup({
+  location,
+  onView,
+}: {
+  location: EnrichedParkingLocation;
+  onView: () => void;
+}) {
+  const availability = getAvailability(location);
+
+  return (
+    <div className="w-64 max-w-[72vw] p-1 font-sans">
+      <div className="flex items-start justify-between gap-3">
+        <h2 className="min-w-0 truncate text-sm font-semibold text-slate-950">
+          {location.name}
+        </h2>
+        <AvailabilityBadge state={availability} />
+      </div>
+
+      <div className="mt-3 space-y-2 text-xs text-slate-600">
+        <p className="flex min-w-0 items-center gap-1.5">
+          <MapPin className="size-3.5 shrink-0" />
+          <span className="truncate">{location.address}</span>
+        </p>
+        {location.displayDistance != null ? (
+          <p className="flex items-center gap-1.5">
+            <Navigation className="size-3.5" />
+            {formatDistance(location.displayDistance)} away
+          </p>
+        ) : null}
+      </div>
+
+      <div className="mt-3 grid grid-cols-3 gap-2 border-y border-slate-200 py-3 text-center">
+        <SlotMetric label="Total avail." value={location.availableSlots} />
+        <SlotMetric label="2W slots" value={location.availableTwoWheelerSlots} />
+        <SlotMetric label="4W slots" value={location.availableFourWheelerSlots} />
+      </div>
+
+      <p className="mt-3 truncate text-xs text-slate-600">
+        {formatRates(location)}
+      </p>
+      <Button type="button" className="mt-3 h-8 w-full gap-1.5" onClick={onView}>
+        <CircleParking className="size-4" />
+        View Parking
+      </Button>
+    </div>
+  );
+}
+
+function SlotMetric({
+  label,
+  value,
+}: {
+  label: string;
+  value?: number;
+}) {
+  return (
+    <div>
+      <p className="text-sm font-semibold text-blue-600">
+        {value ?? "--"}
+      </p>
+      <p className="mt-1 text-[11px] text-slate-500">{label}</p>
+    </div>
+  );
+}
+
+function AvailabilityBadge({ state }: { state: AvailabilityState }) {
+  const styles = availabilityStyles[state];
+
+  return (
+    <Badge className={cn("shrink-0 rounded-full", styles.badge)}>
+      <span className="size-1.5 rounded-full bg-current" />
+      {styles.label}
+    </Badge>
+  );
+}
+
+function MapLegend({ userLocation }: { userLocation: boolean }) {
+  return (
+    <div className="flex flex-wrap items-center gap-x-3 gap-y-2 text-xs text-slate-700">
+      <span className="font-semibold text-slate-500">Legend:</span>
+      <LegendDot className="bg-green-600" label="Available" />
+      <LegendDot className="bg-amber-600" label="Almost Full" />
+      <LegendDot className="bg-slate-500" label="Full" />
+      {userLocation ? <LegendDot className="bg-blue-600" label="Your location" /> : null}
+    </div>
+  );
+}
+
+function LegendDot({ className, label }: { className: string; label: string }) {
+  return (
+    <span className="inline-flex items-center gap-1.5 whitespace-nowrap">
+      <span className={cn("size-2.5 rounded-full", className)} />
+      {label}
+    </span>
+  );
+}
+
+function ParkingListSkeleton() {
+  return (
+    <>
+      {Array.from({ length: 4 }).map((_, index) => (
+        <Card key={index} className="border-slate-200 bg-white shadow-none">
+          <CardContent className="space-y-3 p-4">
+            <Skeleton className="h-4 w-2/3" />
+            <Skeleton className="h-3 w-full" />
+            <div className="flex gap-3">
+              <Skeleton className="h-3 w-20" />
+              <Skeleton className="h-3 w-20" />
+            </div>
+            <Skeleton className="h-8 w-full" />
+          </CardContent>
+        </Card>
+      ))}
+    </>
+  );
+}
+
+function ParkingEmptyState() {
+  return (
+    <Card className="border-dashed border-slate-200 bg-white shadow-none">
+      <CardContent className="p-6 text-center">
+        <CircleParking className="mx-auto size-9 text-slate-400" />
+        <h2 className="mt-3 text-sm font-semibold text-slate-950">
+          No parking locations available
+        </h2>
+        <p className="mt-1 text-sm text-slate-500">
+          There are no parking locations to show right now.
+        </p>
+      </CardContent>
+    </Card>
+  );
+}
+
+function ParkingErrorState({ onRetry }: { onRetry: () => void }) {
+  return (
+    <Card className="border-red-100 bg-white shadow-none">
+      <CardContent className="p-5">
+        <h2 className="text-sm font-semibold text-slate-950">
+          Unable to load parking locations
+        </h2>
+        <p className="mt-1 text-sm text-slate-500">Please try again.</p>
+        <Button type="button" className="mt-4 gap-2" size="sm" onClick={onRetry}>
+          <RefreshCcw className="size-4" />
+          Retry
+        </Button>
+      </CardContent>
+    </Card>
+  );
+}
+
+function getAvailability(location: ParkingLocation): AvailabilityState {
+  if (location.availableSlots === 0) return "full";
+  const totalSlots = location.totalSlots ?? 0;
+  const occupancy =
+    totalSlots > 0
+      ? Math.round(((totalSlots - location.availableSlots) / totalSlots) * 100)
+      : 0;
+  return occupancy >= 80 ? "almostFull" : "available";
+}
+
+function getUserLocation(
+  state: ReturnType<typeof useGeolocation>["state"],
+): LatLng | null {
+  if (state.status !== "located") return null;
+  return { lat: state.lat, lng: state.lng };
+}
+
+function calculateDistanceKm(from: LatLng, to: LatLng): number {
+  const earthRadiusKm = 6371;
+  const dLat = toRadians(to.lat - from.lat);
+  const dLng = toRadians(to.lng - from.lng);
+  const lat1 = toRadians(from.lat);
+  const lat2 = toRadians(to.lat);
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLng / 2) ** 2;
+  return earthRadiusKm * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
+function toRadians(value: number) {
+  return (value * Math.PI) / 180;
+}
+
+function formatSlotCount(value?: number) {
+  return value ?? "--";
+}
+
+function formatDistance(distance: number) {
+  return `${distance.toFixed(distance < 10 ? 1 : 0)} km`;
+}
+
+function formatRates(location: ParkingLocation) {
+  const twoWheelerRate =
+    location.twoWheelerRatePerHour != null
+      ? `Rs. ${location.twoWheelerRatePerHour}/hr 2W`
+      : null;
+  const fourWheelerRate =
+    location.fourWheelerRatePerHour != null
+      ? `Rs. ${location.fourWheelerRatePerHour}/hr 4W`
+      : null;
+  return [twoWheelerRate, fourWheelerRate].filter(Boolean).join(" · ") || "Rates unavailable";
 }

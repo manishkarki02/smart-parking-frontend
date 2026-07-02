@@ -1,233 +1,189 @@
 import { useMemo, useState } from "react";
-import { Search } from "lucide-react";
+import {
+  CalendarCheck,
+  CarFront,
+  CheckCircle2,
+  RefreshCw,
+  XCircle,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   DataTablePagination,
-  InfoItem,
   SplitDataTable,
-  SplitDetailPanel,
   TableEmptyState,
-  TableToolbar,
-  type DataTableColumn,
 } from "@/common";
 import { PageHeader } from "@/common/components/PageHeader";
-import useCustomQuery from "@/common/hooks/useCustomQuery";
 import { useAuthGuard } from "@/common/hooks/use-auth-guard";
-import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import { queryKeys } from "@/config/query-keys";
-import { getAdminBookings } from "@/features/bookings/services/admin-bookings.service";
-import type { AdminBooking } from "@/features/bookings/types/admin-booking.types";
-import { BookingStatusBadge } from "@/features/bookings/components/BookingStatusBadge";
+import { getApiErrorMessage } from "@/common/utils/get-api-error-message";
+import { AdminBookingDetailPanel } from "@/features/bookings/components/AdminBookingDetailPanel";
+import { AdminBookingFiltersBar } from "@/features/bookings/components/AdminBookingFiltersBar";
+import { AdminBookingStatsCard } from "@/features/bookings/components/AdminBookingStatsCard";
 import {
-  formatBookingAmount,
-  formatBookingCustomerName,
-  formatBookingDate,
-  formatBookingDateTime,
-  formatBookingTime,
-  formatVehicleType,
-} from "@/features/bookings/utils/booking-formatters";
+  adminBookingCompactTableColumns,
+  adminBookingTableColumns,
+} from "@/features/bookings/components/AdminBookingsTable";
+import { useAdminBookings } from "@/features/bookings/hooks/useAdminBookings";
+import type {
+  AdminBooking,
+  AdminBookingFilters,
+} from "@/features/bookings/types/admin-booking.types";
+import {
+  filterAdminBookings,
+  getAdminBookingCustomerName,
+  getAdminBookingStats,
+  paginateAdminBookings,
+} from "@/features/bookings/utils/admin-booking.utils";
 
-function AdminBookingStatusBadge({ booking }: { booking: AdminBooking }) {
-  return (
-    <BookingStatusBadge
-      status={booking.status}
-      slotStatus={booking.slotStatus}
-    />
-  );
-}
-
-function AdminBookingDetailPanel({
-  booking,
-  onClose,
-}: {
-  booking: AdminBooking;
-  onClose: () => void;
-}) {
-  return (
-    <SplitDetailPanel
-      title={formatBookingCustomerName(booking)}
-      subtitle={booking.bookingId}
-      onClose={onClose}
-    >
-      <div className="space-y-4">
-        <section className="grid gap-3 sm:grid-cols-2">
-          <InfoItem label="Parking" value={booking.parkingLocationName} />
-          <InfoItem label="Slot" value={booking.slotNumber} />
-          <InfoItem
-            label="Vehicle type"
-            value={formatVehicleType(booking.vehicleType)}
-          />
-          <InfoItem label="Vehicle number" value={booking.vehicleNumber ?? "-"} />
-          <InfoItem label="Amount" value={formatBookingAmount(booking.totalAmount)} />
-          <InfoItem
-            label="Source"
-            value={booking.walkIn ? "Walk-in" : "Driver app"}
-          />
-        </section>
-
-        <section className="rounded-lg border p-3">
-          <h3 className="text-sm font-medium">Status</h3>
-          <div className="mt-3 flex flex-wrap gap-2">
-            <AdminBookingStatusBadge booking={booking} />
-            {booking.paymentStatus ? (
-              <Badge variant="outline">{booking.paymentStatus}</Badge>
-            ) : null}
-            {booking.slotStatus ? (
-              <Badge variant="secondary">{booking.slotStatus}</Badge>
-            ) : null}
-          </div>
-        </section>
-
-        <section className="grid gap-3 sm:grid-cols-2">
-          <InfoItem label="Customer" value={formatBookingCustomerName(booking)} />
-          <InfoItem label="Phone" value={booking.customerPhone ?? "-"} />
-          <InfoItem label="Driver ID" value={booking.driverId ?? "-"} />
-          <InfoItem label="Payment method" value={booking.paymentMethod ?? "-"} />
-          <InfoItem label="Payment ID" value={booking.paymentId ?? "-"} />
-          <InfoItem label="Paid at" value={formatBookingDateTime(booking.paidAt)} />
-        </section>
-
-        <section className="rounded-lg border p-3">
-          <h3 className="text-sm font-medium">Timeline</h3>
-          <div className="mt-3 space-y-3 text-sm">
-            <div className="flex justify-between gap-3">
-              <span className="text-muted-foreground">Start</span>
-              <span className="text-right font-medium">
-                {formatBookingDateTime(booking.startTime)}
-              </span>
-            </div>
-            <div className="flex justify-between gap-3">
-              <span className="text-muted-foreground">End</span>
-              <span className="text-right font-medium">
-                {formatBookingDateTime(booking.endTime)}
-              </span>
-            </div>
-            <div className="flex justify-between gap-3">
-              <span className="text-muted-foreground">Cancelled</span>
-              <span className="text-right font-medium">
-                {formatBookingDateTime(booking.cancelledAt)}
-              </span>
-            </div>
-          </div>
-        </section>
-      </div>
-    </SplitDetailPanel>
-  );
-}
-
-const columns: DataTableColumn<AdminBooking>[] = [
-  {
-    id: "bookingId",
-    header: "ID",
-    className: "font-mono",
-    cell: (booking) => `${booking.bookingId.slice(0, 8)}…`,
-    compact: true,
-  },
-  {
-    id: "driver",
-    header: "Driver",
-    cell: (booking) => (
-      <div>
-        <p className="font-medium">{formatBookingCustomerName(booking)}</p>
-        <p className="text-xs text-muted-foreground">
-          {booking.customerPhone ?? booking.vehicleNumber ?? "No phone"}
-        </p>
-      </div>
-    ),
-    compact: true,
-  },
-  {
-    id: "location",
-    header: "Location",
-    cell: (booking) => (
-      <span className="rounded-md border bg-muted/30 px-2 py-1 text-sm">
-        {booking.parkingLocationName}
-      </span>
-    ),
-  },
-  {
-    id: "slot",
-    header: "Slot",
-    cell: (booking) => (
-      <span className="rounded-md bg-primary/10 px-2 py-1 font-mono text-sm font-semibold text-primary">
-        {booking.slotNumber}
-      </span>
-    ),
-  },
-  {
-    id: "startTime",
-    header: "Time",
-    cell: (booking) => (
-      <div>
-        <p className="font-medium">
-          {formatBookingTime(booking.startTime)}-
-          {formatBookingTime(booking.endTime)}
-        </p>
-        <p className="text-xs text-muted-foreground">
-          {formatBookingDate(booking.startTime)}
-        </p>
-      </div>
-    ),
-  },
-  {
-    id: "status",
-    header: "Status",
-    cell: (booking) => <AdminBookingStatusBadge booking={booking} />,
-    compact: true,
-  },
-  {
-    id: "amount",
-    header: "Amount",
-    align: "right",
-    cell: (booking) => formatBookingAmount(booking.totalAmount),
-  },
-  {
-    id: "action",
-    header: "Action",
-    cell: () => (
-      <span data-row-action="true" className="text-muted-foreground">
-        -
-      </span>
-    ),
-  },
-];
+const DEFAULT_FILTERS: AdminBookingFilters = {
+  search: "",
+  status: "ALL",
+  paymentStatus: "ALL",
+  date: null,
+  page: 1,
+  pageSize: 10,
+};
 
 export function AdminBookingsPage() {
   const { isAuthorized } = useAuthGuard({ allowedRoles: ["ADMIN"] });
-  const [search, setSearch] = useState("");
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const [filters, setFilters] = useState<AdminBookingFilters>(DEFAULT_FILTERS);
   const [selectedBookingId, setSelectedBookingId] = useState<string | null>(null);
-
-  const { data, isLoading, isError } = useCustomQuery({
-    key: queryKeys.admin.bookings({ search, page }),
-    queryFn: () => getAdminBookings({ search, page }),
-    options: {
-      enabled: isAuthorized,
-    },
-  });
+  const {
+    data,
+    isLoading,
+    isError,
+    error,
+    refetch,
+    isFetching,
+  } = useAdminBookings(isAuthorized);
 
   const bookings = useMemo(() => data?.data ?? [], [data?.data]);
+  const stats = useMemo(() => getAdminBookingStats(bookings), [bookings]);
+  const filteredBookings = useMemo(
+    () => filterAdminBookings(bookings, filters),
+    [bookings, filters],
+  );
+  const pageCount = Math.max(
+    1,
+    Math.ceil(filteredBookings.length / filters.pageSize),
+  );
+  const currentPage = Math.min(filters.page, pageCount);
+  const paginatedBookings = useMemo(
+    () =>
+      paginateAdminBookings(
+        filteredBookings,
+        currentPage,
+        filters.pageSize,
+      ),
+    [currentPage, filteredBookings, filters.pageSize],
+  );
   const selectedBooking = useMemo(
     () =>
-      bookings.find((booking) => booking.bookingId === selectedBookingId) ??
-      null,
-    [bookings, selectedBookingId],
+      filteredBookings.find(
+        (booking) => booking.bookingId === selectedBookingId,
+      ) ?? null,
+    [filteredBookings, selectedBookingId],
+  );
+  const headerContent = useMemo(
+    () => (
+      <div className="min-w-0">
+        <p className="truncate text-lg font-semibold tracking-tight text-foreground">
+          Bookings
+        </p>
+        <p className="hidden truncate text-xs text-muted-foreground sm:block">
+          All platform bookings across drivers and vendors
+        </p>
+      </div>
+    ),
+    [],
   );
 
   if (!isAuthorized) {
     return null;
   }
 
+  if (isError) {
+    const message = getApiErrorMessage(error);
+    const readableMessage = Array.isArray(message) ? message.join(", ") : message;
+
+    return (
+      <>
+        <PageHeader
+          title="Bookings"
+          content={headerContent}
+        />
+        <Card className="rounded-lg border shadow-none">
+          <CardContent className="flex min-h-[420px] flex-col items-center justify-center gap-4 p-6 text-center">
+            <div className="flex size-12 items-center justify-center rounded-lg bg-destructive/10 text-destructive">
+              <RefreshCw className="size-6" aria-hidden="true" />
+            </div>
+            <div className="space-y-1">
+              <h1 className="text-xl font-semibold">Could not load bookings.</h1>
+              <p className="max-w-md text-sm text-muted-foreground">
+                {readableMessage || "Please try again."}
+              </p>
+            </div>
+            <Button
+              type="button"
+              onClick={() => void refetch()}
+              disabled={isFetching}
+            >
+              <RefreshCw aria-hidden="true" />
+              Try again
+            </Button>
+          </CardContent>
+        </Card>
+      </>
+    );
+  }
+
   return (
-    <>
-      <PageHeader title="Bookings" />
+    <div className="space-y-6">
+      <PageHeader title="Bookings" content={headerContent} />
+
+      {isLoading ? (
+        <BookingStatsSkeleton />
+      ) : (
+        <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <AdminBookingStatsCard
+            title="Total Bookings"
+            value={stats.totalBookings}
+            description="all time"
+            icon={CalendarCheck}
+            tone="blue"
+          />
+          <AdminBookingStatsCard
+            title="Occupied"
+            value={stats.occupied}
+            description="currently active"
+            icon={CarFront}
+            tone="orange"
+          />
+          <AdminBookingStatsCard
+            title="Completed"
+            value={stats.completed}
+            description="all time"
+            icon={CheckCircle2}
+            tone="green"
+          />
+          <AdminBookingStatsCard
+            title="Cancelled"
+            value={stats.cancelled}
+            description="all time"
+            icon={XCircle}
+            tone="red"
+          />
+        </section>
+      )}
+
       <SplitDataTable
-        columns={columns}
-        rows={bookings}
+        columns={adminBookingTableColumns}
+        compactColumns={adminBookingCompactTableColumns}
+        rows={paginatedBookings}
         getRowId={(booking) => booking.bookingId}
-        selectedRowId={selectedBookingId}
-        onRowSelect={(booking) =>
+        selectedRowId={selectedBooking ? selectedBookingId : null}
+        onRowSelect={(booking: AdminBooking) =>
           setSelectedBookingId((current) =>
             current === booking.bookingId ? null : booking.bookingId,
           )
@@ -235,58 +191,81 @@ export function AdminBookingsPage() {
         onDetailClose={() => setSelectedBookingId(null)}
         detailTitle={
           selectedBooking
-            ? formatBookingCustomerName(selectedBooking)
+            ? getAdminBookingCustomerName(selectedBooking)
             : "Booking details"
         }
         detailPanel={
-          selectedBooking ? (
-            <AdminBookingDetailPanel
-              booking={selectedBooking}
-              onClose={() => setSelectedBookingId(null)}
-            />
-          ) : null
+          <AdminBookingDetailPanel
+            booking={selectedBooking}
+            onClose={() => setSelectedBookingId(null)}
+          />
         }
         isLoading={isLoading}
-        error={isError}
         emptyState={
           <TableEmptyState
-            title="No bookings found"
-            description="Try adjusting your search to find a booking."
+            title={
+              bookings.length === 0
+                ? "No bookings found"
+                : "No bookings match the selected filters"
+            }
+            description={
+              bookings.length === 0
+                ? "Platform bookings will appear here after drivers or vendors create them."
+                : "Try adjusting the search, status, payment, or date filters."
+            }
           />
         }
         toolbar={
-          <TableToolbar
-            left={
-              <div className="relative max-w-sm">
-                <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-                <Input
-                  value={search}
-                  onChange={(event) => {
-                    setSearch(event.target.value);
-                    setPage(1);
-                    setSelectedBookingId(null);
-                  }}
-                  placeholder="Search bookings..."
-                  className="pl-9"
-                />
-              </div>
-            }
+          <AdminBookingFiltersBar
+            filters={filters}
+            resultCount={filteredBookings.length}
+            onFiltersChange={(nextFilters) => {
+              setFilters(nextFilters);
+              setSelectedBookingId(null);
+            }}
           />
         }
         pagination={
           <DataTablePagination
-            page={page}
-            pageSize={pageSize}
-            totalPages={data?.totalPages ?? 1}
-            pageSizeOptions={[10]}
-            onPageChange={setPage}
-            onPageSizeChange={(nextPageSize) => {
-              setPageSize(nextPageSize);
-              setPage(1);
-            }}
+            page={currentPage}
+            pageSize={filters.pageSize}
+            totalItems={filteredBookings.length}
+            pageSizeOptions={[10, 20, 50]}
+            onPageChange={(page) =>
+              setFilters((current) => ({
+                ...current,
+                page,
+              }))
+            }
+            onPageSizeChange={(pageSize) =>
+              setFilters((current) => ({
+                ...current,
+                page: 1,
+                pageSize,
+              }))
+            }
           />
         }
       />
-    </>
+    </div>
+  );
+}
+
+function BookingStatsSkeleton() {
+  return (
+    <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      {Array.from({ length: 4 }).map((_, index) => (
+        <Card key={index} className="rounded-lg border shadow-none">
+          <CardContent className="flex items-start justify-between gap-4 p-5">
+            <div className="space-y-3">
+              <Skeleton className="h-4 w-28" />
+              <Skeleton className="h-8 w-14" />
+              <Skeleton className="h-4 w-24" />
+            </div>
+            <Skeleton className="size-11 rounded-lg" />
+          </CardContent>
+        </Card>
+      ))}
+    </section>
   );
 }
