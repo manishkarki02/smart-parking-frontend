@@ -80,4 +80,6 @@ export const ADMIN_ROUTES = {
 export const PAYMENT_ROUTES = {
   KHALTI_INITIATE: "/khalti/initiate",
   KHALTI_VERIFY: "/khalti/verify",
+  ME: "/me",
+  ME_BY_ID: (id: number | string) => `/me/${id}`,
 } as const;

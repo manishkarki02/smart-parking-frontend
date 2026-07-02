@@ -129,3 +129,77 @@ export type AdminPaymentDetail = {
   parking: AdminPaymentParking;
   refund?: AdminPaymentRefund | null;
 };
+
+export type RefundStatus = "NONE" | "PENDING" | "COMPLETED" | "FAILED";
+
+export type BookingStatus = "PENDING" | "CONFIRMED" | "CANCELLED" | "COMPLETED";
+
+export type DriverPaymentQueryParams = {
+  search?: string;
+  status?: PaymentStatus;
+  fromDate?: string;
+  toDate?: string;
+  page: number;
+  size: number;
+  sort?: string;
+};
+
+export type DriverPaymentBooking = {
+  bookingId?: string | null;
+  parkingLocationId?: string | null;
+  parkingLocationName?: string | null;
+  address?: string | null;
+  slotId?: string | null;
+  slotNumber?: string | null;
+  vehicleNumber?: string | null;
+  vehicleType?: VehicleType | null;
+  startTime?: string | null;
+  endTime?: string | null;
+  durationMinutes?: number | null;
+  ratePerHour?: number | null;
+  totalAmount?: number | null;
+  status?: BookingStatus | null;
+};
+
+export type DriverPaymentRefund = {
+  refundEligible: boolean;
+  refundStatus: RefundStatus;
+  refundAmount?: number | null;
+};
+
+export type DriverPaymentHistoryItem = {
+  paymentId: string;
+  bookingId?: string | null;
+  transactionId?: string | null;
+  amount: number;
+  status: PaymentStatus;
+  paymentMethod: "KHALTI";
+  paymentUrl?: string | null;
+  pidx?: string | null;
+  paidAt?: string | null;
+  createdAt?: string | null;
+  updatedAt?: string | null;
+  message?: string | null;
+  booking: DriverPaymentBooking;
+  refund: DriverPaymentRefund;
+};
+
+export type DriverPaymentSummary = {
+  totalSpent: number;
+  totalPaymentCount: number;
+  successfulPaymentCount: number;
+  successfulAmount: number;
+  pendingPaymentCount: number;
+  pendingAmount: number;
+  failedPaymentCount: number;
+  failedAmount: number;
+};
+
+export type DriverPaymentPageResponse = {
+  content: DriverPaymentHistoryItem[];
+  page: number;
+  size: number;
+  totalElements: number;
+  totalPages: number;
+  summary: DriverPaymentSummary;
+};
