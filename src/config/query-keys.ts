@@ -81,5 +81,15 @@ export const queryKeys = {
     }) => ["PAYMENT", "ADMIN", "LIST", params ?? {}] as const,
     adminDetail: (paymentId?: string | null) =>
       ["PAYMENT", "ADMIN", "DETAIL", paymentId ?? "NONE"] as const,
+    driverList: (params?: {
+      search?: string;
+      status?: string;
+      fromDate?: string;
+      toDate?: string;
+      page?: number;
+      size?: number;
+    }) => ["PAYMENT", "DRIVER", "LIST", params ?? {}] as const,
+    driverDetail: (paymentId?: string | null) =>
+      ["PAYMENT", "DRIVER", "DETAIL", paymentId ?? "NONE"] as const,
   },
 } as const;

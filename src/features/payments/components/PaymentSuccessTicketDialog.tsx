@@ -4,10 +4,11 @@ import {
   CalendarCheck,
   CheckCircle2,
   Clock,
+  CreditCard,
   MapPin,
   ReceiptText,
+  ShieldCheck,
 } from "lucide-react";
-import { InfoItem } from "@/common";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -25,6 +26,7 @@ import {
   formatBookingTime,
   formatVehicleType,
 } from "@/features/bookings/utils/booking-formatters";
+import { cn } from "@/lib/utils";
 
 export interface PaymentSuccessDetails {
   paymentSuccess?: boolean;
@@ -54,47 +56,78 @@ export function PaymentSuccessTicketDialog({
 }: PaymentSuccessTicketDialogProps) {
   const status = booking?.paymentStatus ?? payment.status ?? "SUCCESS";
   const isSuccessful = status.toUpperCase() === "SUCCESS";
+  const paymentMethod = payment.paymentMethod ?? booking?.paymentMethod ?? "-";
+  const paidAt = formatBookingDateTime(payment.paidAt ?? booking?.paidAt);
+  const transactionId = payment.transactionId ?? "-";
+  const paymentId = payment.paymentId ?? "-";
+  const vehicle = booking
+    ? `${booking.vehicleNumber ?? "-"} (${formatVehicleType(booking.vehicleType)})`
+    : "-";
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[92vh] overflow-y-auto p-0 sm:max-w-3xl">
-        <DialogHeader className="border-b bg-slate-50 px-6 py-7 text-center">
-          <div className="mx-auto mb-4 flex size-16 items-center justify-center rounded-full bg-emerald-100 text-emerald-700">
-            <CheckCircle2 className="size-9" />
-          </div>
-          <DialogTitle className="text-3xl font-black tracking-tight text-slate-950">
-            Payment successful
-          </DialogTitle>
-          <DialogDescription className="text-base text-slate-500">
-            Your parking payment was verified and your booking is ready.
-          </DialogDescription>
-        </DialogHeader>
+      <DialogContent className="max-h-[92vh] overflow-y-auto p-0 sm:max-w-4xl">
+        <div className="border-b bg-white px-5 py-5 sm:px-6">
+          <DialogHeader className="text-left">
+            <div className="flex items-start gap-4">
+              <div
+                className={cn(
+                  "flex size-12 shrink-0 items-center justify-center rounded-full",
+                  isSuccessful
+                    ? "bg-emerald-100 text-emerald-700"
+                    : "bg-amber-100 text-amber-700",
+                )}
+              >
+                <CheckCircle2 className="size-7" aria-hidden="true" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <DialogTitle className="text-2xl font-semibold tracking-tight text-slate-950">
+                  {isSuccessful ? "Payment successful" : "Payment receipt"}
+                </DialogTitle>
+                <DialogDescription className="mt-1 text-sm text-slate-600">
+                  {isSuccessful
+                    ? "Your parking payment was verified and your booking is ready."
+                    : "Your parking payment details are shown below."}
+                </DialogDescription>
+              </div>
+              <Badge
+                variant="outline"
+                className={cn(
+                  "mt-1 shrink-0",
+                  isSuccessful
+                    ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+                    : "border-amber-200 bg-amber-50 text-amber-700",
+                )}
+              >
+                {isSuccessful ? "Paid" : status}
+              </Badge>
+            </div>
+          </DialogHeader>
+        </div>
 
-        <div className="grid gap-5 p-6 lg:grid-cols-[1.05fr_0.95fr]">
-          <section className="space-y-4">
-            <div className="rounded-lg border border-dashed border-emerald-300 bg-emerald-50 p-5">
-              <div className="flex items-start justify-between gap-4">
-                <div>
-                  <p className="text-sm font-semibold uppercase tracking-wide text-emerald-700">
-                    Smart Parking Ticket
-                  </p>
-                  <h1 className="mt-2 text-2xl font-black text-slate-950">
-                    {booking?.parkingLocationName ?? "Parking booking"}
-                  </h1>
+        <div className="grid gap-5 bg-slate-50 p-5 sm:p-6 lg:grid-cols-[minmax(0,1fr)_minmax(280px,0.82fr)]">
+          <section className="min-w-0 space-y-4">
+            <div className="overflow-hidden rounded-lg border border-emerald-200 bg-white shadow-sm">
+              <div className="border-b border-dashed border-emerald-200 bg-emerald-50 px-5 py-4">
+                <div className="flex min-w-0 items-start justify-between gap-4">
+                  <div className="min-w-0">
+                    <p className="text-xs font-semibold uppercase tracking-wide text-emerald-700">
+                      Smart Parking Ticket
+                    </p>
+                    <h3 className="mt-1 truncate text-xl font-semibold text-slate-950">
+                      {booking?.parkingLocationName ?? "Parking booking"}
+                    </h3>
+                  </div>
+                  <ShieldCheck className="size-5 shrink-0 text-emerald-700" aria-hidden="true" />
                 </div>
-                <Badge
-                  variant={isSuccessful ? "default" : "secondary"}
-                  className="shrink-0"
-                >
-                  {status}
-                </Badge>
               </div>
 
-              <div className="mt-5 grid gap-3 sm:grid-cols-2">
+              <div className="grid gap-3 p-4 sm:grid-cols-2">
                 <TicketLine
                   icon={<ReceiptText className="size-4" />}
                   label="Booking ID"
-                  value={payment.bookingId ?? "-"}
+                  value={shorten(payment.bookingId)}
+                  title={payment.bookingId}
                 />
                 <TicketLine
                   icon={<MapPin className="size-4" />}
@@ -114,45 +147,44 @@ export function PaymentSuccessTicketDialog({
               </div>
             </div>
 
-            <div className="flex flex-wrap gap-3">
-              <Button type="button" onClick={() => onOpenChange(false)}>
+            <div className="flex flex-col-reverse gap-3 sm:flex-row">
+              <Button
+                type="button"
+                variant="outline"
+                className="sm:min-w-32"
+                onClick={() => onOpenChange(false)}
+              >
                 Done
               </Button>
-              <Button variant="outline" asChild>
+              <Button className="sm:min-w-36" asChild>
                 <Link to="/bookings">My bookings</Link>
               </Button>
             </div>
           </section>
 
-          <section className="space-y-3">
-            <InfoItem
-              label="Amount paid"
-              value={formatPaymentAmount(payment, booking)}
-            />
-            <InfoItem
-              label="Payment method"
-              value={payment.paymentMethod ?? booking?.paymentMethod ?? "-"}
-            />
-            <InfoItem label="Payment status" value={status} />
-            <InfoItem
-              label="Paid at"
-              value={formatBookingDateTime(payment.paidAt ?? booking?.paidAt)}
-            />
-            <InfoItem
-              label="Transaction ID"
-              value={payment.transactionId ?? "-"}
-            />
-            <InfoItem label="Payment ID" value={payment.paymentId ?? "-"} />
-            <InfoItem
-              label="Vehicle"
-              value={
-                booking
-                  ? `${booking.vehicleNumber ?? "-"} (${formatVehicleType(
-                      booking.vehicleType,
-                    )})`
-                  : "-"
-              }
-            />
+          <section className="min-w-0 rounded-lg border bg-white shadow-sm">
+            <div className="flex items-start justify-between gap-4 border-b p-4">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                  Amount paid
+                </p>
+                <p className="mt-1 text-2xl font-semibold text-slate-950">
+                  {formatPaymentAmount(payment, booking)}
+                </p>
+              </div>
+              <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
+                <CreditCard className="size-5" aria-hidden="true" />
+              </div>
+            </div>
+
+            <div className="grid gap-px bg-slate-200 sm:grid-cols-2 lg:grid-cols-1">
+              <ReceiptField label="Payment method" value={paymentMethod} />
+              <ReceiptField label="Payment status" value={isSuccessful ? "Paid" : status} />
+              <ReceiptField label="Paid at" value={paidAt} />
+              <ReceiptField label="Transaction ID" value={shorten(transactionId)} title={transactionId} />
+              <ReceiptField label="Payment ID" value={shorten(paymentId)} title={paymentId} />
+              <ReceiptField label="Vehicle" value={vehicle} />
+            </div>
           </section>
         </div>
       </DialogContent>
@@ -164,13 +196,15 @@ function TicketLine({
   icon,
   label,
   value,
+  title,
 }: {
   icon: ReactNode;
   label: string;
   value: ReactNode;
+  title?: string;
 }) {
   return (
-    <div className="flex items-center gap-3 rounded-md bg-white/80 p-3">
+    <div className="flex min-w-0 items-center gap-3 rounded-md border bg-white p-3">
       <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-emerald-700">
         {icon}
       </div>
@@ -178,7 +212,33 @@ function TicketLine({
         <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
           {label}
         </p>
-        <div className="truncate text-sm font-bold text-slate-950">{value}</div>
+        <div className="truncate text-sm font-semibold text-slate-950" title={title}>
+          {value}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ReceiptField({
+  label,
+  value,
+  title,
+}: {
+  label: string;
+  value: ReactNode;
+  title?: string;
+}) {
+  return (
+    <div className="min-w-0 bg-white p-4">
+      <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+        {label}
+      </p>
+      <div
+        className="mt-1 truncate text-sm font-semibold text-slate-950"
+        title={title}
+      >
+        {value}
       </div>
     </div>
   );
@@ -199,4 +259,16 @@ function formatPaymentAmount(
     return formatBookingAmount(payment.amount);
   }
   return formatBookingAmount(booking?.totalAmount);
+}
+
+function shorten(value?: string | null): string {
+  if (!value || value === "-") {
+    return "-";
+  }
+
+  if (value.length <= 14) {
+    return value;
+  }
+
+  return `${value.slice(0, 8)}...${value.slice(-4)}`;
 }

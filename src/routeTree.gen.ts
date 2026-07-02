@@ -10,9 +10,11 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as RegisterRouteImport } from './routes/register'
+import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as AppRouteImport } from './routes/_app'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as PaymentsIndexRouteImport } from './routes/payments/index'
 import { Route as BookingsIndexRouteImport } from './routes/bookings/index'
 import { Route as ParkingsMapRouteImport } from './routes/parkings.map'
 import { Route as ParkingsIdRouteImport } from './routes/parkings.$id'
@@ -34,6 +36,11 @@ const RegisterRoute = RegisterRouteImport.update({
   path: '/register',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ProfileRoute = ProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
@@ -46,6 +53,11 @@ const AppRoute = AppRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PaymentsIndexRoute = PaymentsIndexRouteImport.update({
+  id: '/payments/',
+  path: '/payments/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const BookingsIndexRoute = BookingsIndexRouteImport.update({
@@ -128,11 +140,13 @@ const AppVendorParkingParkingIdRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
+  '/profile': typeof ProfileRoute
   '/register': typeof RegisterRoute
   '/dashboard': typeof AppDashboardRoute
   '/parkings/$id': typeof ParkingsIdRoute
   '/parkings/map': typeof ParkingsMapRoute
   '/bookings/': typeof BookingsIndexRoute
+  '/payments/': typeof PaymentsIndexRoute
   '/admin/bookings': typeof AppAdminBookingsRoute
   '/admin/drivers': typeof AppAdminDriversRoute
   '/admin/payments': typeof AppAdminPaymentsRoute
@@ -148,11 +162,13 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
+  '/profile': typeof ProfileRoute
   '/register': typeof RegisterRoute
   '/dashboard': typeof AppDashboardRoute
   '/parkings/$id': typeof ParkingsIdRoute
   '/parkings/map': typeof ParkingsMapRoute
   '/bookings': typeof BookingsIndexRoute
+  '/payments': typeof PaymentsIndexRoute
   '/admin/bookings': typeof AppAdminBookingsRoute
   '/admin/drivers': typeof AppAdminDriversRoute
   '/admin/payments': typeof AppAdminPaymentsRoute
@@ -170,11 +186,13 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_app': typeof AppRouteWithChildren
   '/login': typeof LoginRoute
+  '/profile': typeof ProfileRoute
   '/register': typeof RegisterRoute
   '/_app/dashboard': typeof AppDashboardRoute
   '/parkings/$id': typeof ParkingsIdRoute
   '/parkings/map': typeof ParkingsMapRoute
   '/bookings/': typeof BookingsIndexRoute
+  '/payments/': typeof PaymentsIndexRoute
   '/_app/admin/bookings': typeof AppAdminBookingsRoute
   '/_app/admin/drivers': typeof AppAdminDriversRoute
   '/_app/admin/payments': typeof AppAdminPaymentsRoute
@@ -192,11 +210,13 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/login'
+    | '/profile'
     | '/register'
     | '/dashboard'
     | '/parkings/$id'
     | '/parkings/map'
     | '/bookings/'
+    | '/payments/'
     | '/admin/bookings'
     | '/admin/drivers'
     | '/admin/payments'
@@ -212,11 +232,13 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/login'
+    | '/profile'
     | '/register'
     | '/dashboard'
     | '/parkings/$id'
     | '/parkings/map'
     | '/bookings'
+    | '/payments'
     | '/admin/bookings'
     | '/admin/drivers'
     | '/admin/payments'
@@ -233,11 +255,13 @@ export interface FileRouteTypes {
     | '/'
     | '/_app'
     | '/login'
+    | '/profile'
     | '/register'
     | '/_app/dashboard'
     | '/parkings/$id'
     | '/parkings/map'
     | '/bookings/'
+    | '/payments/'
     | '/_app/admin/bookings'
     | '/_app/admin/drivers'
     | '/_app/admin/payments'
@@ -255,10 +279,12 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AppRoute: typeof AppRouteWithChildren
   LoginRoute: typeof LoginRoute
+  ProfileRoute: typeof ProfileRoute
   RegisterRoute: typeof RegisterRoute
   ParkingsIdRoute: typeof ParkingsIdRoute
   ParkingsMapRoute: typeof ParkingsMapRoute
   BookingsIndexRoute: typeof BookingsIndexRoute
+  PaymentsIndexRoute: typeof PaymentsIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -268,6 +294,13 @@ declare module '@tanstack/react-router' {
       path: '/register'
       fullPath: '/register'
       preLoaderRoute: typeof RegisterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/profile': {
+      id: '/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof ProfileRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -289,6 +322,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/payments/': {
+      id: '/payments/'
+      path: '/payments'
+      fullPath: '/payments/'
+      preLoaderRoute: typeof PaymentsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/bookings/': {
@@ -435,10 +475,12 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AppRoute: AppRouteWithChildren,
   LoginRoute: LoginRoute,
+  ProfileRoute: ProfileRoute,
   RegisterRoute: RegisterRoute,
   ParkingsIdRoute: ParkingsIdRoute,
   ParkingsMapRoute: ParkingsMapRoute,
   BookingsIndexRoute: BookingsIndexRoute,
+  PaymentsIndexRoute: PaymentsIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

@@ -69,6 +69,18 @@ const navItems: NavItem[] = [
     roles: ["DRIVER"],
   },
   {
+    label: "Payment History",
+    to: "/payments",
+    icon: CreditCard,
+    roles: ["DRIVER"],
+  },
+  {
+    label: "Profile / Settings",
+    to: "/profile",
+    icon: SettingsIcon,
+    roles: ["DRIVER"],
+  },
+  {
     label: "Dashboard",
     to: "/vendor/dashboard",
     icon: LayoutDashboard,

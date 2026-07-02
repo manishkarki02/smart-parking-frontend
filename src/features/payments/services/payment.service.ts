@@ -5,6 +5,9 @@ import type {
   AdminPaymentsQueryParams,
   AdminPaymentSummaryParams,
   AdminPaymentSummaryResponse,
+  DriverPaymentHistoryItem,
+  DriverPaymentPageResponse,
+  DriverPaymentQueryParams,
   PaymentRequest,
   PaymentResponse,
 } from "../types/payment.types";
@@ -51,6 +54,27 @@ export async function getAdminPaymentDetail(
 ): Promise<AdminPaymentDetail> {
   const response = await adminApi.get<ApiResponse<AdminPaymentDetail>>(
     ADMIN_ROUTES.PAYMENT_BY_ID(paymentId),
+  );
+
+  return response.data.data;
+}
+
+export async function getDriverPayments(
+  params: DriverPaymentQueryParams,
+): Promise<DriverPaymentPageResponse> {
+  const response = await paymentApi.get<ApiResponse<DriverPaymentPageResponse>>(
+    PAYMENT_ROUTES.ME,
+    { params },
+  );
+
+  return response.data.data;
+}
+
+export async function getDriverPaymentDetail(
+  paymentId: string,
+): Promise<DriverPaymentHistoryItem> {
+  const response = await paymentApi.get<ApiResponse<DriverPaymentHistoryItem>>(
+    PAYMENT_ROUTES.ME_BY_ID(paymentId),
   );
 
   return response.data.data;
