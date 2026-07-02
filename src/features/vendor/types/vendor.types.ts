@@ -18,11 +18,24 @@ export type VendorDashboardSlotStats = {
 export type VendorDashboardLocation = {
   id: string;
   name: string;
+  address: string;
+  latitude: number;
+  longitude: number;
+  twoWheelerRatePerHour?: number;
+  fourWheelerRatePerHour?: number;
+  vendorName?: string;
   totalSlots: number;
   availableSlots: number;
   occupiedSlots: number;
   twoWheelerSlots: VendorDashboardSlotStats;
   fourWheelerSlots: VendorDashboardSlotStats;
+};
+
+export type VendorDashboardVendor = {
+  id: string;
+  name: string;
+  email: string;
+  approved: boolean;
 };
 
 export type VendorDashboardData = {
@@ -33,4 +46,5 @@ export type VendorDashboardData = {
   twoWheelerSlots: VendorDashboardSlotStats;
   fourWheelerSlots: VendorDashboardSlotStats;
   locations: VendorDashboardLocation[];
+  vendor?: VendorDashboardVendor;
 };
