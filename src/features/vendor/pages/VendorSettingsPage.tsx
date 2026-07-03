@@ -41,7 +41,7 @@ export function VendorSettingsPage() {
   const token = useAuthStore((state) => state.token);
 
   const profileQuery = useCustomQuery({
-    key: ["USERS", "ME"],
+    key: queryKeys.users.me(),
     queryFn: getMyProfile,
   });
 
@@ -85,7 +85,7 @@ export function VendorSettingsPage() {
   >({
     api: updateMyProfile,
     onSuccess: (updatedProfile) => {
-      queryClient.setQueryData(["USERS", "ME"], updatedProfile);
+      queryClient.setQueryData(queryKeys.users.me(), updatedProfile);
       if (token) {
         setAuth(token, {
           id: updatedProfile.id,

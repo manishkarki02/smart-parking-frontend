@@ -61,6 +61,13 @@ export const queryKeys = {
     dashboard: () => queryKeys.vendor.dashboardRoot(),
   },
 
+  // ─── Users ───────────────────────────────────────────────────────────────────
+  users: {
+    root: () => ["USERS"] as const,
+    meRoot: () => [...queryKeys.users.root(), "ME"] as const,
+    me: () => queryKeys.users.meRoot(),
+  },
+
   // ─── Admin ───────────────────────────────────────────────────────────────────
   admin: {
     root: () => ["ADMIN"] as const,
