@@ -12,11 +12,9 @@ import {
 } from "lucide-react";
 import type { ZodError } from "zod/v4";
 
-import { AppLayout } from "@/common/components/AppLayout";
 import { PageHeader } from "@/common/components/PageHeader";
 import useCustomMutation from "@/common/hooks/useCustomMutation";
 import useCustomQuery from "@/common/hooks/useCustomQuery";
-import { useAuthGuard } from "@/common/hooks/use-auth-guard";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -51,7 +49,6 @@ const emptyPasswordForm: DriverPasswordFormValues = {
 };
 
 export function DriverSettingsPage() {
-  const { isAuthorized } = useAuthGuard({ allowedRoles: ["DRIVER"] });
   const queryClient = useQueryClient();
   const setAuth = useAuthStore((state) => state.setAuth);
   const token = useAuthStore((state) => state.token);
@@ -60,7 +57,7 @@ export function DriverSettingsPage() {
     key: ["USERS", "ME"],
     queryFn: getMyProfile,
     options: {
-      enabled: isAuthorized,
+      enabled: true,
     },
   });
 
@@ -68,7 +65,7 @@ export function DriverSettingsPage() {
     key: queryKeys.bookings.me(),
     queryFn: getMyBookings,
     options: {
-      enabled: isAuthorized,
+      enabled: true,
     },
   });
 
@@ -188,10 +185,6 @@ export function DriverSettingsPage() {
     [bookingsQuery.data],
   );
 
-  if (!isAuthorized) {
-    return null;
-  }
-
   function handleProfileSave() {
     const validation = driverProfileSchema.safeParse(resolvedProfileForm);
     if (!validation.success) {
@@ -219,7 +212,7 @@ export function DriverSettingsPage() {
   }
 
   return (
-    <AppLayout mainClassName="bg-slate-50">
+    <>
       <PageHeader
         title="Account Settings"
         content={headerContent}
@@ -285,7 +278,7 @@ export function DriverSettingsPage() {
           </div>
         </div>
       )}
-    </AppLayout>
+    </>
   );
 }
 

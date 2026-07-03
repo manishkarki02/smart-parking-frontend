@@ -25,9 +25,7 @@ import {
 import { initiatePayment } from "@/features/payments/services/payment.service";
 import type { BookingResponse } from "@/features/bookings/types/booking.types";
 import { toast } from "sonner";
-import { AppLayout } from "@/common/components/AppLayout";
 import { PageHeader } from "@/common/components/PageHeader";
-import { useAuthGuard } from "@/common/hooks/use-auth-guard";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -85,7 +83,6 @@ export function DriverBookingsPage({
   parkingLocationId,
   payment,
 }: DriverBookingsPageProps) {
-  const { isAuthorized } = useAuthGuard({ allowedRoles: ["DRIVER"] });
   const queryClient = useQueryClient();
   const navigate = useNavigate();
 
@@ -105,7 +102,6 @@ export function DriverBookingsPage({
   const { data: bookings = [], isLoading } = useQuery({
     queryKey: queryKeys.bookings.me(),
     queryFn: getMyBookings,
-    enabled: isAuthorized,
   });
 
   const cancelMutation = useCustomMutation({
@@ -341,12 +337,8 @@ export function DriverBookingsPage({
     closeAddBookingDialog();
   };
 
-  if (!isAuthorized) {
-    return null;
-  }
-
   return (
-    <AppLayout mainClassName="bg-slate-50">
+    <>
       <PageHeader
         title="My Bookings"
         content={
@@ -511,7 +503,7 @@ export function DriverBookingsPage({
           }
         }}
       />
-    </AppLayout>
+    </>
   );
 }
 

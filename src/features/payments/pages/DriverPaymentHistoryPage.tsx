@@ -14,7 +14,6 @@ import {
   WalletCards,
   XCircle,
 } from "lucide-react";
-import { AppLayout } from "@/common/components/AppLayout";
 import { PageHeader } from "@/common/components/PageHeader";
 import { SplitDetailPanel } from "@/common/components/layout/SplitDetailPanel";
 import {
@@ -24,7 +23,6 @@ import {
   type DataTableColumn,
 } from "@/common";
 import useCustomMutation from "@/common/hooks/useCustomMutation";
-import { useAuthGuard } from "@/common/hooks/use-auth-guard";
 import { getApiErrorMessage } from "@/common/utils/get-api-error-message";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -86,7 +84,6 @@ const DEFAULT_FILTERS: DriverPaymentFilters = {
 const PAGE_SIZE = 10;
 
 export function DriverPaymentHistoryPage() {
-  const { isAuthorized } = useAuthGuard({ allowedRoles: ["DRIVER"] });
   const navigate = useNavigate();
   const [filters, setFilters] = useState(DEFAULT_FILTERS);
   const [page, setPage] = useState(0);
@@ -104,7 +101,7 @@ export function DriverPaymentHistoryPage() {
     error,
     refetch,
     isFetching,
-  } = useDriverPayments(listParams, isAuthorized);
+  } = useDriverPayments(listParams, true);
   const payments = paymentPage?.content ?? [];
   const selectedPaymentId = getSelectedPaymentId(payments, selection);
   const {
@@ -196,12 +193,8 @@ export function DriverPaymentHistoryPage() {
     }
   }
 
-  if (!isAuthorized) {
-    return null;
-  }
-
   return (
-    <AppLayout mainClassName="bg-slate-50">
+    <>
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-5">
         <PageHeader
           title="Payment History"
@@ -326,7 +319,7 @@ export function DriverPaymentHistoryPage() {
           }
         }}
       />
-    </AppLayout>
+    </>
   );
 }
 

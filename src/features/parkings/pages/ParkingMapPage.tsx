@@ -24,12 +24,10 @@ import {
   UserRound,
 } from "lucide-react";
 
-import { AppLayout } from "@/common/components/AppLayout";
 import { PageHeader } from "@/common/components/PageHeader";
 import { MapProvider } from "@/common/components/maps/MapProvider";
 import { useGeolocation } from "@/common/hooks/maps/useGeolocation";
 import useCustomQuery from "@/common/hooks/useCustomQuery";
-import { useAuthGuard } from "@/common/hooks/use-auth-guard";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -82,7 +80,6 @@ const availabilityStyles: Record<
 };
 
 export function ParkingMapPage() {
-  const { isAuthorized } = useAuthGuard({ allowedRoles: ["DRIVER"] });
   const navigate = useNavigate();
   const { state: geoState, locate } = useGeolocation();
   const [selectedParkingId, setSelectedParkingId] = useState<string | null>(
@@ -99,7 +96,7 @@ export function ParkingMapPage() {
     key: queryKeys.parking.available(),
     queryFn: getAllSlots,
     options: {
-      enabled: isAuthorized,
+      enabled: true,
     },
   });
 
@@ -124,10 +121,6 @@ export function ParkingMapPage() {
     enrichedLocations.find((location) => location.id === selectedParkingId) ??
     null;
 
-  if (!isAuthorized) {
-    return null;
-  }
-
   function viewParking(location: ParkingLocation) {
     navigate({
       to: "/parkings/$id",
@@ -136,7 +129,7 @@ export function ParkingMapPage() {
   }
 
   return (
-    <AppLayout mainClassName="overflow-hidden bg-slate-50 p-0 md:p-0">
+    <>
       <PageHeader
         title="Find Parking"
         content={
@@ -229,7 +222,7 @@ export function ParkingMapPage() {
           </MapProvider>
         </section>
       </div>
-    </AppLayout>
+    </>
   );
 }
 
