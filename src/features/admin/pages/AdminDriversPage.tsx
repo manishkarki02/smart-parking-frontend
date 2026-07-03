@@ -53,7 +53,7 @@ export function AdminDriversPage() {
   });
 
   const invalidateDrivers = () => {
-    void queryClient.invalidateQueries({ queryKey: queryKeys.admin.drivers() });
+    void queryClient.invalidateQueries({ queryKey: queryKeys.admin.driversRoot() });
   };
 
   const banMutation = useCustomMutation({

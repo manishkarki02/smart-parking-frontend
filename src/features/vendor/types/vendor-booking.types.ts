@@ -7,6 +7,12 @@ export type VendorBookingStatusFilter =
   | "CANCELLED"
   | "PAYMENT_PENDING";
 
+export type VendorBookingPaymentMethodFilter =
+  | "ALL"
+  | "CASH"
+  | "KHALTI"
+  | "ESEWA";
+
 export type VendorBookingStatusView = {
   label: string;
   variant: "default" | "secondary" | "destructive" | "outline";

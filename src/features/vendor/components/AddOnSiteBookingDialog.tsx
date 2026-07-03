@@ -157,10 +157,10 @@ export function AddOnSiteBookingDialog({
         paymentMethod: "CASH",
       });
       void queryClient.invalidateQueries({
-        queryKey: queryKeys.bookings.vendor(),
+        queryKey: queryKeys.bookings.vendorRoot(),
       });
       void queryClient.invalidateQueries({
-        queryKey: queryKeys.vendor.dashboard(),
+        queryKey: queryKeys.vendor.dashboardRoot(),
       });
       void queryClient.invalidateQueries({ queryKey: queryKeys.parking.mine() });
       void queryClient.invalidateQueries({

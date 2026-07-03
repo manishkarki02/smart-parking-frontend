@@ -63,7 +63,7 @@ export function AdminVendorsPage() {
   const approveMutation = useCustomMutation({
     api: approveVendor,
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: queryKeys.admin.vendors() });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.admin.vendorsRoot() });
       toast.success("Vendor approved successfully");
     },
   });
@@ -72,7 +72,7 @@ export function AdminVendorsPage() {
     api: deleteVendor,
     onSuccess: () => {
       setDeletingVendorId(null);
-      void queryClient.invalidateQueries({ queryKey: queryKeys.admin.vendors() });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.admin.vendorsRoot() });
       toast.success("Vendor deleted successfully");
     },
   });

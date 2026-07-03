@@ -5,6 +5,8 @@ import type {
   BookingResponse,
 } from "../types/booking.types";
 import createApi from "@/common/utils/api";
+import type { PaginatedResult } from "@/common/types/pagination.types";
+import { normalizePaginatedResponse } from "@/common/utils/api-response";
 import { API_BASE, BOOKING_ROUTES, VENDOR_ROUTES } from "@/config/api-routes";
 
 const bookingApi = createApi(API_BASE.BOOKINGS)
@@ -57,35 +59,7 @@ export interface VendorBooking {
   updatedAt?: string | null;
 }
 
-export interface PaginatedBookings<TData> {
-  data: TData[];
-  totalPages: number;
-}
-
-type PaginatedBookingPayload<TData> = {
-  items?: TData[];
-  content?: TData[];
-  data?: TData[];
-  totalPages?: number;
-  totalPage?: number;
-  meta?: {
-    totalPages?: number;
-  };
-};
-
-function normalizeBookings<TData>(
-  payload: TData[] | PaginatedBookingPayload<TData>,
-): PaginatedBookings<TData> {
-  if (Array.isArray(payload)) {
-    return { data: payload, totalPages: 1 };
-  }
-
-  return {
-    data: payload.items ?? payload.content ?? payload.data ?? [],
-    totalPages:
-      payload.totalPages ?? payload.totalPage ?? payload.meta?.totalPages ?? 1,
-  };
-}
+export type PaginatedBookings<TData> = PaginatedResult<TData>;
 
 export async function createBooking(
   data: BookingRequest
@@ -111,9 +85,7 @@ export async function getBookingById(
 export async function getVendorBookings(
   params: BookingListParams = {},
 ): Promise<PaginatedBookings<VendorBooking>> {
-  const response = await vendorApi.get<
-    ApiResponse<VendorBooking[] | PaginatedBookingPayload<VendorBooking>>
-  >(VENDOR_ROUTES.BOOKINGS, {
+  const response = await vendorApi.get<ApiResponse<unknown>>(VENDOR_ROUTES.BOOKINGS, {
     params: {
       search: params.search || undefined,
       page: params.page,
@@ -121,7 +93,7 @@ export async function getVendorBookings(
       status: params.status || undefined,
     },
   });
-  return normalizeBookings(response.data.data ?? []);
+  return normalizePaginatedResponse<VendorBooking>(response.data.data);
 }
 
 export async function updateBookingStatus({
