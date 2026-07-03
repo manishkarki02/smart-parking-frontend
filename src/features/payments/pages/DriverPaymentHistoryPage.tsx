@@ -9,13 +9,15 @@ import {
   MapPin,
   Receipt,
   ReceiptText,
-  RefreshCw,
   Search,
   WalletCards,
   XCircle,
 } from "lucide-react";
 import { PageHeader } from "@/common/components/PageHeader";
 import { SplitDetailPanel } from "@/common/components/layout/SplitDetailPanel";
+import { DetailItem as DetailPair } from "@/common/components/detail-panel/DetailItem";
+import { DetailSection } from "@/common/components/detail-panel/DetailSection";
+import { QueryErrorState } from "@/common/components/feedback/QueryErrorState";
 import {
   DataTablePagination,
   SplitDataTable,
@@ -205,9 +207,10 @@ export function DriverPaymentHistoryPage() {
         {isLoading && !paymentPage ? (
           <DriverPaymentsSkeleton />
         ) : isError ? (
-          <PaymentErrorState
-            error={error}
-            isFetching={isFetching}
+          <QueryErrorState
+            title="Unable to load payment history"
+            message={readPaymentErrorMessage(error)}
+            isRetrying={isFetching}
             onRetry={() => void refetch()}
           />
         ) : (
@@ -787,73 +790,10 @@ function KhaltiBadge() {
   );
 }
 
-function DetailSection({
-  title,
-  children,
-}: {
-  title: string;
-  children: ReactNode;
-}) {
-  return (
-    <section className="space-y-3 border-t pt-4 first:border-t-0 first:pt-0">
-      <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-        {title}
-      </h3>
-      <div className="space-y-3">{children}</div>
-    </section>
-  );
-}
-
-function DetailPair({
-  label,
-  value,
-  title,
-}: {
-  label: string;
-  value?: ReactNode;
-  title?: string;
-}) {
-  return (
-    <div className="grid grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] gap-3 text-sm">
-      <p className="text-muted-foreground">{label}</p>
-      <div className="min-w-0 justify-self-end break-words text-right font-medium" title={title}>
-        {value || "-"}
-      </div>
-    </div>
-  );
-}
-
-function PaymentErrorState({
-  error,
-  isFetching,
-  onRetry,
-}: {
-  error: unknown;
-  isFetching: boolean;
-  onRetry: () => void;
-}) {
+function readPaymentErrorMessage(error: unknown) {
   const message = getApiErrorMessage(error);
   const readableMessage = Array.isArray(message) ? message.join(", ") : message;
-
-  return (
-    <Card className="rounded-lg border shadow-none">
-      <CardContent className="flex min-h-[420px] flex-col items-center justify-center gap-4 p-6 text-center">
-        <div className="flex size-12 items-center justify-center rounded-lg bg-red-50 text-red-600">
-          <RefreshCw className="size-6" aria-hidden="true" />
-        </div>
-        <div className="space-y-1">
-          <h1 className="text-xl font-semibold">Unable to load payment history</h1>
-          <p className="max-w-md text-sm text-muted-foreground">
-            {readableMessage || "Please try again."}
-          </p>
-        </div>
-        <Button type="button" onClick={onRetry} disabled={isFetching}>
-          <RefreshCw className="size-4" aria-hidden="true" />
-          Retry
-        </Button>
-      </CardContent>
-    </Card>
-  );
+  return readableMessage || "Please try again.";
 }
 
 function DriverPaymentsSkeleton() {

@@ -6,13 +6,13 @@ import {
   Eye,
   EyeOff,
   LockKeyhole,
-  RefreshCw,
   ShieldCheck,
   UserRound,
 } from "lucide-react";
 import type { ZodError } from "zod/v4";
 
 import { PageHeader } from "@/common/components/PageHeader";
+import { QueryErrorState } from "@/common/components/feedback/QueryErrorState";
 import useCustomMutation from "@/common/hooks/useCustomMutation";
 import useCustomQuery from "@/common/hooks/useCustomQuery";
 import { Button } from "@/components/ui/button";
@@ -220,7 +220,15 @@ export function DriverSettingsPage() {
       />
 
       {profileQuery.isError ? (
-        <ErrorCard onRetry={() => void profileQuery.refetch()} />
+        <QueryErrorState
+          title="Unable to load account settings"
+          onRetry={() => void profileQuery.refetch()}
+          className="mx-auto max-w-xl rounded-xl border-slate-200 bg-white shadow-none"
+          contentClassName="min-h-0 items-start gap-4 p-6 text-left"
+          showIcon={false}
+          titleClassName="text-base text-slate-950"
+          messageClassName="mt-1 max-w-none text-slate-500"
+        />
       ) : (
         <div className="mx-auto flex w-full max-w-7xl flex-col gap-5">
           <div className="grid items-start gap-4 xl:grid-cols-[minmax(0,1.02fr)_minmax(320px,0.98fr)]">
@@ -731,25 +739,6 @@ function AccountInfoSkeleton() {
         </div>
       ))}
     </div>
-  );
-}
-
-function ErrorCard({ onRetry }: { onRetry: () => void }) {
-  return (
-    <Card className="mx-auto max-w-xl rounded-xl border-slate-200 bg-white shadow-none">
-      <CardContent className="space-y-4 p-6">
-        <div>
-          <h2 className="text-base font-semibold text-slate-950">
-            Unable to load account settings
-          </h2>
-          <p className="mt-1 text-sm text-slate-500">Please try again.</p>
-        </div>
-        <Button type="button" onClick={onRetry}>
-          <RefreshCw className="size-4" />
-          Retry
-        </Button>
-      </CardContent>
-    </Card>
   );
 }
 
