@@ -1,16 +1,12 @@
 export * from "./components/AppLayout";
 export * from "./components/ConfirmDialog";
-export { default as DataTable } from "./components/DataTable";
-export type {
-  ColumnDef,
-  DataTableProps,
-} from "./components/DataTable";
 export * from "./components/DriverHeader";
 export * from "./components/DriverLayout";
 export * from "./components/LoadingSpinner";
 export * from "./components/PageHeader";
 export * from "./components/PublicNavbar";
 export * from "./components/PublicShell";
+export * from "./components/RouteGuard";
 export * from "./components/StatsCard";
 export * from "./components/TableEmptyState";
 export * from "./components/layout/SplitDetailPanel";
@@ -39,5 +35,7 @@ export { default as useDebounce } from "./hooks/useDebounce";
 export * from "./hooks/use-mobile";
 export * from "./types/api.types";
 export * from "./types/map.types";
+export * from "./types/pagination.types";
 export { default as createApi } from "./utils/api";
+export * from "./utils/api-response";
 export * from "./utils/get-api-error-message";
