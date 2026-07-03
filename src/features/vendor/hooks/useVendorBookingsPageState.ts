@@ -3,7 +3,6 @@ import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import useCustomMutation from "@/common/hooks/useCustomMutation";
 import useCustomQuery from "@/common/hooks/useCustomQuery";
-import { useAuthGuard } from "@/common/hooks/use-auth-guard";
 import { getApiErrorMessage } from "@/common/utils/get-api-error-message";
 import { queryKeys } from "@/config/query-keys";
 import {
@@ -32,7 +31,6 @@ import {
 } from "@/features/vendor/utils/vendor-booking.utils";
 
 export function useVendorBookingsPageState() {
-  const { isAuthorized } = useAuthGuard({ allowedRoles: ["VENDOR"] });
   const queryClient = useQueryClient();
   const [locationId, setLocationId] = useState("ALL");
   const [search, setSearch] = useState("");
@@ -51,7 +49,6 @@ export function useVendorBookingsPageState() {
   const { data: locations = [] } = useCustomQuery({
     key: queryKeys.parking.mine(),
     queryFn: getMyParkingLocations,
-    options: { enabled: isAuthorized },
   });
 
   const { data, isLoading, isError } = useCustomQuery({
@@ -62,7 +59,6 @@ export function useVendorBookingsPageState() {
       status: statusFilter,
     }),
     queryFn: () => getVendorBookings({ locationId: vendorLocationId }),
-    options: { enabled: isAuthorized },
   });
 
   const bookings = useMemo(() => data?.data ?? [], [data?.data]);
@@ -217,7 +213,6 @@ export function useVendorBookingsPageState() {
   }
 
   return {
-    isAuthorized,
     locations,
     locationId,
     search,

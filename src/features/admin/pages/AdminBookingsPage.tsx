@@ -15,7 +15,6 @@ import {
   TableEmptyState,
 } from "@/common";
 import { PageHeader } from "@/common/components/PageHeader";
-import { useAuthGuard } from "@/common/hooks/use-auth-guard";
 import { getApiErrorMessage } from "@/common/utils/get-api-error-message";
 import { AdminBookingDetailPanel } from "@/features/bookings/components/AdminBookingDetailPanel";
 import { AdminBookingFiltersBar } from "@/features/bookings/components/AdminBookingFiltersBar";
@@ -46,7 +45,6 @@ const DEFAULT_FILTERS: AdminBookingFilters = {
 };
 
 export function AdminBookingsPage() {
-  const { isAuthorized } = useAuthGuard({ allowedRoles: ["ADMIN"] });
   const [filters, setFilters] = useState<AdminBookingFilters>(DEFAULT_FILTERS);
   const [selectedBookingId, setSelectedBookingId] = useState<string | null>(null);
   const {
@@ -56,7 +54,7 @@ export function AdminBookingsPage() {
     error,
     refetch,
     isFetching,
-  } = useAdminBookings(isAuthorized);
+  } = useAdminBookings();
 
   const bookings = useMemo(() => data?.data ?? [], [data?.data]);
   const stats = useMemo(() => getAdminBookingStats(bookings), [bookings]);
@@ -98,10 +96,6 @@ export function AdminBookingsPage() {
     ),
     [],
   );
-
-  if (!isAuthorized) {
-    return null;
-  }
 
   if (isError) {
     const message = getApiErrorMessage(error);

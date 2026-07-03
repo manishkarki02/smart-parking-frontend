@@ -9,10 +9,6 @@ import { useVendorBookingsPageState } from "@/features/vendor/hooks/useVendorBoo
 export function VendorBookingsPage() {
   const page = useVendorBookingsPageState();
 
-  if (!page.isAuthorized) {
-    return null;
-  }
-
   return (
     <div className="min-h-full min-w-0 overflow-x-hidden bg-slate-50">
       <VendorBookingsPageHeader

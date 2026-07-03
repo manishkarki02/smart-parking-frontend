@@ -11,7 +11,6 @@ import { useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { PageHeader } from "@/common/components/PageHeader";
-import { useAuthGuard } from "@/common/hooks/use-auth-guard";
 import { getApiErrorMessage } from "@/common/utils/get-api-error-message";
 import { AdminBookingStatusCard } from "@/features/admin/components/AdminBookingStatusCard";
 import { AdminDashboardSkeleton } from "@/features/admin/components/AdminDashboardSkeleton";
@@ -23,7 +22,6 @@ import { useAdminDashboard } from "@/features/admin/hooks/useAdminDashboard";
 import { formatAdminCurrentDate } from "@/features/admin/utils/admin-dashboard.utils";
 
 export function AdminDashboardPage() {
-  const { isAuthorized } = useAuthGuard({ allowedRoles: ["ADMIN"] });
   const {
     data,
     isLoading,
@@ -31,7 +29,7 @@ export function AdminDashboardPage() {
     error,
     refetch,
     isFetching,
-  } = useAdminDashboard(isAuthorized);
+  } = useAdminDashboard();
   const headerContent = useMemo(
     () => (
       <div className="min-w-0">
@@ -55,10 +53,6 @@ export function AdminDashboardPage() {
     ),
     [],
   );
-
-  if (!isAuthorized) {
-    return null;
-  }
 
   if (isLoading) {
     return (

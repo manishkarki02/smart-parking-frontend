@@ -17,7 +17,6 @@ import {
   Wallet,
 } from "lucide-react";
 import { PageHeader } from "@/common/components/PageHeader";
-import { useAuthGuard } from "@/common/hooks/use-auth-guard";
 import { queryKeys } from "@/config/query-keys";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -114,7 +113,6 @@ function getSlotCounts(slots: ParkingSlot[], location: ParkingLocation): SlotCou
 export function VendorParkingDetailsPage({
   parkingId,
 }: VendorParkingDetailsPageProps) {
-  const { isAuthorized } = useAuthGuard({ allowedRoles: ["VENDOR"] });
   const navigate = useNavigate();
   const [selectedSlot, setSelectedSlot] = useState<ParkingSlot | null>(null);
   const [isAddBookingOpen, setIsAddBookingOpen] = useState(false);
@@ -123,13 +121,11 @@ export function VendorParkingDetailsPage({
   const parkingQuery = useQuery({
     queryKey: queryKeys.parking.detail(parkingId),
     queryFn: () => getParkingById(parkingId),
-    enabled: isAuthorized,
   });
 
   const slotsQuery = useQuery({
     queryKey: queryKeys.parking.vendorSlots(parkingId),
     queryFn: () => getVendorSlots(parkingId),
-    enabled: isAuthorized,
   });
 
   const slots = useMemo(() => slotsQuery.data ?? [], [slotsQuery.data]);
@@ -141,8 +137,6 @@ export function VendorParkingDetailsPage({
     () => slots.filter((slot) => slot.vehicleType === "FOUR_WHEELER"),
     [slots],
   );
-
-  if (!isAuthorized) return null;
 
   const location = parkingQuery.data;
   const isLoading = parkingQuery.isLoading || slotsQuery.isLoading;

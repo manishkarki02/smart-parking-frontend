@@ -8,7 +8,6 @@ import {
   TableEmptyState,
 } from "@/common";
 import { PageHeader } from "@/common/components/PageHeader";
-import { useAuthGuard } from "@/common/hooks/use-auth-guard";
 import { getApiErrorMessage } from "@/common/utils/get-api-error-message";
 import { AdminPaymentDetailPanel } from "@/features/payments/components/AdminPaymentDetailPanel";
 import {
@@ -50,7 +49,6 @@ const DEFAULT_FILTERS: AdminPaymentFilterState = {
 const DEFAULT_PAGE_SIZE = 10;
 
 export function AdminPaymentsPage() {
-  const { isAuthorized } = useAuthGuard({ allowedRoles: ["ADMIN"] });
   const [filters, setFilters] = useState<AdminPaymentFilterState>(DEFAULT_FILTERS);
   const [page, setPage] = useState(0);
   const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
@@ -69,7 +67,7 @@ export function AdminPaymentsPage() {
   const {
     data: summary,
     isLoading: isSummaryLoading,
-  } = useAdminPaymentSummary(summaryParams, isAuthorized);
+  } = useAdminPaymentSummary(summaryParams);
   const {
     data: paymentPage,
     isLoading,
@@ -77,7 +75,7 @@ export function AdminPaymentsPage() {
     error,
     refetch,
     isFetching,
-  } = useAdminPayments(listParams, isAuthorized);
+  } = useAdminPayments(listParams);
   const payments = paymentPage?.content ?? [];
   const selectedPaymentId = getSelectedPaymentId(payments, selection);
   const {
@@ -103,10 +101,6 @@ export function AdminPaymentsPage() {
     setFilters(nextFilters);
     setPage(0);
     setSelection({ mode: "auto" });
-  }
-
-  if (!isAuthorized) {
-    return null;
   }
 
   if (isLoading && !paymentPage) {

@@ -16,9 +16,9 @@ import type {
 } from "@/features/admin/types/admin-user.types";
 import { mapAdminRawUsers } from "@/features/admin/utils/admin-user.utils";
 
-export function useAdminUsers(role: AdminUserRoleFilter, enabled: boolean) {
+export function useAdminUsers(role: AdminUserRoleFilter, enabled = true) {
   return useCustomQuery({
-    key: ["ADMIN", "USERS", "UNIFIED", role] as const,
+    key: queryKeys.admin.usersList(role),
     queryFn: async () => mapAdminRawUsers(await getAdminUsers(role)),
     options: {
       enabled,
@@ -33,7 +33,8 @@ export function useApproveVendor() {
     api: approveVendor,
     success: "Vendor approved successfully",
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: queryKeys.admin.all() });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.admin.usersRoot() });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.admin.dashboardRoot() });
     },
   });
 }
@@ -45,7 +46,8 @@ export function useBanAdminUser() {
     api: banUser,
     success: "Driver banned successfully",
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: queryKeys.admin.all() });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.admin.usersRoot() });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.admin.dashboardRoot() });
     },
   });
 }
@@ -57,7 +59,8 @@ export function useUnbanAdminUser() {
     api: unbanUser,
     success: "Driver unbanned successfully",
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: queryKeys.admin.all() });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.admin.usersRoot() });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.admin.dashboardRoot() });
     },
   });
 }
@@ -70,7 +73,8 @@ export function useDeleteAdminUser() {
       user.role === "VENDOR" ? deleteVendor(user.id) : deleteUser(user.id),
     success: "User deleted successfully",
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: queryKeys.admin.all() });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.admin.usersRoot() });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.admin.dashboardRoot() });
     },
   });
 }

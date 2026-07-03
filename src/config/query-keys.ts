@@ -73,14 +73,16 @@ export const queryKeys = {
     bookings: (params?: { search?: string; page?: number }) =>
       queryKeys.admin.bookingsList(params),
     usersRoot: () => [...queryKeys.admin.root(), "USERS"] as const,
+    usersList: (role: "ALL" | "VENDOR" | "DRIVER" = "ALL") =>
+      [...queryKeys.admin.usersRoot(), "LIST", { role }] as const,
     users: (role?: "VENDOR" | "DRIVER") =>
-      [...queryKeys.admin.usersRoot(), { role }] as const,
-    vendorsRoot: () => [...queryKeys.admin.usersRoot(), { role: "VENDOR" }] as const,
+      queryKeys.admin.usersList(role ?? "ALL"),
+    vendorsRoot: () => [...queryKeys.admin.usersRoot(), "VENDORS"] as const,
     vendorsList: (params?: { search?: string; page?: number }) =>
       [...queryKeys.admin.vendorsRoot(), params ?? {}] as const,
     vendors: (params?: { search?: string; page?: number }) =>
       queryKeys.admin.vendorsList(params),
-    driversRoot: () => [...queryKeys.admin.usersRoot(), { role: "DRIVER" }] as const,
+    driversRoot: () => [...queryKeys.admin.usersRoot(), "DRIVERS"] as const,
     driversList: (params?: { search?: string; page?: number }) =>
       [...queryKeys.admin.driversRoot(), params ?? {}] as const,
     drivers: (params?: { search?: string; page?: number }) =>

@@ -13,7 +13,6 @@ import {
 import { PageHeader } from "@/common/components/PageHeader";
 import useCustomMutation from "@/common/hooks/useCustomMutation";
 import useCustomQuery from "@/common/hooks/useCustomQuery";
-import { useAuthGuard } from "@/common/hooks/use-auth-guard";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -56,7 +55,6 @@ const emptyPasswordForm: PasswordFormState = {
 };
 
 export function VendorSettingsPage() {
-  const { isAuthorized } = useAuthGuard({ allowedRoles: ["VENDOR"] });
   const queryClient = useQueryClient();
   const setAuth = useAuthStore((state) => state.setAuth);
   const token = useAuthStore((state) => state.token);
@@ -64,9 +62,6 @@ export function VendorSettingsPage() {
   const profileQuery = useCustomQuery({
     key: ["USERS", "ME"],
     queryFn: getMyProfile,
-    options: {
-      enabled: isAuthorized,
-    },
   });
 
   const dashboardQuery = useVendorDashboard();
@@ -74,9 +69,6 @@ export function VendorSettingsPage() {
   const bookingsQuery = useCustomQuery({
     key: queryKeys.bookings.vendor({ status: "ALL" }),
     queryFn: () => getVendorBookings({ status: "ALL" }),
-    options: {
-      enabled: isAuthorized,
-    },
   });
 
   const profile = profileQuery.data;
@@ -158,10 +150,6 @@ export function VendorSettingsPage() {
       totalRevenue,
     };
   }, [bookingItems, dashboard]);
-
-  if (!isAuthorized) {
-    return null;
-  }
 
   function handleProfileSave() {
     const errors = validateProfile(resolvedProfileForm);
