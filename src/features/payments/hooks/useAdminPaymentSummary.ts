@@ -5,7 +5,7 @@ import type { AdminPaymentSummaryParams } from "@/features/payments/types/paymen
 
 export function useAdminPaymentSummary(
   params: AdminPaymentSummaryParams,
-  enabled: boolean,
+  enabled = true,
 ) {
   return useCustomQuery({
     key: queryKeys.payment.adminSummary(params),

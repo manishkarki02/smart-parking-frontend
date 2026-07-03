@@ -15,7 +15,6 @@ import { PageHeader } from "@/common/components/PageHeader";
 import { ConfirmDialog } from "@/common/components/ConfirmDialog";
 import useCustomMutation from "@/common/hooks/useCustomMutation";
 import useCustomQuery from "@/common/hooks/useCustomQuery";
-import { useAuthGuard } from "@/common/hooks/use-auth-guard";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -43,7 +42,6 @@ function canApproveVendor(vendor: AdminUser): boolean {
 }
 
 export function AdminVendorsPage() {
-  const { isAuthorized } = useAuthGuard({ allowedRoles: ["ADMIN"] });
   const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
@@ -55,15 +53,12 @@ export function AdminVendorsPage() {
   const { data, isLoading, isError } = useCustomQuery({
     key: vendorsKey,
     queryFn: () => getAdminVendors({ search, page }),
-    options: {
-      enabled: isAuthorized,
-    },
   });
 
   const approveMutation = useCustomMutation({
     api: approveVendor,
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: queryKeys.admin.vendors() });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.admin.vendorsRoot() });
       toast.success("Vendor approved successfully");
     },
   });
@@ -72,7 +67,7 @@ export function AdminVendorsPage() {
     api: deleteVendor,
     onSuccess: () => {
       setDeletingVendorId(null);
-      void queryClient.invalidateQueries({ queryKey: queryKeys.admin.vendors() });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.admin.vendorsRoot() });
       toast.success("Vendor deleted successfully");
     },
   });
@@ -146,10 +141,6 @@ export function AdminVendorsPage() {
       compact: true,
     },
   ];
-
-  if (!isAuthorized) {
-    return null;
-  }
 
   return (
     <>

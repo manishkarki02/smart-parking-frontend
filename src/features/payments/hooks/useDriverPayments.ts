@@ -5,7 +5,7 @@ import type { DriverPaymentQueryParams } from "@/features/payments/types/payment
 
 export function useDriverPayments(
   params: DriverPaymentQueryParams,
-  enabled: boolean,
+  enabled = true,
 ) {
   return useCustomQuery({
     key: queryKeys.payment.driverList(params),

@@ -7,7 +7,8 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { FieldError } from "@/common/components/form/FieldError";
+import { RequiredLabel } from "@/common/components/form/RequiredLabel";
 import {
   Select,
   SelectContent,
@@ -429,19 +430,6 @@ export function BookingForm({
   );
 }
 
-function RequiredLabel({ children }: { children: React.ReactNode }) {
-  return (
-    <Label className="text-sm font-semibold text-slate-950">
-      {children} <span className="text-red-500">*</span>
-    </Label>
-  );
-}
-
-function FieldError({ message }: { message?: string }) {
-  if (!message) return null;
-  return <p className="text-xs text-red-600">{message}</p>;
-}
-
 function SelectField({
   label,
   error,
@@ -453,9 +441,11 @@ function SelectField({
 }) {
   return (
     <div className="grid gap-2">
-      <RequiredLabel>{label}</RequiredLabel>
+      <RequiredLabel className="text-sm font-semibold text-slate-950">
+        {label}
+      </RequiredLabel>
       {children}
-      <FieldError message={error} />
+      <FieldError message={error} className="text-xs text-red-600" />
     </div>
   );
 }
@@ -471,9 +461,11 @@ function TextField({
 }) {
   return (
     <div className="grid gap-2">
-      <RequiredLabel>{label}</RequiredLabel>
+      <RequiredLabel className="text-sm font-semibold text-slate-950">
+        {label}
+      </RequiredLabel>
       {children}
-      <FieldError message={error} />
+      <FieldError message={error} className="text-xs text-red-600" />
     </div>
   );
 }

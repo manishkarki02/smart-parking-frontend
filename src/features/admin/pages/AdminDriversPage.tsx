@@ -15,7 +15,6 @@ import { PageHeader } from "@/common/components/PageHeader";
 import { ConfirmDialog } from "@/common/components/ConfirmDialog";
 import useCustomMutation from "@/common/hooks/useCustomMutation";
 import useCustomQuery from "@/common/hooks/useCustomQuery";
-import { useAuthGuard } from "@/common/hooks/use-auth-guard";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -36,7 +35,6 @@ function getDriverStatus(driver: AdminUser): string {
 }
 
 export function AdminDriversPage() {
-  const { isAuthorized } = useAuthGuard({ allowedRoles: ["ADMIN"] });
   const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
@@ -47,13 +45,10 @@ export function AdminDriversPage() {
   const { data, isLoading, isError } = useCustomQuery({
     key: queryKeys.admin.drivers({ search, page }),
     queryFn: () => getAdminDrivers({ search, page }),
-    options: {
-      enabled: isAuthorized,
-    },
   });
 
   const invalidateDrivers = () => {
-    void queryClient.invalidateQueries({ queryKey: queryKeys.admin.drivers() });
+    void queryClient.invalidateQueries({ queryKey: queryKeys.admin.driversRoot() });
   };
 
   const banMutation = useCustomMutation({
@@ -167,10 +162,6 @@ export function AdminDriversPage() {
       compact: true,
     },
   ];
-
-  if (!isAuthorized) {
-    return null;
-  }
 
   return (
     <>

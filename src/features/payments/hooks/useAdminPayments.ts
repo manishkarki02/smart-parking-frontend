@@ -5,7 +5,7 @@ import type { AdminPaymentsQueryParams } from "@/features/payments/types/payment
 
 export function useAdminPayments(
   params: AdminPaymentsQueryParams,
-  enabled: boolean,
+  enabled = true,
 ) {
   return useCustomQuery({
     key: queryKeys.payment.adminList(params),

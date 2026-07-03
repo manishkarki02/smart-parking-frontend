@@ -149,6 +149,9 @@ export function LeafletParkingOverviewMap({
 
           {visibleSpots.map((spot) => {
             const isFull = spot.availableSlots === 0;
+            const distance = spot.distance;
+            const hasDistance =
+              typeof distance === "number" && Number.isFinite(distance);
 
             return (
               <Marker
@@ -163,7 +166,7 @@ export function LeafletParkingOverviewMap({
                     <p>{spot.address}</p>
                     <p>
                       <b>{spot.availableSlots}</b> slots available
-                      {spot.distance != null ? ` · ${spot.distance.toFixed(1)} km away` : ""}
+                      {hasDistance ? ` · ${distance.toFixed(1)} km away` : ""}
                     </p>
                     <button
                       type="button"

@@ -140,6 +140,8 @@ export function AppLayout({
   mainClassName?: string;
 }) {
   const [pageHeader, setPageHeader] = useState<PageHeaderState | null>(null);
+  const location = useLocation();
+  const routeMainClassName = getRouteMainClassName(location.pathname);
 
   const pageHeaderValue = useMemo(
     () => ({ pageHeader, setPageHeader }),
@@ -191,6 +193,7 @@ export function AppLayout({
           <main
             className={cn(
               "min-w-0 flex-1 overflow-x-hidden overflow-y-auto p-4 md:p-6",
+              routeMainClassName,
               mainClassName,
             )}
           >
@@ -200,6 +203,23 @@ export function AppLayout({
       </PageHeaderContext.Provider>
     </SidebarProvider>
   );
+}
+
+function getRouteMainClassName(pathname: string): string | undefined {
+  if (pathname === "/parkings/map") {
+    return "overflow-hidden bg-slate-50 p-0 md:p-0";
+  }
+
+  if (
+    pathname === "/bookings" ||
+    pathname === "/payments" ||
+    pathname === "/profile" ||
+    pathname.startsWith("/parkings/")
+  ) {
+    return "bg-slate-50";
+  }
+
+  return undefined;
 }
 
 function AppSidebar() {

@@ -35,7 +35,6 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { PageHeader } from "@/common/components/PageHeader";
-import { useAuthGuard } from "@/common/hooks/use-auth-guard";
 import type { ParkingLocation } from "@/features/parkings/types/parking.types";
 import { cn } from "@/lib/utils";
 
@@ -88,7 +87,6 @@ function filterLocations(locations: ParkingLocation[], searchTerm: string) {
 }
 
 export function VendorParkingPage() {
-  const { isAuthorized } = useAuthGuard({ allowedRoles: ["VENDOR"] });
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [activeOnly, setActiveOnly] = useState(true);
@@ -101,7 +99,6 @@ export function VendorParkingPage() {
   } = useQuery({
     queryKey: queryKeys.parking.mine(),
     queryFn: getMyParkingLocations,
-    enabled: isAuthorized,
   });
 
   const metrics = useMemo(() => getLocationMetrics(locations), [locations]);
@@ -111,10 +108,6 @@ export function VendorParkingPage() {
   );
   const hasSearch = searchTerm.trim().length > 0;
   const hasLocations = locations.length > 0;
-
-  if (!isAuthorized) {
-    return null;
-  }
 
   return (
     <div className="space-y-6">

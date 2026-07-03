@@ -9,7 +9,6 @@ import {
 } from "@/common";
 import { ConfirmDialog } from "@/common/components/ConfirmDialog";
 import { PageHeader } from "@/common/components/PageHeader";
-import { useAuthGuard } from "@/common/hooks/use-auth-guard";
 import { getApiErrorMessage } from "@/common/utils/get-api-error-message";
 import { AdminUserDetailsPanel } from "@/features/admin/components/AdminUserDetailsPanel";
 import { AdminUsersFilterBar } from "@/features/admin/components/AdminUsersFilterBar";
@@ -54,7 +53,6 @@ type PendingConfirmation = {
 const DEFAULT_PAGE_SIZE = 10;
 
 export function AdminUsersPage({ initialRole = "ALL" }: AdminUsersPageProps) {
-  const { isAuthorized } = useAuthGuard({ allowedRoles: ["ADMIN"] });
   const [filters, setFilters] = useState<AdminUsersFilters>({
     search: "",
     role: initialRole,
@@ -71,7 +69,7 @@ export function AdminUsersPage({ initialRole = "ALL" }: AdminUsersPageProps) {
     error,
     refetch,
     isFetching,
-  } = useAdminUsers(filters.role, isAuthorized);
+  } = useAdminUsers(filters.role);
   const approveVendorMutation = useApproveVendor();
   const banUserMutation = useBanAdminUser();
   const unbanUserMutation = useUnbanAdminUser();
@@ -170,10 +168,6 @@ export function AdminUsersPage({ initialRole = "ALL" }: AdminUsersPageProps) {
         setConfirmation(null);
       },
     });
-  }
-
-  if (!isAuthorized) {
-    return null;
   }
 
   if (isLoading) {

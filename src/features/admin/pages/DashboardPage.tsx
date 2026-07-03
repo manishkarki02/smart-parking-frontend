@@ -25,8 +25,17 @@ import {
 } from "@/components/ui/empty";
 import { Button } from "@/components/ui/button";
 import { useAuthGuard } from "@/common/hooks/use-auth-guard";
+import { useGeolocation } from "@/common/hooks/maps/useGeolocation";
+import useCustomQuery from "@/common/hooks/useCustomQuery";
+import { queryKeys } from "@/config/query-keys";
+import { getMyBookings } from "@/features/bookings/services/booking.service";
+import useNearbyParkings from "@/features/parkings/hooks/useNearbyParkings";
 import useParkingSlots from "@/features/parkings/hooks/useParkingSlots";
 import type { ParkingLocation } from "@/features/parkings/types/parking.types";
+import {
+  calculateDistanceKm,
+  type LatLng,
+} from "@/features/parkings/utils/parking-map.utils";
 import { useEffect } from "react";
 import { AdminDashboardPage } from "@/features/admin/pages/AdminDashboardPage";
 
@@ -56,17 +65,62 @@ export function DashboardPage() {
 }
 
 function DriverDashboardRoute() {
-  const { locations, isLoading } = useParkingSlots();
+  const { state: geoState, locate } = useGeolocation();
+  const hasCurrentLocation = geoState.status === "located";
+  const currentLocation = hasCurrentLocation
+    ? { lat: geoState.lat, lng: geoState.lng }
+    : null;
+  const {
+    locations: currentLocationLocations,
+    isLoading: isCurrentLocationLoading,
+  } = useNearbyParkings({
+    lat: currentLocation?.lat ?? null,
+    lng: currentLocation?.lng ?? null,
+    radius: 5,
+  });
+  const { locations: fallbackLocations, isLoading: isFallbackLoading } =
+    useParkingSlots();
+  const { data: bookings = [], isLoading: isBookingsLoading } = useCustomQuery({
+    key: queryKeys.bookings.me(),
+    queryFn: getMyBookings,
+    options: {
+      enabled: true,
+    },
+  });
+  const locations = hasCurrentLocation
+    ? currentLocationLocations
+    : fallbackLocations;
+  const isLoading = hasCurrentLocation
+    ? isCurrentLocationLoading
+    : isFallbackLoading;
 
-  return <DriverDashboardPage locations={locations} isLoading={isLoading} />;
+  useEffect(() => {
+    locate();
+  }, [locate]);
+
+  return (
+    <DriverDashboardPage
+      locations={locations}
+      isLoading={isLoading}
+      currentLocation={currentLocation}
+      bookingsCount={bookings.length}
+      isBookingsLoading={isBookingsLoading}
+    />
+  );
 }
 
 function DriverDashboardPage({
   locations,
   isLoading,
+  currentLocation,
+  bookingsCount,
+  isBookingsLoading,
 }: {
   locations: ParkingLocation[] | undefined;
   isLoading: boolean;
+  currentLocation: LatLng | null;
+  bookingsCount: number;
+  isBookingsLoading: boolean;
 }) {
   const availableLocations =
     locations?.filter((location) => location.availableSlots > 0) ?? [];
@@ -88,7 +142,7 @@ function DriverDashboardPage({
         />
         <StatsCard
           title="My Bookings"
-          value="View"
+          value={isBookingsLoading ? "..." : bookingsCount}
           icon={<CalendarCheck className="h-5 w-5 text-muted-foreground" />}
         />
       </div>
@@ -114,54 +168,73 @@ function DriverDashboardPage({
           </div>
         ) : (
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
-            {locations?.map((location) => (
-              <Card
-                key={location.id}
-                className="group overflow-hidden border bg-card transition-all duration-200 hover:border-primary/30 hover:shadow-md"
-              >
-                <CardHeader className="pb-3">
-                  <div className="flex items-start justify-between gap-3">
-                    <CardTitle className="line-clamp-1 text-lg">
-                      {location.name}
-                    </CardTitle>
-                    <span className="rounded-md bg-green-100 px-2 py-1 text-xs font-semibold text-green-700">
-                      Rs. {location.fourWheelerRatePerHour ?? location.twoWheelerRatePerHour ?? 0}/hr
-                    </span>
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-3 text-sm">
-                  <div className="flex items-center text-muted-foreground">
-                    <MapPin className="mr-2 h-4 w-4 text-primary/70" />
-                    <span className="line-clamp-1">{location.address}</span>
-                  </div>
-                  <div className="flex items-center text-muted-foreground">
-                    <Navigation className="mr-2 h-4 w-4 text-primary/70" />
-                    <span>
-                      {location.distance !== undefined
-                        ? `${location.distance?.toFixed(1)} km away`
-                        : "Distance unknown"}
-                    </span>
-                  </div>
-                  <p className="font-medium">
-                    <span className="font-bold text-primary">
-                      {location.availableSlots}
-                    </span>{" "}
-                    spots left
-                  </p>
-                </CardContent>
-                <CardFooter>
-                  <Button asChild className="w-full">
-                    <Link
-                      to="/parkings/$id"
-                      params={{ id: location.id.toString() }}
-                    >
-                      View Details
-                      <ArrowRight className="ml-2 h-4 w-4" />
-                    </Link>
-                  </Button>
-                </CardFooter>
-              </Card>
-            ))}
+            {locations?.map((location) => {
+              const distanceFromCurrentLocation =
+                currentLocation &&
+                typeof location.latitude === "number" &&
+                Number.isFinite(location.latitude) &&
+                typeof location.longitude === "number" &&
+                Number.isFinite(location.longitude)
+                  ? calculateDistanceKm(currentLocation, {
+                      lat: location.latitude,
+                      lng: location.longitude,
+                    })
+                  : null;
+
+              return (
+                <Card
+                  key={location.id}
+                  className="group overflow-hidden border bg-card transition-all duration-200 hover:border-primary/30 hover:shadow-md"
+                >
+                  <CardHeader className="pb-3">
+                    <div className="flex items-start justify-between gap-3">
+                      <CardTitle className="line-clamp-1 text-lg">
+                        {location.name}
+                      </CardTitle>
+                      <span className="rounded-md bg-green-100 px-2 py-1 text-xs font-semibold text-green-700">
+                        Rs.{" "}
+                        {location.fourWheelerRatePerHour ??
+                          location.twoWheelerRatePerHour ??
+                          0}
+                        /hr
+                      </span>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="space-y-3 text-sm">
+                    <div className="flex items-center text-muted-foreground">
+                      <MapPin className="mr-2 h-4 w-4 text-primary/70" />
+                      <span className="line-clamp-1">{location.address}</span>
+                    </div>
+                    <div className="flex items-center text-muted-foreground">
+                      <Navigation className="mr-2 h-4 w-4 text-primary/70" />
+                      <span>
+                        {distanceFromCurrentLocation !== null &&
+                        Number.isFinite(distanceFromCurrentLocation)
+                          ? `${distanceFromCurrentLocation.toFixed(1)} km away`
+                          : "Distance unknown"}
+                      </span>
+                    </div>
+                    <p className="font-medium">
+                      <span className="font-bold text-primary">
+                        {location.availableSlots}
+                      </span>{" "}
+                      spots left
+                    </p>
+                  </CardContent>
+                  <CardFooter>
+                    <Button asChild className="w-full">
+                      <Link
+                        to="/parkings/$id"
+                        params={{ id: location.id.toString() }}
+                      >
+                        View Details
+                        <ArrowRight className="ml-2 h-4 w-4" />
+                      </Link>
+                    </Button>
+                  </CardFooter>
+                </Card>
+              );
+            })}
 
             {!locations?.length && (
               <Empty className="col-span-full border bg-card">

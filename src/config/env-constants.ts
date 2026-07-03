@@ -3,8 +3,8 @@ import { z } from "zod/v4";
 const schema = z.object({
   VITE_PUBLIC_URL: z.url().optional(),
   VITE_PORT: z.coerce.number().default(5173),
-  VITE_API_BASE_URL: z.url().optional(),
   VITE_GOOGLE_MAPS_API_KEY: z.string(),
+  VITE_ENABLE_MOCK_PARKINGS: z.coerce.boolean().default(false),
   VITE_NODE_ENV: z
     .enum(["development", "test", "production"])
     .default("development"),

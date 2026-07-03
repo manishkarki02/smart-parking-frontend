@@ -1,5 +1,7 @@
 import createApi from "@/common/utils/api";
 import type { ApiResponse } from "@/common/types/api.types";
+import type { PaginatedResult } from "@/common/types/pagination.types";
+import { normalizePaginatedResponse } from "@/common/utils/api-response";
 import type {
   AdminDashboardResponse,
   AdminStats,
@@ -22,36 +24,6 @@ const adminApi = createApi(API_BASE.ADMIN);
 export interface AdminListParams {
   search?: string;
   page?: number;
-}
-
-export interface PaginatedResult<TData> {
-  data: TData[];
-  totalPages: number;
-}
-
-type PaginatedPayload<TData> = {
-  items?: TData[];
-  content?: TData[];
-  data?: TData[];
-  totalPages?: number;
-  totalPage?: number;
-  meta?: {
-    totalPages?: number;
-  };
-};
-
-function normalizePaginatedResult<TData>(
-  payload: TData[] | PaginatedPayload<TData>,
-): PaginatedResult<TData> {
-  if (Array.isArray(payload)) {
-    return { data: payload, totalPages: 1 };
-  }
-
-  return {
-    data: payload.items ?? payload.content ?? payload.data ?? [],
-    totalPages:
-      payload.totalPages ?? payload.totalPage ?? payload.meta?.totalPages ?? 1,
-  };
 }
 
 export async function getDashboard(): Promise<AdminStats> {
@@ -80,31 +52,27 @@ export async function getAdminDashboardData(): Promise<AdminDashboardResponse> {
 export async function getAdminVendors(
   params: AdminListParams = {},
 ): Promise<PaginatedResult<AdminUser>> {
-  const response = await adminApi.get<
-    ApiResponse<AdminUser[] | PaginatedPayload<AdminUser>>
-  >(ADMIN_ROUTES.USERS, {
+  const response = await adminApi.get<ApiResponse<unknown>>(ADMIN_ROUTES.USERS, {
     params: {
       role: "VENDOR",
       search: params.search || undefined,
       page: params.page,
     },
   });
-  return normalizePaginatedResult(response.data.data ?? []);
+  return normalizePaginatedResponse<AdminUser>(response.data.data);
 }
 
 export async function getAdminDrivers(
   params: AdminListParams = {},
 ): Promise<PaginatedResult<AdminUser>> {
-  const response = await adminApi.get<
-    ApiResponse<AdminUser[] | PaginatedPayload<AdminUser>>
-  >(ADMIN_ROUTES.USERS, {
+  const response = await adminApi.get<ApiResponse<unknown>>(ADMIN_ROUTES.USERS, {
     params: {
       role: "DRIVER",
       search: params.search || undefined,
       page: params.page,
     },
   });
-  return normalizePaginatedResult(response.data.data ?? []);
+  return normalizePaginatedResponse<AdminUser>(response.data.data);
 }
 
 export async function getAdminUsers(

@@ -23,7 +23,7 @@ export function useGeolocation() {
           lng: coords.longitude,
         }),
       (err) => setState({ status: "error", message: err.message }),
-      { enableHighAccuracy: true }
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 },
     );
   }, []);
 

@@ -31,35 +31,69 @@ export const queryKeys = {
 
   // ─── Bookings ────────────────────────────────────────────────────────────────
   bookings: {
-    all: () => ["BOOKINGS"] as const,
-    me: () => ["BOOKINGS", "ME"] as const,
-    vendor: (params?: {
+    root: () => ["BOOKINGS"] as const,
+    all: () => queryKeys.bookings.root(),
+    meRoot: () => [...queryKeys.bookings.root(), "ME"] as const,
+    me: () => queryKeys.bookings.meRoot(),
+    vendorRoot: () => [...queryKeys.bookings.root(), "VENDOR"] as const,
+    vendorList: (params?: {
       search?: string;
       page?: number;
       locationId?: string;
       status?: string;
     }) =>
-      ["BOOKINGS", "VENDOR", params ?? {}] as const,
-    byId: (id: number | string) => ["BOOKINGS", "DETAIL", id] as const,
+      [...queryKeys.bookings.vendorRoot(), params ?? {}] as const,
+    vendor: (params?: {
+      search?: string;
+      page?: number;
+      locationId?: string;
+      status?: string;
+    }) => queryKeys.bookings.vendorList(params),
+    byId: (id: number | string) =>
+      [...queryKeys.bookings.root(), "DETAIL", id] as const,
   },
 
   // ─── Vendor ──────────────────────────────────────────────────────────────────
   vendor: {
-    all: () => ["VENDOR"] as const,
-    dashboard: () => ["VENDOR", "DASHBOARD"] as const,
+    root: () => ["VENDOR"] as const,
+    all: () => queryKeys.vendor.root(),
+    dashboardRoot: () => [...queryKeys.vendor.root(), "DASHBOARD"] as const,
+    dashboard: () => queryKeys.vendor.dashboardRoot(),
+  },
+
+  // ─── Users ───────────────────────────────────────────────────────────────────
+  users: {
+    root: () => ["USERS"] as const,
+    meRoot: () => [...queryKeys.users.root(), "ME"] as const,
+    me: () => queryKeys.users.meRoot(),
   },
 
   // ─── Admin ───────────────────────────────────────────────────────────────────
   admin: {
-    all: () => ["ADMIN"] as const,
-    dashboard: () => ["ADMIN", "DASHBOARD"] as const,
+    root: () => ["ADMIN"] as const,
+    all: () => queryKeys.admin.root(),
+    dashboardRoot: () => [...queryKeys.admin.root(), "DASHBOARD"] as const,
+    dashboard: () => queryKeys.admin.dashboardRoot(),
+    bookingsRoot: () => [...queryKeys.admin.root(), "BOOKINGS"] as const,
+    bookingsList: (params?: { search?: string; page?: number }) =>
+      [...queryKeys.admin.bookingsRoot(), params ?? {}] as const,
     bookings: (params?: { search?: string; page?: number }) =>
-      ["ADMIN", "BOOKINGS", params ?? {}] as const,
-    users: (role?: "VENDOR" | "DRIVER") => ["ADMIN", "USERS", { role }] as const,
+      queryKeys.admin.bookingsList(params),
+    usersRoot: () => [...queryKeys.admin.root(), "USERS"] as const,
+    usersList: (role: "ALL" | "VENDOR" | "DRIVER" = "ALL") =>
+      [...queryKeys.admin.usersRoot(), "LIST", { role }] as const,
+    users: (role?: "VENDOR" | "DRIVER") =>
+      queryKeys.admin.usersList(role ?? "ALL"),
+    vendorsRoot: () => [...queryKeys.admin.usersRoot(), "VENDORS"] as const,
+    vendorsList: (params?: { search?: string; page?: number }) =>
+      [...queryKeys.admin.vendorsRoot(), params ?? {}] as const,
     vendors: (params?: { search?: string; page?: number }) =>
-      ["ADMIN", "USERS", { role: "VENDOR" }, params ?? {}] as const,
+      queryKeys.admin.vendorsList(params),
+    driversRoot: () => [...queryKeys.admin.usersRoot(), "DRIVERS"] as const,
+    driversList: (params?: { search?: string; page?: number }) =>
+      [...queryKeys.admin.driversRoot(), params ?? {}] as const,
     drivers: (params?: { search?: string; page?: number }) =>
-      ["ADMIN", "USERS", { role: "DRIVER" }, params ?? {}] as const,
+      queryKeys.admin.driversList(params),
   },
 
   // ─── Payment ─────────────────────────────────────────────────────────────────

@@ -19,9 +19,9 @@ export function useCreateWalkInBooking(parkingLocationId: string) {
         queryKey: queryKeys.parking.vendorSlots(parkingLocationId),
       });
       void queryClient.invalidateQueries({ queryKey: queryKeys.parking.mine() });
-      void queryClient.invalidateQueries({ queryKey: queryKeys.vendor.dashboard() });
-      void queryClient.invalidateQueries({ queryKey: queryKeys.bookings.vendor() });
-      void queryClient.invalidateQueries({ queryKey: queryKeys.admin.bookings() });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.vendor.dashboardRoot() });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.bookings.vendorRoot() });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.admin.bookingsRoot() });
     },
     onError: (error) => {
       const message = getApiErrorMessage(error);

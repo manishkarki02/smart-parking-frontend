@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod/v4";
+import { RouteGuard } from "@/common/components/RouteGuard";
 import { DriverBookingsPage } from "@/features/bookings/pages/DriverBookingsPage";
 
 const bookingsSearchSchema = z.object({
@@ -16,7 +17,7 @@ const bookingsSearchSchema = z.object({
   message: z.string().optional(),
 });
 
-export const Route = createFileRoute("/bookings/")({
+export const Route = createFileRoute("/_app/bookings/")({
   validateSearch: bookingsSearchSchema,
   component: BookingsRoute,
 });
@@ -25,9 +26,11 @@ function BookingsRoute() {
   const search = Route.useSearch();
 
   return (
-    <DriverBookingsPage
-      parkingLocationId={search.parkingLocationId}
-      payment={search}
-    />
+    <RouteGuard allowedRoles={["DRIVER"]}>
+      <DriverBookingsPage
+        parkingLocationId={search.parkingLocationId}
+        payment={search}
+      />
+    </RouteGuard>
   );
 }

@@ -23,13 +23,11 @@ RUN --mount=type=cache,id=smart-parking-frontend-pnpm-store,target=/pnpm/store \
 # ---------- Build ----------
 FROM deps AS build
 
-ARG VITE_API_BASE_URL=http://localhost:8080
 ARG VITE_GOOGLE_MAPS_API_KEY=not-configured
 ARG VITE_NODE_ENV=production
 ARG VITE_APP_NAME="Smart Parking"
 
-ENV VITE_API_BASE_URL=$VITE_API_BASE_URL \
-    VITE_GOOGLE_MAPS_API_KEY=$VITE_GOOGLE_MAPS_API_KEY \
+ENV VITE_GOOGLE_MAPS_API_KEY=$VITE_GOOGLE_MAPS_API_KEY \
     VITE_NODE_ENV=$VITE_NODE_ENV \
     VITE_APP_NAME=$VITE_APP_NAME
 

@@ -28,7 +28,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { FieldError } from "@/common/components/form/FieldError";
+import { RequiredLabel } from "@/common/components/form/RequiredLabel";
 import {
   Select,
   SelectContent,
@@ -157,10 +158,10 @@ export function AddOnSiteBookingDialog({
         paymentMethod: "CASH",
       });
       void queryClient.invalidateQueries({
-        queryKey: queryKeys.bookings.vendor(),
+        queryKey: queryKeys.bookings.vendorRoot(),
       });
       void queryClient.invalidateQueries({
-        queryKey: queryKeys.vendor.dashboard(),
+        queryKey: queryKeys.vendor.dashboardRoot(),
       });
       void queryClient.invalidateQueries({ queryKey: queryKeys.parking.mine() });
       void queryClient.invalidateQueries({
@@ -428,21 +429,6 @@ export function AddOnSiteBookingDialog({
       </DialogContent>
     </Dialog>
   );
-}
-
-function RequiredLabel({ children }: { children: React.ReactNode }) {
-  return (
-    <Label>
-      {children} <span className="text-red-500">*</span>
-    </Label>
-  );
-}
-
-function FieldError({ message }: { message?: string }) {
-  if (!message) {
-    return null;
-  }
-  return <p className="text-sm text-destructive">{message}</p>;
 }
 
 function SelectField({

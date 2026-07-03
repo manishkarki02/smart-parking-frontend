@@ -1,4 +1,5 @@
 import type { VendorBooking } from "@/features/bookings/services/booking.service";
+import { formatCurrency, formatEnumLabel } from "@/domain/shared/formatters";
 import type {
   VendorBookingStatusFilter,
   VendorBookingStatusView,
@@ -30,13 +31,11 @@ export function formatDateTime(value?: string | null): string {
 }
 
 export function formatAmount(booking: VendorBooking): string {
-  return `Rs. ${Number(booking.totalAmount ?? booking.amount ?? 0).toFixed(2)}`;
+  return formatCurrency(booking.totalAmount ?? booking.amount ?? 0);
 }
 
 export function formatVehicleType(vehicleType?: string): string {
-  if (vehicleType === "TWO_WHEELER") return "Two wheeler";
-  if (vehicleType === "FOUR_WHEELER") return "Four wheeler";
-  return "-";
+  return vehicleType ? formatEnumLabel(vehicleType) : "-";
 }
 
 export function getBookingId(booking: VendorBooking): string {
@@ -94,7 +93,7 @@ export function getOperationalStatus(
     };
   }
 
-  return { label: status || "Unknown", variant: "outline" };
+  return { label: formatEnumLabel(status), variant: "outline" };
 }
 
 export function getPaymentStatusVariant(
