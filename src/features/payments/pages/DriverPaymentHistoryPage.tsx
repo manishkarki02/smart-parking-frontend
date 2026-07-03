@@ -1,6 +1,4 @@
-import { Link, useNavigate } from "@tanstack/react-router";
-import { useCallback, useMemo, useState } from "react";
-import { toast } from "sonner";
+import { Link } from "@tanstack/react-router";
 import { MapPin, ReceiptText } from "lucide-react";
 import { PageHeader } from "@/common/components/PageHeader";
 import { QueryErrorState } from "@/common/components/feedback/QueryErrorState";
@@ -9,7 +7,6 @@ import {
   SplitDataTable,
   TableEmptyState,
 } from "@/common";
-import useCustomMutation from "@/common/hooks/useCustomMutation";
 import { getApiErrorMessage } from "@/common/utils/get-api-error-message";
 import { Button } from "@/components/ui/button";
 import {
@@ -18,123 +15,18 @@ import {
   DriverPaymentSummaryCards,
   DriverPaymentToolbar,
 } from "@/features/payments/components/driver/DriverPaymentHistorySections";
-import { buildDriverPaymentColumns } from "@/features/payments/components/driver/driver-payment-columns";
 import {
   PaymentSuccessTicketDialog,
 } from "@/features/payments/components/PaymentSuccessTicketDialog";
-import { useDriverPaymentDetail } from "@/features/payments/hooks/useDriverPaymentDetail";
-import { useDriverPayments } from "@/features/payments/hooks/useDriverPayments";
-import { initiatePayment } from "@/features/payments/services/payment.service";
-import type {
-  DriverPaymentHistoryItem,
-  PaymentRequest,
-  PaymentResponse,
-} from "@/features/payments/types/payment.types";
+import { useDriverPaymentsPageState } from "@/features/payments/hooks/useDriverPaymentsPageState";
 import {
-  buildDriverPaymentListParams,
-  DEFAULT_DRIVER_PAYMENT_FILTERS,
   DRIVER_PAYMENT_PAGE_SIZE,
-  EMPTY_DRIVER_PAYMENT_SUMMARY,
-  getSelectedDriverPaymentId,
-  type DriverPaymentFilters,
-  type SelectionState,
   toDriverReceiptBooking,
   toDriverReceiptPayment,
 } from "@/features/payments/utils/driver-payment-page.utils";
 
 export function DriverPaymentHistoryPage() {
-  const navigate = useNavigate();
-  const [filters, setFilters] = useState(DEFAULT_DRIVER_PAYMENT_FILTERS);
-  const [page, setPage] = useState(0);
-  const [selection, setSelection] = useState<SelectionState>({ mode: "auto" });
-  const [receiptPayment, setReceiptPayment] =
-    useState<DriverPaymentHistoryItem | null>(null);
-
-  const listParams = useMemo(
-    () => buildDriverPaymentListParams(filters, page),
-    [filters, page],
-  );
-  const {
-    data: paymentPage,
-    isLoading,
-    isError,
-    error,
-    refetch,
-    isFetching,
-  } = useDriverPayments(listParams, true);
-
-  const payments = paymentPage?.content ?? [];
-  const selectedPaymentId = getSelectedDriverPaymentId(payments, selection);
-  const {
-    data: selectedPaymentDetail,
-    isLoading: isDetailLoading,
-    isError: isDetailError,
-  } = useDriverPaymentDetail(selectedPaymentId);
-
-  const {
-    mutate: initiateKhaltiPayment,
-    isPending: isPaymentActionPending,
-  } = useCustomMutation<PaymentRequest, PaymentResponse>({
-    api: initiatePayment,
-    onSuccess: (payment) => {
-      if (payment.paymentUrl) {
-        window.location.assign(payment.paymentUrl);
-        return;
-      }
-
-      toast.info(payment.message || "Payment initiated.");
-    },
-    error: "Unable to start Khalti payment.",
-  });
-
-  const summary = paymentPage?.summary ?? EMPTY_DRIVER_PAYMENT_SUMMARY;
-
-  const handlePayNow = useCallback(
-    (payment: DriverPaymentHistoryItem) => {
-      if (payment.paymentUrl) {
-        window.location.assign(payment.paymentUrl);
-        return;
-      }
-
-      if (!payment.bookingId) {
-        toast.error("This payment is missing a booking reference.");
-        return;
-      }
-
-      initiateKhaltiPayment({
-        bookingId: payment.bookingId,
-        paymentMethod: "KHALTI",
-      });
-    },
-    [initiateKhaltiPayment],
-  );
-
-  const columns = useMemo(
-    () =>
-      buildDriverPaymentColumns({
-        onReceiptClick: setReceiptPayment,
-        onPayClick: handlePayNow,
-        isPaymentActionPending,
-      }),
-    [handlePayNow, isPaymentActionPending],
-  );
-
-  const compactColumns = useMemo(
-    () => [columns[0], columns[2], columns[4], columns[5]],
-    [columns],
-  );
-
-  function updateFilters(nextFilters: Partial<DriverPaymentFilters>) {
-    setFilters((current) => ({ ...current, ...nextFilters }));
-    setPage(0);
-    setSelection({ mode: "auto" });
-  }
-
-  function handleViewBooking(payment: DriverPaymentHistoryItem) {
-    if (payment.bookingId) {
-      void navigate({ to: "/bookings" });
-    }
-  }
+  const page = useDriverPaymentsPageState();
 
   return (
     <>
@@ -145,68 +37,58 @@ export function DriverPaymentHistoryPage() {
           action={<DriverPaymentsHeaderActions />}
         />
 
-        {isLoading && !paymentPage ? (
+        {page.isLoading && !page.paymentPage ? (
           <DriverPaymentsSkeleton />
-        ) : isError ? (
+        ) : page.isError ? (
           <QueryErrorState
             title="Unable to load payment history"
-            message={readPaymentErrorMessage(error)}
-            isRetrying={isFetching}
-            onRetry={() => void refetch()}
+            message={readPaymentErrorMessage(page.error)}
+            isRetrying={page.isFetching}
+            onRetry={() => void page.refetch()}
           />
         ) : (
           <>
-            <DriverPaymentSummaryCards summary={summary} />
+            <DriverPaymentSummaryCards summary={page.summary} />
 
             <SplitDataTable
-              columns={columns}
-              compactColumns={compactColumns}
-              rows={payments}
+              columns={page.columns}
+              compactColumns={page.compactColumns}
+              rows={page.payments}
               getRowId={(payment) => payment.paymentId}
-              selectedRowId={selectedPaymentId}
-              onRowSelect={(payment) =>
-                setSelection((current) =>
-                  current.mode === "selected" &&
-                  current.id === payment.paymentId
-                    ? { mode: "closed" }
-                    : { mode: "selected", id: payment.paymentId },
-                )
-              }
-              onDetailClose={() => setSelection({ mode: "closed" })}
+              selectedRowId={page.selectedPaymentId}
+              onRowSelect={page.selectPayment}
+              onDetailClose={page.closeDetail}
               detailTitle="Payment Detail"
               detailPanel={
                 <DriverPaymentDetailPanel
-                  payment={selectedPaymentDetail}
-                  isLoading={isDetailLoading}
-                  isError={isDetailError}
-                  isActionPending={isPaymentActionPending}
-                  onClose={() => setSelection({ mode: "closed" })}
-                  onPayNow={handlePayNow}
-                  onReceiptClick={setReceiptPayment}
-                  onViewBooking={handleViewBooking}
+                  payment={page.selectedPaymentDetail}
+                  isLoading={page.isDetailLoading}
+                  isError={page.isDetailError}
+                  isActionPending={page.isPaymentActionPending}
+                  onClose={page.closeDetail}
+                  onPayNow={page.handlePayNow}
+                  onReceiptClick={page.setReceiptPayment}
+                  onViewBooking={page.handleViewBooking}
                 />
               }
-              isLoading={isLoading}
+              isLoading={page.isLoading}
               loadingRowCount={6}
               splitContainerClassName="min-h-[560px]"
               emptyState={<DriverPaymentsEmptyState />}
               toolbar={
                 <DriverPaymentToolbar
-                  filters={filters}
-                  onFiltersChange={updateFilters}
+                  filters={page.filters}
+                  onFiltersChange={page.updateFilters}
                 />
               }
               pagination={
                 <DataTablePagination
-                  page={(paymentPage?.page ?? page) + 1}
+                  page={page.currentPage}
                   pageSize={DRIVER_PAYMENT_PAGE_SIZE}
-                  totalItems={paymentPage?.totalElements ?? 0}
-                  totalPages={paymentPage?.totalPages}
+                  totalItems={page.totalItems}
+                  totalPages={page.totalPages}
                   pageSizeOptions={[DRIVER_PAYMENT_PAGE_SIZE]}
-                  onPageChange={(nextPage) => {
-                    setPage(nextPage - 1);
-                    setSelection({ mode: "auto" });
-                  }}
+                  onPageChange={page.changePage}
                   onPageSizeChange={() => undefined}
                 />
               }
@@ -216,16 +98,16 @@ export function DriverPaymentHistoryPage() {
       </div>
 
       <PaymentSuccessTicketDialog
-        open={Boolean(receiptPayment)}
-        payment={receiptPayment ? toDriverReceiptPayment(receiptPayment) : {}}
-        booking={
-          receiptPayment ? toDriverReceiptBooking(receiptPayment) : undefined
+        open={Boolean(page.receiptPayment)}
+        payment={
+          page.receiptPayment ? toDriverReceiptPayment(page.receiptPayment) : {}
         }
-        onOpenChange={(open) => {
-          if (!open) {
-            setReceiptPayment(null);
-          }
-        }}
+        booking={
+          page.receiptPayment
+            ? toDriverReceiptBooking(page.receiptPayment)
+            : undefined
+        }
+        onOpenChange={page.closeReceiptDialog}
       />
     </>
   );
