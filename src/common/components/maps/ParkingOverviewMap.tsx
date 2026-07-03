@@ -105,7 +105,8 @@ function ParkingInfoWindow({
           <span style={{ fontSize: "11px", color: "#888" }}>
             📌 {spot.address}
           </span>
-          {spot.distance != null && (
+          {typeof spot.distance === "number" &&
+            Number.isFinite(spot.distance) && (
             <span>📍 {spot.distance.toFixed(1)} km away</span>
           )}
         </div>

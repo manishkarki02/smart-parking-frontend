@@ -234,7 +234,8 @@ export function ParkingOverviewCard({
             icon={Navigation}
             label="Distance"
             value={
-              location.distance
+              typeof location.distance === "number" &&
+              Number.isFinite(location.distance)
                 ? `${location.distance.toFixed(1)} km away`
                 : "Distance available from map search"
             }

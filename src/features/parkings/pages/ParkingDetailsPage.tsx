@@ -106,11 +106,13 @@ export function ParkingDetailsPage({ id }: ParkingDetailsPageProps) {
 
   return (
     <ParkingDetailsLayout isSignedIn={isSignedIn}>
-      <ParkingDetailHeader
-        location={location}
-        onFindParking={() => navigate({ to: "/parkings/map" })}
-        inlineFallback={!isSignedIn}
-      />
+      {isSignedIn ? (
+        <ParkingDetailHeader
+          location={location}
+          onFindParking={() => navigate({ to: "/parkings/map" })}
+          inlineFallback={false}
+        />
+      ) : null}
 
       <div className="mx-auto w-full max-w-7xl space-y-4 px-0">
         <KpiGrid location={location} slots={slots} />

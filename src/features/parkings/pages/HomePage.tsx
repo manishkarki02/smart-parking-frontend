@@ -22,14 +22,40 @@ import {
   Loader2,
   ParkingCircle,
 } from "lucide-react";
-import useThamelNearbyParking from "@/features/parkings/hooks/useThamelNearbyParking";
+import { useEffect } from "react";
+import { useGeolocation } from "@/common/hooks/maps/useGeolocation";
+import useParkingSlots from "@/features/parkings/hooks/useParkingSlots";
+import useNearbyParkings from "@/features/parkings/hooks/useNearbyParkings";
+import { calculateDistanceKm } from "@/features/parkings/utils/parking-map.utils";
 
 export function HomePage() {
-  const { locations, isLoading } = useThamelNearbyParking({
-    lat: 27.718391063838315,
-    lng: 85.35217956423477,
+  const { state: geoState, locate } = useGeolocation();
+  const hasCurrentLocation = geoState.status === "located";
+  const currentLocation = hasCurrentLocation
+    ? { lat: geoState.lat, lng: geoState.lng }
+    : null;
+  const {
+    locations: currentLocationLocations,
+    isLoading: isCurrentLocationLoading,
+  } = useNearbyParkings({
+    lat: currentLocation?.lat ?? null,
+    lng: currentLocation?.lng ?? null,
     radius: 5,
   });
+  const { locations: fallbackLocations, isLoading: isFallbackLoading } =
+    useParkingSlots();
+  const locations = hasCurrentLocation
+    ? currentLocationLocations
+    : fallbackLocations;
+  const isWaitingForLocation =
+    geoState.status === "idle" || geoState.status === "locating";
+  const isLoading =
+    isWaitingForLocation ||
+    (hasCurrentLocation ? isCurrentLocationLoading : isFallbackLoading);
+
+  useEffect(() => {
+    locate();
+  }, [locate]);
 
   return (
     <PublicShell>
@@ -64,67 +90,82 @@ export function HomePage() {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {locations?.map((location) => (
-              <Card
-                key={location.id}
-                className="group overflow-hidden border bg-card hover:shadow-xl hover:border-primary/30 transition-all duration-300"
-              >
-                <CardHeader className="pb-4 bg-muted/30">
-                  <div className="flex items-start justify-between">
-                    <CardTitle className="text-xl font-bold line-clamp-1 group-hover:text-primary transition-colors">
-                      {location.name}
-                    </CardTitle>
-                    <div className="px-3 py-1 bg-green-100 text-green-700 font-semibold text-sm rounded-full">
-                      Rs.{" "}
-                      {location.fourWheelerRatePerHour ??
-                        location.twoWheelerRatePerHour ??
-                        0}
-                      /hr
+            {locations?.map((location) => {
+              const distanceFromCurrentLocation =
+                currentLocation &&
+                typeof location.latitude === "number" &&
+                Number.isFinite(location.latitude) &&
+                typeof location.longitude === "number" &&
+                Number.isFinite(location.longitude)
+                  ? calculateDistanceKm(currentLocation, {
+                      lat: location.latitude,
+                      lng: location.longitude,
+                    })
+                  : null;
+
+              return (
+                <Card
+                  key={location.id}
+                  className="group overflow-hidden border bg-card hover:shadow-xl hover:border-primary/30 transition-all duration-300"
+                >
+                  <CardHeader className="pb-4 bg-muted/30">
+                    <div className="flex items-start justify-between">
+                      <CardTitle className="text-xl font-bold line-clamp-1 group-hover:text-primary transition-colors">
+                        {location.name}
+                      </CardTitle>
+                      <div className="px-3 py-1 bg-green-100 text-green-700 font-semibold text-sm rounded-full">
+                        Rs.{" "}
+                        {location.fourWheelerRatePerHour ??
+                          location.twoWheelerRatePerHour ??
+                          0}
+                        /hr
+                      </div>
                     </div>
-                  </div>
-                </CardHeader>
+                  </CardHeader>
 
-                <CardContent className="pt-4 space-y-3">
-                  <div className="flex items-center text-muted-foreground text-sm">
-                    <MapPin className="w-4 h-4 mr-2 text-primary/70" />
-                    <span className="line-clamp-1">{location.address}</span>
-                  </div>
+                  <CardContent className="pt-4 space-y-3">
+                    <div className="flex items-center text-muted-foreground text-sm">
+                      <MapPin className="w-4 h-4 mr-2 text-primary/70" />
+                      <span className="line-clamp-1">{location.address}</span>
+                    </div>
 
-                  <div className="flex items-center text-muted-foreground text-sm">
-                    <Navigation className="w-4 h-4 mr-2 text-primary/70" />
-                    <span>
-                      {location.distance !== undefined
-                        ? `${location.distance.toFixed(1)} km away`
-                        : "Distance unknown"}
-                    </span>
-                  </div>
+                    <div className="flex items-center text-muted-foreground text-sm">
+                      <Navigation className="w-4 h-4 mr-2 text-primary/70" />
+                      <span>
+                        {distanceFromCurrentLocation !== null &&
+                        Number.isFinite(distanceFromCurrentLocation)
+                          ? `${distanceFromCurrentLocation.toFixed(1)} km away`
+                          : "Distance unknown"}
+                      </span>
+                    </div>
 
-                  <div className="pt-2 flex justify-between items-center">
-                    <span className="text-sm font-medium">
-                      <span className="text-primary font-bold">
-                        {location.availableSlots}
-                      </span>{" "}
-                      spots left
-                    </span>
-                  </div>
-                </CardContent>
+                    <div className="pt-2 flex justify-between items-center">
+                      <span className="text-sm font-medium">
+                        <span className="text-primary font-bold">
+                          {location.availableSlots}
+                        </span>{" "}
+                        spots left
+                      </span>
+                    </div>
+                  </CardContent>
 
-                <CardFooter className="bg-muted/10 pt-4">
-                  <Button
-                    asChild
-                    className="w-full group-hover:bg-primary transition-colors"
-                  >
-                    <Link
-                      to="/parkings/$id"
-                      params={{ id: location.id.toString() }}
+                  <CardFooter className="bg-muted/10 pt-4">
+                    <Button
+                      asChild
+                      className="w-full group-hover:bg-primary transition-colors"
                     >
-                      View Details
-                      <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
-                    </Link>
-                  </Button>
-                </CardFooter>
-              </Card>
-            ))}
+                      <Link
+                        to="/parkings/$id"
+                        params={{ id: location.id.toString() }}
+                      >
+                        View Details
+                        <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                      </Link>
+                    </Button>
+                  </CardFooter>
+                </Card>
+              );
+            })}
 
             {!locations?.length && (
               <Empty className="col-span-full border bg-card">

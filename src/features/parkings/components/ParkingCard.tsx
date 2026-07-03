@@ -57,7 +57,9 @@ export function ParkingCard({ location, onBook }: ParkingCardProps) {
             <span>Managed by <span className="font-medium text-foreground">{location.vendorName}</span></span>
           </div>
 
-          {location.distance !== undefined && location.distance > 0 && (
+          {typeof location.distance === "number" &&
+            Number.isFinite(location.distance) &&
+            location.distance > 0 && (
             <div className="inline-flex mt-1 items-center px-2 py-0.5 rounded text-xs font-medium bg-secondary text-secondary-foreground">
               📍 {location.distance.toFixed(2)} km away
             </div>
