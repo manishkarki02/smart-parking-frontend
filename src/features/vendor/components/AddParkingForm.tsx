@@ -105,9 +105,11 @@ function LocationFields({
   useEffect(() => {
     if (!pickedLocation || activeMethod != null) return;
 
-    setSearchQuery(pickedLocation.address ?? "");
-    setManualLat(String(pickedLocation.lat));
-    setManualLng(String(pickedLocation.lng));
+    queueMicrotask(() => {
+      setSearchQuery(pickedLocation.address ?? "");
+      setManualLat(String(pickedLocation.lat));
+      setManualLng(String(pickedLocation.lng));
+    });
   }, [activeMethod, pickedLocation]);
 
   useEffect(() => {
@@ -123,8 +125,10 @@ function LocationFields({
       lng: Number(debouncedLng),
     };
 
-    setReverseCoords(nextLocation);
-    onLocationChange(nextLocation);
+    queueMicrotask(() => {
+      setReverseCoords(nextLocation);
+      onLocationChange(nextLocation);
+    });
   }, [activeMethod, debouncedLat, debouncedLng, onLocationChange]);
 
   useEffect(() => {
@@ -135,8 +139,10 @@ function LocationFields({
       address: resolvedAddress,
     };
 
-    setSearchQuery(resolvedAddress);
-    onLocationChange(nextLocation);
+    queueMicrotask(() => {
+      setSearchQuery(resolvedAddress);
+      onLocationChange(nextLocation);
+    });
   }, [resolvedAddress, reverseCoords, onLocationChange]);
 
   useEffect(() => {
@@ -432,8 +438,10 @@ export function ParkingLocationForm({
   });
 
   useEffect(() => {
-    reset(getParkingFormDefaults(initialValues));
-    setPickedLocation(getPickedLocation(initialValues));
+    queueMicrotask(() => {
+      reset(getParkingFormDefaults(initialValues));
+      setPickedLocation(getPickedLocation(initialValues));
+    });
   }, [initialValues, reset]);
 
   const addMutation = useAddParkingMutation(() => {

@@ -23,11 +23,10 @@ const INITIAL_STATE: DirectionsState = {
 export function useDirections(origin: LatLng | null, destination: LatLng | null) {
   const routesLib = useMapsLibrary("routes");
   const [state, setState] = useState<DirectionsState>(INITIAL_STATE);
+  const hasRouteInputs = Boolean(routesLib && origin && destination);
 
   useEffect(() => {
-    // Reset to idle when inputs are cleared
     if (!routesLib || !origin || !destination) {
-      setState(INITIAL_STATE);
       return;
     }
 
@@ -69,10 +68,10 @@ export function useDirections(origin: LatLng | null, destination: LatLng | null)
     return () => {
       cancelled = true;
     };
-  }, [routesLib, origin?.lat, origin?.lng, destination?.lat, destination?.lng]);
+  }, [routesLib, origin, destination]);
 
-  // Derive loading — we have valid inputs but no result or error yet
-  const isLoading = !!(routesLib && origin && destination && !state.raw && !state.error);
+  const visibleState = hasRouteInputs ? state : INITIAL_STATE;
+  const isLoading = hasRouteInputs && !visibleState.raw && !visibleState.error;
 
-  return { ...state, isLoading };
+  return { ...visibleState, isLoading };
 }
