@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Loader2, LocateFixed, MapPin, RotateCcw, Search } from "lucide-react";
 import { toast } from "sonner";
 import { LocationPickerMap } from "@/common/components/maps/LocationPickerMap";
-import { useLeafletLocationSearch } from "@/common/hooks/maps/useLeafletGeocode";
+import { useOsmLocationSearch } from "@/common/hooks/maps/useOsmGeocode";
 import { useReverseGeocode } from "@/common/hooks/maps/useReverseGeocode";
 import useDebounce from "@/common/hooks/useDebounce";
 import type { PickerLocation } from "@/common/types/map.types";
@@ -63,7 +63,7 @@ export function ParkingLocationFields({
     data: searchResults = [],
     isFetching: isSearching,
     isError: isSearchError,
-  } = useLeafletLocationSearch(
+  } = useOsmLocationSearch(
     activeMethod === "search" ? debouncedSearchQuery : "",
   );
 

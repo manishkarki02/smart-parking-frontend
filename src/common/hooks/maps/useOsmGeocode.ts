@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 
-export interface LeafletSearchResult {
+export interface OsmSearchResult {
   placeId: string;
   label: string;
   lat: number;
@@ -36,7 +36,7 @@ async function reverseGeocode(lat: number, lng: number): Promise<string> {
   return data?.display_name ?? "Unknown location";
 }
 
-async function searchLocations(query: string): Promise<LeafletSearchResult[]> {
+async function searchLocations(query: string): Promise<OsmSearchResult[]> {
   const { data } = await nominatimClient.get<NominatimSearchResult[]>(
     "/search",
     {
@@ -57,13 +57,13 @@ async function searchLocations(query: string): Promise<LeafletSearchResult[]> {
   }));
 }
 
-export function useLeafletReverseGeocode(
+export function useOsmReverseGeocode(
   lat: number | undefined,
   lng: number | undefined,
   enabled = true,
 ) {
   return useQuery({
-    queryKey: ["leaflet-reverse-geocode", lat, lng],
+    queryKey: ["osm-reverse-geocode", lat, lng],
     queryFn: () => reverseGeocode(lat!, lng!),
     enabled: enabled && lat != null && lng != null,
     staleTime: Infinity,
@@ -71,11 +71,11 @@ export function useLeafletReverseGeocode(
   });
 }
 
-export function useLeafletLocationSearch(query: string) {
+export function useOsmLocationSearch(query: string) {
   const trimmed = query.trim();
 
   return useQuery({
-    queryKey: ["leaflet-location-search", trimmed],
+    queryKey: ["osm-location-search", trimmed],
     queryFn: () => searchLocations(trimmed),
     enabled: trimmed.length > 1,
     staleTime: 1000 * 60 * 5,
