@@ -74,7 +74,6 @@ export function ParkingLocationForm({
     register,
     handleSubmit,
     reset,
-    resetField,
     setValue,
     control,
     formState: { errors },
@@ -156,13 +155,6 @@ export function ParkingLocationForm({
     }
   }, [setValue]);
 
-  const handleLocationReset = useCallback(() => {
-    setPickedLocation(null);
-    resetField("address");
-    resetField("latitude");
-    resetField("longitude");
-  }, [resetField]);
-
   const onSubmit = async (data: AddParkingFormValues) => {
     const parsed = addParkingSchema.parse(data);
 
@@ -204,7 +196,6 @@ export function ParkingLocationForm({
           <ParkingLocationFields
             pickedLocation={pickedLocation}
             onLocationChange={handleLocationChange}
-            onLocationReset={handleLocationReset}
             hasLocationError={Boolean(hasLocationError)}
           />
         </MapProvider>

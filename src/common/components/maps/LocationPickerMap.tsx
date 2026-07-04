@@ -6,17 +6,16 @@ import {
   MapControl,
   Pin,
   useMap,
-  useMapsLibrary,
 } from "@vis.gl/react-google-maps";
 import {
   Loader2,
   LocateFixed,
   LocateOff,
+  MapPin,
   Maximize2,
   Minimize2,
   Minus,
   Plus,
-  Search,
 } from "lucide-react";
 import { useReverseGeocode } from "../../hooks/maps/useReverseGeocode";
 import {
@@ -26,46 +25,6 @@ import {
 import type { PickerLocation } from "../../types/map.types";
 
 const DEFAULT_CENTER = { lat: 27.7172, lng: 85.324 };
-
-function PlaceAutocomplete({
-  onPlaceSelect,
-  inputRef,
-}: {
-  onPlaceSelect: (lat: number, lng: number, address: string) => void;
-  inputRef: React.RefObject<HTMLInputElement | null>;
-}) {
-  const map = useMap();
-  const placesLib = useMapsLibrary("places");
-
-  useEffect(() => {
-    if (!placesLib || !inputRef.current || !map) return;
-
-    const autocomplete = new placesLib.Autocomplete(inputRef.current, {
-      fields: ["geometry", "formatted_address"],
-    });
-
-    const listener = autocomplete.addListener("place_changed", () => {
-      const place = autocomplete.getPlace();
-      const location = place.geometry?.location;
-
-      if (!location) return;
-
-      const lat = location.lat();
-      const lng = location.lng();
-
-      map.panTo({ lat, lng });
-      map.setZoom(17);
-
-      onPlaceSelect(lat, lng, place.formatted_address ?? "");
-    });
-
-    return () => {
-      listener.remove();
-    };
-  }, [placesLib, map, onPlaceSelect, inputRef]);
-
-  return null;
-}
 
 function LocationMarker({
   value,
@@ -117,6 +76,65 @@ function LocateEffect({
   }, [geoState, map, onLocated]);
 
   return null;
+}
+
+function SelectedLocationEffect({
+  value,
+  setZoom,
+}: {
+  value: PickerLocation | null;
+  setZoom: React.Dispatch<React.SetStateAction<number>>;
+}) {
+  const map = useMap();
+
+  useEffect(() => {
+    if (!value || !map) return;
+
+    const nextZoom = Math.max(map.getZoom() ?? 13, 17);
+
+    map.panTo({ lat: value.lat, lng: value.lng });
+    map.setZoom(nextZoom);
+    setZoom(nextZoom);
+  }, [map, setZoom, value]);
+
+  return null;
+}
+
+function SelectedLocationControl({
+  value,
+  resolving,
+}: {
+  value: PickerLocation | null;
+  resolving: boolean;
+}) {
+  if (!value) return null;
+
+  const label = resolving
+    ? "Locating address..."
+    : value.address || "Selected coordinates";
+
+  return (
+    <MapControl position={ControlPosition.TOP_LEFT}>
+      <div className="m-3 max-w-[260px] rounded-lg border border-slate-200 bg-white/95 px-3 py-2 text-slate-900 shadow-lg backdrop-blur-sm">
+        <div className="flex min-w-0 items-start gap-2">
+          <span className="mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-full bg-blue-50 text-blue-600">
+            <MapPin size={15} />
+          </span>
+          <div className="min-w-0">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-500">
+              Selected location
+            </p>
+            <p className="mt-0.5 line-clamp-2 text-xs font-semibold leading-4 text-slate-950">
+              {label}
+            </p>
+            <p className="mt-1 font-mono text-[11px] text-slate-500">
+              {value.lat.toFixed(5)}, {value.lng.toFixed(5)}
+            </p>
+          </div>
+        </div>
+      </div>
+    </MapControl>
+  );
 }
 
 function MapControls({
@@ -241,14 +259,13 @@ export function LocationPickerMap({
   const [isFullscreen, setIsFullscreen] = useState(false);
 
   const wrapperRef = useRef<HTMLDivElement>(null);
-  const searchInputRef = useRef<HTMLInputElement>(null);
 
   const { state: geoState, locate } = useGeolocation();
 
   const { data: resolvedAddress, isFetching: isGeocoding } = useReverseGeocode(
     value?.lat,
     value?.lng,
-    !value?.address,
+    !!value && !value.address,
   );
 
   useEffect(() => {
@@ -256,14 +273,6 @@ export function LocationPickerMap({
       onChange({ ...value, address: resolvedAddress });
     }
   }, [resolvedAddress, value, onChange]);
-
-  const handlePlaceSelect = useCallback(
-    (lat: number, lng: number, address: string) => {
-      setZoom(17);
-      onChange({ lat, lng, address });
-    },
-    [onChange],
-  );
 
   const handleLocated = useCallback(
     (lat: number, lng: number) => {
@@ -305,20 +314,6 @@ export function LocationPickerMap({
       ref={wrapperRef}
       className={`lp-wrapper${isFullscreen ? " lp-wrapper--fullscreen" : ""}`}
     >
-      <div className="lp-search-row">
-        <span className="lp-search-icon-wrap">
-          <Search size={16} />
-        </span>
-
-        <input
-          ref={searchInputRef}
-          className="lp-search-input"
-          placeholder="Search for your parking location"
-          type="text"
-          autoComplete="off"
-        />
-      </div>
-
       <div className="lp-map-area">
         <Map
           style={{ width: "100%", height: "100%" }}
@@ -343,10 +338,9 @@ export function LocationPickerMap({
             }
           }}
         >
-          <PlaceAutocomplete
-            onPlaceSelect={handlePlaceSelect}
-            inputRef={searchInputRef}
-          />
+          <SelectedLocationEffect value={value} setZoom={setZoom} />
+
+          <SelectedLocationControl value={value} resolving={isGeocoding} />
 
           <LocateEffect geoState={geoState} onLocated={handleLocated} />
 
@@ -371,7 +365,7 @@ export function LocationPickerMap({
                 `${value.lat.toFixed(5)}, ${value.lng.toFixed(5)}`}
           </p>
         ) : (
-          <p>Click the map or drag the pin to select your parking location</p>
+          <p>Click the map or drag the pin, then press Done to confirm</p>
         )}
       </div>
     </div>

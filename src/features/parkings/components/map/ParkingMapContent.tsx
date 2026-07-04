@@ -11,7 +11,8 @@ import {
   Bike,
   Car,
   CircleParking,
-  Crosshair,
+  LocateFixed,
+  LocateOff,
   Loader2,
   Minus,
   MapPin,
@@ -133,8 +134,12 @@ export function DriverParkingMap({
           </InfoWindow>
         ) : null}
 
-        <MapControl position={ControlPosition.RIGHT_TOP}>
-          <MapControlButtons onLocate={onLocate} locating={locating} />
+        <MapControl position={ControlPosition.RIGHT_BOTTOM}>
+          <MapControlButtons
+            onLocate={onLocate}
+            locating={locating}
+            located={Boolean(userLocation)}
+          />
         </MapControl>
       </Map>
 
@@ -153,9 +158,11 @@ export function DriverParkingMap({
 function MapControlButtons({
   onLocate,
   locating,
+  located,
 }: {
   onLocate: () => void;
   locating: boolean;
+  located: boolean;
 }) {
   const map = useMap();
 
@@ -165,36 +172,52 @@ function MapControlButtons({
   }
 
   return (
-    <div className="m-3 flex flex-col overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+    <div className="mb-2 mr-2 flex flex-col items-center gap-2">
       <button
         type="button"
-        className="flex size-9 items-center justify-center border-b border-slate-200 text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-70"
-        onClick={() => zoomBy(1)}
-        title="Zoom in"
-      >
-        <Plus className="size-4" />
-      </button>
-      <button
-        type="button"
-        className="flex size-9 items-center justify-center border-b border-slate-200 text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-70"
-        onClick={() => zoomBy(-1)}
-        title="Zoom out"
-      >
-        <Minus className="size-4" />
-      </button>
-      <button
-        type="button"
-        className="flex size-9 items-center justify-center text-blue-600 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-70"
+        className={cn(
+          "lp-locate-btn",
+          locating && "lp-locate-btn--locating",
+          located && "lp-locate-btn--located",
+        )}
         onClick={onLocate}
         disabled={locating}
-        title="Use current location"
+        title={
+          locating
+            ? "Finding your location..."
+            : located
+              ? "Location found"
+              : "Use current location"
+        }
       >
         {locating ? (
-          <Loader2 className="size-4 animate-spin" />
+          <Loader2 size={18} className="animate-spin" />
+        ) : located ? (
+          <LocateFixed size={18} />
         ) : (
-          <Crosshair className="size-4" />
+          <LocateOff size={18} />
         )}
       </button>
+
+      <div className="lp-control-group">
+        <button
+          type="button"
+          className="lp-icon-btn"
+          onClick={() => zoomBy(1)}
+          title="Zoom in"
+        >
+          <Plus size={18} />
+        </button>
+        <span className="lp-divider" />
+        <button
+          type="button"
+          className="lp-icon-btn"
+          onClick={() => zoomBy(-1)}
+          title="Zoom out"
+        >
+          <Minus size={18} />
+        </button>
+      </div>
     </div>
   );
 }

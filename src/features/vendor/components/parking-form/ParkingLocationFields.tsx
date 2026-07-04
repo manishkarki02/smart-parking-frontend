@@ -13,7 +13,6 @@ import { Label } from "@/components/ui/label";
 interface ParkingLocationFieldsProps {
   pickedLocation: PickerLocation | null;
   onLocationChange: (location: PickerLocation) => void;
-  onLocationReset: () => void;
   hasLocationError: boolean;
 }
 
@@ -36,11 +35,12 @@ function isValidCoordinatePair(latValue: string, lngValue: string) {
 export function ParkingLocationFields({
   pickedLocation,
   onLocationChange,
-  onLocationReset,
   hasLocationError,
 }: ParkingLocationFieldsProps) {
   const [activeMethod, setActiveMethod] = useState<LocationMethod>(null);
   const [showMap, setShowMap] = useState(false);
+  const [mapDraftLocation, setMapDraftLocation] =
+    useState<PickerLocation | null>(pickedLocation);
   const [searchQuery, setSearchQuery] = useState("");
   const [showSearchResults, setShowSearchResults] = useState(false);
   const [manualLat, setManualLat] = useState("");
@@ -80,6 +80,7 @@ export function ParkingLocationFields({
       setSearchQuery(pickedLocation.address ?? "");
       setManualLat(String(pickedLocation.lat));
       setManualLng(String(pickedLocation.lng));
+      setMapDraftLocation(pickedLocation);
     });
   }, [activeMethod, pickedLocation]);
 
@@ -133,13 +134,24 @@ export function ParkingLocationFields({
   const handleSearchChange = (value: string) => {
     geocodeErrorShownRef.current = false;
     setActiveMethod("search");
+    setShowMap(false);
+    setMapDraftLocation(pickedLocation);
     setSearchQuery(value);
     setShowSearchResults(true);
+  };
+
+  const handleSearchFocus = () => {
+    if (!canUseSearch) return;
+
+    setShowMap(false);
+    setMapDraftLocation(pickedLocation);
   };
 
   const handleSearchSelect = (location: PickerLocation) => {
     setSearchQuery(location.address ?? "");
     setShowSearchResults(false);
+    setShowMap(false);
+    setMapDraftLocation(location);
     setManualLat(String(location.lat));
     setManualLng(String(location.lng));
     onLocationChange(location);
@@ -159,6 +171,8 @@ export function ParkingLocationFields({
   const handleMapPick = (coords: PickerLocation) => {
     reverseErrorShownRef.current = false;
     setActiveMethod("map");
+    setShowMap(false);
+    setMapDraftLocation(coords);
     setManualLat(String(coords.lat));
     setManualLng(String(coords.lng));
     if (coords.address) {
@@ -167,27 +181,44 @@ export function ParkingLocationFields({
     onLocationChange(coords);
   };
 
-  const handleReset = () => {
+  const handleChangeLocation = () => {
     setActiveMethod(null);
-    setShowMap(false);
-    setSearchQuery("");
     setShowSearchResults(false);
-    setManualLat("");
-    setManualLng("");
     setReverseCoords(null);
+    setMapDraftLocation(pickedLocation);
     geocodeErrorShownRef.current = false;
     reverseErrorShownRef.current = false;
-    onLocationReset();
+
+    if (pickedLocation) {
+      setSearchQuery(pickedLocation.address ?? "");
+      setManualLat(String(pickedLocation.lat));
+      setManualLng(String(pickedLocation.lng));
+    }
+  };
+
+  const handleMapButtonClick = () => {
+    if (showMap) {
+      if (mapDraftLocation) {
+        handleMapPick(mapDraftLocation);
+      } else {
+        setShowMap(false);
+      }
+      return;
+    }
+
+    setActiveMethod("map");
+    setMapDraftLocation(pickedLocation);
+    setShowMap(true);
   };
 
   const hasActiveLocation = activeMethod != null || pickedLocation != null;
   const lockedMessage =
     activeMethod === "search"
-      ? "Address search is active. Reset to use coordinates or map."
+      ? "Address search is active. Use Change location to use coordinates or map."
       : activeMethod === "coordinates"
-        ? "Manual coordinates are active. Reset to use search or map."
+        ? "Manual coordinates are active. Use Change location to use search or map."
         : activeMethod === "map"
-          ? "Map picker is active. Reset to use search or coordinates."
+          ? "Map picker is active. Use Change location to use search or coordinates."
           : "Choose one location method.";
 
   return (
@@ -202,7 +233,7 @@ export function ParkingLocationFields({
             variant="ghost"
             size="sm"
             className="h-8 rounded-lg px-2 text-xs"
-            onClick={handleReset}
+            onClick={handleChangeLocation}
           >
             <RotateCcw className="mr-1.5 size-3.5" />
             Change location
@@ -219,6 +250,7 @@ export function ParkingLocationFields({
             className="h-12 rounded-lg pl-11 text-base"
             autoComplete="off"
             disabled={!canUseSearch}
+            onFocus={handleSearchFocus}
             onChange={(event) => handleSearchChange(event.target.value)}
           />
         </div>
@@ -329,19 +361,19 @@ export function ParkingLocationFields({
           size="sm"
           className="rounded-lg"
           disabled={!canUseMap}
-          onClick={() => {
-            setActiveMethod("map");
-            setShowMap((value) => !value);
-          }}
+          onClick={handleMapButtonClick}
         >
           <LocateFixed className="mr-2 size-4" />
-          {showMap ? "Hide map" : "Select from map"}
+          {showMap ? "Done" : "Select from map"}
         </Button>
       </div>
 
       {showMap && (
         <div className="add-location-map rounded-xl border bg-muted/20 p-3">
-          <LocationPickerMap value={pickedLocation} onChange={handleMapPick} />
+          <LocationPickerMap
+            value={mapDraftLocation}
+            onChange={setMapDraftLocation}
+          />
         </div>
       )}
 
