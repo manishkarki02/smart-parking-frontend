@@ -1,16 +1,16 @@
 import type { AdminBooking } from "@/features/bookings/types/admin-booking.types";
+import {
+  formatKathmanduDate,
+  formatKathmanduDateTime,
+  formatKathmanduTime,
+} from "@/domain/shared/formatters";
 
 export function formatBookingDate(value?: string | null): string {
-  if (!value) return "-";
-  return new Date(value).toLocaleDateString();
+  return formatKathmanduDate(value, "-");
 }
 
 export function formatBookingTime(value?: string | null): string {
-  if (!value) return "-";
-  return new Date(value).toLocaleTimeString([], {
-    hour: "2-digit",
-    minute: "2-digit",
-  });
+  return formatKathmanduTime(value, "-");
 }
 
 export function formatBookingDateTime(value?: string | null): string {
@@ -19,11 +19,7 @@ export function formatBookingDateTime(value?: string | null): string {
 }
 
 export function formatBookingDateTimeLong(value?: string | null): string {
-  if (!value) return "-";
-  return new Date(value).toLocaleString("en-US", {
-    dateStyle: "medium",
-    timeStyle: "short",
-  });
+  return formatKathmanduDateTime(value, "-");
 }
 
 export function formatBookingAmount(value?: number | null): string {

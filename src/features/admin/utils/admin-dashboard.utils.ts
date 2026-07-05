@@ -7,6 +7,10 @@ import type {
   AdminStats,
   AdminUser,
 } from "@/features/admin/types/admin.types";
+import {
+  formatKathmanduDate,
+  formatKathmanduTime,
+} from "@/domain/shared/formatters";
 
 export type AdminStatusTone = "default" | "secondary" | "destructive" | "outline";
 
@@ -53,12 +57,7 @@ export function formatAdminCurrency(amount: number): string {
 }
 
 export function formatAdminDate(value: string): string {
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) {
-    return "-";
-  }
-
-  return date.toLocaleDateString("en-US", {
+  return formatKathmanduDate(value, "-", {
     month: "short",
     day: "numeric",
     year: "numeric",
@@ -70,7 +69,7 @@ export function formatAdminTimeRange(startTime: string, endTime: string): string
 }
 
 export function formatAdminCurrentDate(value = new Date()): string {
-  return value.toLocaleDateString("en-US", {
+  return formatKathmanduDate(value, "-", {
     weekday: "long",
     month: "long",
     day: "numeric",
@@ -247,13 +246,5 @@ function getBookingTime(booking: AdminBooking): number {
 }
 
 function formatAdminTime(value: string): string {
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) {
-    return "-";
-  }
-
-  return date.toLocaleTimeString("en-US", {
-    hour: "2-digit",
-    minute: "2-digit",
-  });
+  return formatKathmanduTime(value, "-");
 }

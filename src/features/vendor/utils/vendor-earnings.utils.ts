@@ -1,5 +1,9 @@
 import type { VendorBooking } from "@/features/bookings/services/booking.service";
 import {
+  formatKathmanduDate,
+  formatKathmanduDateInputValue,
+} from "@/domain/shared/formatters";
+import {
   getBookingId,
   getCustomerName,
   getSlot,
@@ -55,10 +59,10 @@ export function getDateRange(filter: DateRangeFilter): DateRange {
     return {
       start: startOfDay(start),
       end: endOfDay(now),
-      label: `${start.toLocaleDateString(undefined, {
+      label: `${formatKathmanduDate(start, "-", {
         month: "short",
         day: "numeric",
-      })} - ${now.toLocaleDateString(undefined, {
+      })} - ${formatKathmanduDate(now, "-", {
         month: "short",
         day: "numeric",
         year: "numeric",
@@ -73,10 +77,10 @@ export function getDateRange(filter: DateRangeFilter): DateRange {
   return {
     start: startOfDay(start),
     end: endOfDay(now),
-    label: `${start.toLocaleDateString(undefined, {
+    label: `${formatKathmanduDate(start, "-", {
       month: "short",
       day: "numeric",
-    })} - ${now.toLocaleDateString(undefined, {
+    })} - ${formatKathmanduDate(now, "-", {
       month: "short",
       day: "numeric",
       year: "numeric",
@@ -142,8 +146,8 @@ export function buildDailyRevenue(
     days.push({
       date,
       amount,
-      label: date.toLocaleDateString(undefined, { weekday: "short" }),
-      dateLabel: date.toLocaleDateString(undefined, {
+      label: formatKathmanduDate(date, "-", { weekday: "short" }),
+      dateLabel: formatKathmanduDate(date, "-", {
         month: "short",
         day: "numeric",
       }),
@@ -275,5 +279,5 @@ function endOfDay(date: Date) {
 }
 
 function sameDay(left: Date, right: Date) {
-  return left.toDateString() === right.toDateString();
+  return formatKathmanduDateInputValue(left) === formatKathmanduDateInputValue(right);
 }

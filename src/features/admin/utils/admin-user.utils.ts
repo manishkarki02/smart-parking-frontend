@@ -9,6 +9,7 @@ import type {
   AdminUserStatusFilter,
   AdminVendorApprovalStatus,
 } from "@/features/admin/types/admin-user.types";
+import { formatKathmanduDateTime } from "@/domain/shared/formatters";
 
 export type AdminUserBadgeTone =
   | "default"
@@ -153,22 +154,7 @@ export function getAdminUserInitials(user: AdminUser): string {
 }
 
 export function formatAdminUserJoinedDate(user: AdminUser): string {
-  const value = user.joinedAt ?? user.createdAt;
-
-  if (!value) {
-    return "N/A";
-  }
-
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) {
-    return "N/A";
-  }
-
-  return date.toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  });
+  return formatKathmanduDateTime(user.joinedAt ?? user.createdAt, "N/A");
 }
 
 export function truncateAdminUserId(id: string): string {

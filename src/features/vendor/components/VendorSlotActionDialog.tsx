@@ -13,6 +13,7 @@ import { useForm, useWatch } from "react-hook-form";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { formatKathmanduDateTime } from "@/domain/shared/formatters";
 import {
   Dialog,
   DialogContent,
@@ -93,14 +94,7 @@ function getDefaultEndTime(): string {
 }
 
 function formatDateTime(value?: string): string {
-  if (!value) return "Not available";
-
-  return new Date(value).toLocaleString(undefined, {
-    month: "short",
-    day: "numeric",
-    hour: "numeric",
-    minute: "2-digit",
-  });
+  return formatKathmanduDateTime(value, "Not available");
 }
 
 function formatMoney(value?: number) {

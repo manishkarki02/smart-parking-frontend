@@ -5,6 +5,10 @@ import type {
   PaymentStatus,
   VehicleType,
 } from "@/features/payments/types/payment.types";
+import {
+  formatKathmanduDate,
+  formatKathmanduDateTime,
+} from "@/domain/shared/formatters";
 
 export type PaymentStatusFilter = "ALL" | PaymentStatus;
 export type PaymentMethodFilter = "ALL" | PaymentMethod;
@@ -34,35 +38,11 @@ export function formatPaymentCurrency(amount: number): string {
 }
 
 export function formatPaymentDateTime(value?: string | null): string {
-  if (!value) {
-    return "-";
-  }
-
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) {
-    return "-";
-  }
-
-  return date.toLocaleString("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
+  return formatKathmanduDateTime(value, "-");
 }
 
 export function formatPaymentDate(value?: string | null): string {
-  if (!value) {
-    return "-";
-  }
-
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) {
-    return "-";
-  }
-
-  return date.toLocaleDateString("en-US", {
+  return formatKathmanduDate(value, "-", {
     month: "short",
     day: "numeric",
     year: "numeric",

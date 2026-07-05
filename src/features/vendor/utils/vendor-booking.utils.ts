@@ -1,5 +1,10 @@
 import type { VendorBooking } from "@/features/bookings/services/booking.service";
-import { formatCurrency, formatEnumLabel } from "@/domain/shared/formatters";
+import {
+  formatCurrency,
+  formatEnumLabel,
+  formatKathmanduDate,
+  formatKathmanduTime,
+} from "@/domain/shared/formatters";
 import type {
   VendorBookingStatusFilter,
   VendorBookingStatusView,
@@ -13,16 +18,11 @@ export function toDateTimeInputValue(date: Date): string {
 }
 
 export function formatDate(value?: string | null): string {
-  if (!value) return "-";
-  return new Date(value).toLocaleDateString();
+  return formatKathmanduDate(value, "-");
 }
 
 export function formatTime(value?: string | null): string {
-  if (!value) return "-";
-  return new Date(value).toLocaleTimeString([], {
-    hour: "2-digit",
-    minute: "2-digit",
-  });
+  return formatKathmanduTime(value, "-");
 }
 
 export function formatDateTime(value?: string | null): string {

@@ -6,6 +6,12 @@ import type {
   AdminBookingStatusFilter,
   AdminPaymentStatusFilter,
 } from "@/features/bookings/types/admin-booking.types";
+import {
+  formatKathmanduDate,
+  formatKathmanduDateInputValue,
+  formatKathmanduDateTime,
+  formatKathmanduTime,
+} from "@/domain/shared/formatters";
 
 export type AdminBookingTone = BadgeVariant;
 
@@ -162,16 +168,7 @@ export function formatAdminBookingCurrency(amount: number): string {
 }
 
 export function formatAdminBookingDate(value?: string | null): string {
-  if (!value) {
-    return "-";
-  }
-
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) {
-    return "-";
-  }
-
-  return date.toLocaleDateString("en-US", {
+  return formatKathmanduDate(value, "-", {
     month: "short",
     day: "numeric",
     year: "numeric",
@@ -179,38 +176,11 @@ export function formatAdminBookingDate(value?: string | null): string {
 }
 
 export function formatAdminBookingDateTime(value?: string | null): string {
-  if (!value) {
-    return "-";
-  }
-
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) {
-    return "-";
-  }
-
-  return date.toLocaleString("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
+  return formatKathmanduDateTime(value, "-");
 }
 
 export function formatAdminBookingTime(value?: string | null): string {
-  if (!value) {
-    return "-";
-  }
-
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) {
-    return "-";
-  }
-
-  return date.toLocaleTimeString("en-US", {
-    hour: "2-digit",
-    minute: "2-digit",
-  });
+  return formatKathmanduTime(value, "-");
 }
 
 export function formatAdminBookingTimeRange(
@@ -333,12 +303,7 @@ function getAdminBookingSearchText(booking: AdminBooking): string {
 }
 
 function getDateInputValue(value: string): string {
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) {
-    return "";
-  }
-
-  return date.toISOString().slice(0, 10);
+  return formatKathmanduDateInputValue(value);
 }
 
 function formatEnumLabel(value: string): string {
