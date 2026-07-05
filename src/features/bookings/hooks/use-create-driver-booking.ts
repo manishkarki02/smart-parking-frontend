@@ -14,12 +14,12 @@ export function useCreateDriverBooking(parkingLocationId: string) {
         queryKey: queryKeys.parking.detail(parkingLocationId),
       });
       void queryClient.invalidateQueries({
-        queryKey: queryKeys.parking.slotsForLocation(parkingLocationId),
+        queryKey: queryKeys.parking.slots(parkingLocationId),
       });
     },
     onError: () => {
       void queryClient.invalidateQueries({
-        queryKey: queryKeys.parking.slotsForLocation(parkingLocationId),
+        queryKey: queryKeys.parking.slots(parkingLocationId),
       });
     },
   });

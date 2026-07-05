@@ -33,7 +33,10 @@ export function BookingCard({ booking, onPay }: BookingCardProps) {
       setIsCancelDialogOpen(false);
       void queryClient.invalidateQueries({ queryKey: queryKeys.bookings.me() });
       void queryClient.invalidateQueries({
-        queryKey: queryKeys.parking.slotsForLocation(booking.parkingLocationId),
+        queryKey: queryKeys.parking.detail(booking.parkingLocationId),
+      });
+      void queryClient.invalidateQueries({
+        queryKey: queryKeys.parking.slots(booking.parkingLocationId),
       });
       toast.success("Booking cancelled successfully");
     },

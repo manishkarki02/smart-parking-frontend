@@ -18,6 +18,8 @@ type ParkingDetailsProps = {
   parkingId: string;
 };
 
+const PARKING_DETAIL_REFRESH_INTERVAL_MS = 5000;
+
 export function ParkingDetails({ parkingId }: ParkingDetailsProps) {
   const navigate = useNavigate();
   const { isAuthenticated } = useAuthStore();
@@ -34,6 +36,9 @@ export function ParkingDetails({ parkingId }: ParkingDetailsProps) {
     queryKey: queryKeys.parking.slots(parkingId),
     queryFn: () => getParkingSlots(parkingId),
     enabled: Boolean(location),
+    refetchInterval: PARKING_DETAIL_REFRESH_INTERVAL_MS,
+    refetchIntervalInBackground: false,
+    refetchOnWindowFocus: true,
   });
 
   const availableSlots = slots.filter((slot) => slot.status === "AVAILABLE");

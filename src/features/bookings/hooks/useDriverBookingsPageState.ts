@@ -1,6 +1,6 @@
 import { useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import useCustomMutation from "@/common/hooks/useCustomMutation";
 import { queryKeys } from "@/config/query-keys";
@@ -57,14 +57,34 @@ export function useDriverBookingsPageState({
   const cancelMutation = useCustomMutation({
     api: cancelBooking,
     onSuccess: () => {
+      const cancelledBooking = bookings.find(
+        (booking) => booking.bookingId === cancelBookingId,
+      );
       setCancelBookingId(null);
       void queryClient.invalidateQueries({ queryKey: queryKeys.bookings.me() });
+      if (cancelledBooking) {
+        void queryClient.invalidateQueries({
+          queryKey: queryKeys.parking.detail(cancelledBooking.parkingLocationId),
+        });
+        void queryClient.invalidateQueries({
+          queryKey: queryKeys.parking.slots(cancelledBooking.parkingLocationId),
+        });
+      }
       toast.success("Booking cancelled successfully");
     },
     onError: () => {
       toast.error("Failed to cancel booking");
     },
   });
+
+  useEffect(() => {
+    if (!payment?.paymentSuccess) {
+      return;
+    }
+
+    void queryClient.invalidateQueries({ queryKey: queryKeys.bookings.me() });
+    void queryClient.invalidateQueries({ queryKey: ["PARKING"] });
+  }, [payment?.paymentSuccess, queryClient]);
 
   const receiptBookingId = receiptPayment?.bookingId ?? payment?.bookingId;
   const paidBooking = useMemo(

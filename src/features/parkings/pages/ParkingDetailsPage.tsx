@@ -26,6 +26,8 @@ interface ParkingDetailsPageProps {
   id: string;
 }
 
+const PARKING_DETAIL_REFRESH_INTERVAL_MS = 5000;
+
 export function ParkingDetailsPage({ id }: ParkingDetailsPageProps) {
   const navigate = useNavigate();
   const token = useAuthStore((state) => state.token);
@@ -43,6 +45,9 @@ export function ParkingDetailsPage({ id }: ParkingDetailsPageProps) {
   } = useQuery({
     queryKey: queryKeys.parking.detail(id),
     queryFn: () => getParkingById(id),
+    refetchInterval: PARKING_DETAIL_REFRESH_INTERVAL_MS,
+    refetchIntervalInBackground: false,
+    refetchOnWindowFocus: true,
   });
 
   const {
@@ -55,6 +60,9 @@ export function ParkingDetailsPage({ id }: ParkingDetailsPageProps) {
     queryKey: queryKeys.parking.slots(id),
     queryFn: () => getParkingSlots(id),
     enabled: Boolean(location?.id),
+    refetchInterval: PARKING_DETAIL_REFRESH_INTERVAL_MS,
+    refetchIntervalInBackground: false,
+    refetchOnWindowFocus: true,
   });
 
   const availableSlots = slots.filter((slot) => slot.status === "AVAILABLE");
