@@ -87,7 +87,13 @@ export function canPayForDriverBooking(booking: BookingResponse) {
 
 export function canCancelDriverBooking(booking: BookingResponse) {
   const status = booking.status.toUpperCase();
-  return status === "PENDING" || status === "CONFIRMED";
+  const slotStatus = booking.slotStatus?.toUpperCase();
+
+  return (
+    !booking.walkIn &&
+    slotStatus !== "OCCUPIED" &&
+    (status === "PENDING" || status === "CONFIRMED")
+  );
 }
 
 export function shortDriverBookingId(value: string) {

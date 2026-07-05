@@ -363,7 +363,17 @@ export function DriverBookingDetailPanel({
               <CalendarX2 className="size-4" />
               Cancel Booking
             </Button>
-          ) : null}
+          ) : (
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full gap-2"
+              disabled
+            >
+              <CalendarX2 className="size-4" />
+              Cancel Unavailable
+            </Button>
+          )}
         </div>
       </CardContent>
     </Card>

@@ -1,6 +1,5 @@
 import {
   CheckCircle2,
-  Eye,
   LogIn,
   UserRound,
   X,
@@ -219,20 +218,15 @@ export function VendorBookingDetailPanel({
             Mark Complete
           </Button>
         ) : null}
-        <Button type="button" className="w-full" variant="outline">
-          <Eye className="size-4" />
-          View Full Details
+        <Button
+          type="button"
+          className="w-full"
+          variant="outline"
+          disabled
+        >
+          <XCircle className="size-4" />
+          Cancel Unavailable
         </Button>
-        {booking.status !== "COMPLETED" && booking.status !== "CANCELLED" ? (
-          <Button
-            type="button"
-            className="w-full bg-red-100 text-red-600 hover:bg-red-200"
-            variant="ghost"
-          >
-            <XCircle className="size-4" />
-            Cancel Booking
-          </Button>
-        ) : null}
       </div>
     </aside>
   );
