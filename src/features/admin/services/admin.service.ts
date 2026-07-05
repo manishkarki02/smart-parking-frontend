@@ -15,7 +15,10 @@ import type {
 import { ADMIN_ROUTES, API_BASE } from "@/config/api-routes";
 import { getAdminBookings } from "@/features/bookings/services/admin-bookings.service";
 import { buildAdminDashboardData } from "@/features/admin/utils/admin-dashboard.utils";
-import { mergeAdminUsers } from "@/features/admin/utils/admin-user.utils";
+import {
+  mapAdminRawUsers,
+  mergeAdminUsers,
+} from "@/features/admin/utils/admin-user.utils";
 
 export type { AdminUser } from "../types/admin.types";
 
@@ -59,7 +62,7 @@ export async function getAdminVendors(
       page: params.page,
     },
   });
-  return normalizePaginatedResponse<AdminUser>(response.data.data);
+  return mapAdminUsersPage(response.data.data);
 }
 
 export async function getAdminDrivers(
@@ -72,7 +75,16 @@ export async function getAdminDrivers(
       page: params.page,
     },
   });
-  return normalizePaginatedResponse<AdminUser>(response.data.data);
+  return mapAdminUsersPage(response.data.data);
+}
+
+function mapAdminUsersPage(payload: unknown): PaginatedResult<AdminUser> {
+  const page = normalizePaginatedResponse<AdminRawUser>(payload);
+
+  return {
+    ...page,
+    data: mapAdminRawUsers(page.data) as AdminUser[],
+  };
 }
 
 export async function getAdminUsers(
