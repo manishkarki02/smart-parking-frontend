@@ -15,10 +15,7 @@ import type {
 import { ADMIN_ROUTES, API_BASE } from "@/config/api-routes";
 import { getAdminBookings } from "@/features/bookings/services/admin-bookings.service";
 import { buildAdminDashboardData } from "@/features/admin/utils/admin-dashboard.utils";
-import {
-  mapAdminRawUsers,
-  mergeAdminUsers,
-} from "@/features/admin/utils/admin-user.utils";
+import { mapAdminRawUsers } from "@/features/admin/utils/admin-user.utils";
 
 export type { AdminUser } from "../types/admin.types";
 
@@ -91,12 +88,11 @@ export async function getAdminUsers(
   role: AdminUserRoleFilter,
 ): Promise<AdminRawUser[]> {
   if (role === "ALL") {
-    const [vendors, drivers] = await Promise.all([
-      getAdminUsersByRole("VENDOR"),
-      getAdminUsersByRole("DRIVER"),
-    ]);
+    const response = await adminApi.get<ApiResponse<AdminRawUser[]>>(
+      ADMIN_ROUTES.USERS,
+    );
 
-    return mergeAdminUsers(vendors, drivers);
+    return response.data.data ?? [];
   }
 
   return getAdminUsersByRole(role);
