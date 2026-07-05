@@ -119,6 +119,7 @@ export function ParkingLocationForm({
   });
 
   const isPending = addMutation.isPending || updateMutation.isPending;
+  const isEditMode = mode === "edit";
 
   const getInputValue = (field: ParkingFormInputName) => {
     const value = {
@@ -200,51 +201,68 @@ export function ParkingLocationForm({
           />
         </MapProvider>
 
+        {isEditMode ? (
+          <div className="grid gap-5 sm:grid-cols-2">
+            <input type="hidden" {...register("totalFourWheelerSlots")} />
+            <input type="hidden" {...register("totalTwoWheelerSlots")} />
+            <LockedSlotCount
+              label="4W Slots"
+              value={initialValues?.totalFourWheelerSlots ?? 0}
+            />
+            <LockedSlotCount
+              label="2W Slots"
+              value={initialValues?.totalTwoWheelerSlots ?? 0}
+            />
+          </div>
+        ) : (
+          <div className="grid gap-5 sm:grid-cols-2">
+            <div className="space-y-2">
+              <Label
+                htmlFor="totalFourWheelerSlots"
+                className="text-xs font-bold uppercase tracking-[0.14em] text-muted-foreground"
+              >
+                4W Slots
+              </Label>
+              <Input
+                id="totalFourWheelerSlots"
+                type="number"
+                min={0}
+                placeholder="20"
+                className="h-12 rounded-lg border-[#E2E8F0] bg-white text-[#0F172A] shadow-sm placeholder:text-[#94A3B8] focus-visible:ring-blue-100"
+                {...bindFormInput("totalFourWheelerSlots")}
+              />
+              {errors.totalFourWheelerSlots && (
+                <p className="text-sm text-destructive">
+                  {errors.totalFourWheelerSlots.message}
+                </p>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <Label
+                htmlFor="totalTwoWheelerSlots"
+                className="text-xs font-bold uppercase tracking-[0.14em] text-muted-foreground"
+              >
+                2W Slots
+              </Label>
+              <Input
+                id="totalTwoWheelerSlots"
+                type="number"
+                min={0}
+                placeholder="30"
+                className="h-12 rounded-lg border-[#E2E8F0] bg-white text-[#0F172A] shadow-sm placeholder:text-[#94A3B8] focus-visible:ring-blue-100"
+                {...bindFormInput("totalTwoWheelerSlots")}
+              />
+              {errors.totalTwoWheelerSlots && (
+                <p className="text-sm text-destructive">
+                  {errors.totalTwoWheelerSlots.message}
+                </p>
+              )}
+            </div>
+          </div>
+        )}
+
         <div className="grid gap-5 sm:grid-cols-2">
-          <div className="space-y-2">
-            <Label
-              htmlFor="totalFourWheelerSlots"
-              className="text-xs font-bold uppercase tracking-[0.14em] text-muted-foreground"
-            >
-              4W Slots
-            </Label>
-            <Input
-              id="totalFourWheelerSlots"
-              type="number"
-              min={0}
-              placeholder="20"
-              className="h-12 rounded-lg border-[#E2E8F0] bg-white text-[#0F172A] shadow-sm placeholder:text-[#94A3B8] focus-visible:ring-blue-100"
-              {...bindFormInput("totalFourWheelerSlots")}
-            />
-            {errors.totalFourWheelerSlots && (
-              <p className="text-sm text-destructive">
-                {errors.totalFourWheelerSlots.message}
-              </p>
-            )}
-          </div>
-
-          <div className="space-y-2">
-            <Label
-              htmlFor="totalTwoWheelerSlots"
-              className="text-xs font-bold uppercase tracking-[0.14em] text-muted-foreground"
-            >
-              2W Slots
-            </Label>
-            <Input
-              id="totalTwoWheelerSlots"
-              type="number"
-              min={0}
-              placeholder="30"
-              className="h-12 rounded-lg border-[#E2E8F0] bg-white text-[#0F172A] shadow-sm placeholder:text-[#94A3B8] focus-visible:ring-blue-100"
-              {...bindFormInput("totalTwoWheelerSlots")}
-            />
-            {errors.totalTwoWheelerSlots && (
-              <p className="text-sm text-destructive">
-                {errors.totalTwoWheelerSlots.message}
-              </p>
-            )}
-          </div>
-
           <div className="space-y-2">
             <Label
               htmlFor="fourWheelerRatePerHour"
@@ -311,6 +329,25 @@ export function ParkingLocationForm({
         </Button>
       </div>
     </form>
+  );
+}
+
+function LockedSlotCount({
+  label,
+  value,
+}: {
+  label: string;
+  value: number;
+}) {
+  return (
+    <div className="space-y-2">
+      <p className="text-xs font-bold uppercase tracking-[0.14em] text-muted-foreground">
+        {label}
+      </p>
+      <div className="flex h-12 items-center rounded-lg border border-[#E2E8F0] bg-slate-50 px-3 text-sm font-medium text-slate-700">
+        {value} slots
+      </div>
+    </div>
   );
 }
 
