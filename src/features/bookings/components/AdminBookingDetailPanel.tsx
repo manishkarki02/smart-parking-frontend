@@ -1,16 +1,7 @@
 import type { ReactNode } from "react";
-import { Link } from "@tanstack/react-router";
 import type { LucideIcon } from "lucide-react";
-import {
-  CreditCard,
-  Globe2,
-  MapPin,
-  Timer,
-  Trash2,
-  UserRound,
-} from "lucide-react";
+import { CreditCard, Globe2, MapPin, Timer, UserRound } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import {
   Empty,
   EmptyDescription,
@@ -67,6 +58,9 @@ export function AdminBookingDetailPanel({
 
   const bookingStatus = getAdminBookingDisplayStatus(booking);
   const paymentStatus = getAdminBookingPaymentStatus(booking);
+  const hasPaymentRecord = Boolean(
+    booking.paymentId || booking.paymentStatus || booking.paymentMethod,
+  );
 
   return (
     <SplitDetailPanel
@@ -152,7 +146,7 @@ export function AdminBookingDetailPanel({
               </Badge>
             }
           />
-          <DetailRow label="Vendor" value="N/A" />
+          <DetailRow label="Vendor" value={booking.vendorName ?? "-"} />
         </DetailSection>
 
         <DetailSection icon={Timer} title="Timeline">
@@ -181,8 +175,8 @@ export function AdminBookingDetailPanel({
           </div>
         </DetailSection>
 
-        <DetailSection icon={CreditCard} title="Payment">
-          {booking.paymentId || booking.paymentStatus || booking.paymentMethod ? (
+        {hasPaymentRecord ? (
+          <DetailSection icon={CreditCard} title="Payment">
             <>
               <DetailRow
                 label="Payment ID"
@@ -216,35 +210,8 @@ export function AdminBookingDetailPanel({
                 value={formatAdminBookingDateTime(booking.paidAt)}
               />
             </>
-          ) : (
-            <div className="rounded-lg bg-muted/40 p-4 text-sm text-muted-foreground">
-              No payment record
-            </div>
-          )}
-        </DetailSection>
-
-        <DetailSection title="Admin Actions">
-          <div className="space-y-2">
-            {booking.paymentId ? (
-              <Button type="button" variant="outline" className="w-full" asChild>
-                <Link to="/admin/payments">
-                  <CreditCard aria-hidden="true" />
-                  View Payment Record
-                </Link>
-              </Button>
-            ) : null}
-            <Button
-              type="button"
-              variant="outline"
-              className="w-full border-red-200 bg-red-50 text-red-600 hover:bg-red-100 hover:text-red-700"
-              disabled
-              title="Booking deletion is not available from this page yet."
-            >
-              <Trash2 aria-hidden="true" />
-              Delete Booking
-            </Button>
-          </div>
-        </DetailSection>
+          </DetailSection>
+        ) : null}
       </div>
     </SplitDetailPanel>
   );

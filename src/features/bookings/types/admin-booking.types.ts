@@ -9,6 +9,8 @@ export interface AdminBooking {
   paidAt?: string | null;
   parkingLocationId: string;
   parkingLocationName: string;
+  vendorId?: string | null;
+  vendorName?: string | null;
   paymentId?: string | null;
   paymentMethod?: "CASH" | "KHALTI" | "ESEWA" | null;
   paymentStatus?: "PENDING" | "SUCCESS" | "FAILED" | null;
@@ -17,6 +19,7 @@ export interface AdminBooking {
   slotStatus?: "AVAILABLE" | "RESERVED" | "BOOKED" | "OCCUPIED" | "MAINTENANCE";
   startTime: string;
   endTime: string;
+  createdAt?: string | null;
   status: string;
   totalAmount: number;
   vehicleNumber?: string | null;
