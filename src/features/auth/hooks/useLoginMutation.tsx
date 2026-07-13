@@ -1,8 +1,9 @@
 import useCustomMutation from "@/common/hooks/useCustomMutation";
 import { loginUser } from "../services/auth.service";
-import { useAuthStore } from "@/store/auth-store";
+import { useAuthStore } from "@/stores/auth-store";
 import { toast } from "sonner";
 import { useNavigate } from "@tanstack/react-router";
+import { getApiErrorMessage } from "@/common/utils/get-api-error-message";
 
 function useLoginMutation({
   onSuccess,
@@ -19,16 +20,13 @@ function useLoginMutation({
     success: "Login successful!",
     error: "Login failed",
     onSuccess: (data) => {
-      setAuth(data.token, {
+      setAuth(data.accessToken, {
+        id: data.userId,
         name: data.name,
         email: data.email,
         role: data.role,
-      });
-
-      console.log("Login successful, user data:", {
-        name: data.name,
-        email: data.email,
-        role: data.role,
+        banned: data.banned,
+        approved: data.approved,
       });
 
       toast.success("Login successful!");
@@ -46,12 +44,15 @@ function useLoginMutation({
             onSuccess?.();
             onOpenChange?.(false);
           } else {
-            navigate({ to: "/" });
+            navigate({ to: "/dashboard" });
           }
       }
     },
     onError: (error) => {
-      toast.error(error.message);
+      const message = getApiErrorMessage(error);
+      if (typeof message === "string") {
+        toast.error(message);
+      }
     },
   });
 

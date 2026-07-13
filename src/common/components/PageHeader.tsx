@@ -1,24 +1,23 @@
-import type { ReactNode } from "react";
-import { Card } from "@/components/ui/card";
+import { useEffect } from "react";
+import { usePageHeader } from "@/common/components/page-header-context";
 
 interface PageHeaderProps {
   title: string;
   description?: string;
-  action?: ReactNode;
+  content?: React.ReactNode;
+  action?: React.ReactNode;
 }
 
-export function PageHeader({ title, description, action }: PageHeaderProps) {
-  return (
-    <Card className="mb-6 rounded-none sm:rounded-lg shadow-sm">
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-6 gap-4">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">{title}</h1>
-          {description && (
-            <p className="text-muted-foreground mt-1">{description}</p>
-          )}
-        </div>
-        {action && <div>{action}</div>}
-      </div>
-    </Card>
-  );
+export function PageHeader({ title, content, action }: PageHeaderProps) {
+  const { setPageHeader } = usePageHeader();
+
+  useEffect(() => {
+    setPageHeader({ title, content, action });
+
+    return () => {
+      setPageHeader(null);
+    };
+  }, [action, content, setPageHeader, title]);
+
+  return null;
 }

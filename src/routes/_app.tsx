@@ -1,17 +1,18 @@
-import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
+import { createFileRoute, Outlet } from "@tanstack/react-router";
 import { AppLayout } from "@/common/components/AppLayout";
-import { useAuthStore } from "@/store/auth-store";
+import { useAuthGuard } from "@/common/hooks/use-auth-guard";
 
 export const Route = createFileRoute("/_app")({
-  beforeLoad: () => {
-    if (!useAuthStore.getState().isAuthenticated()) {
-      throw redirect({ to: "/login" });
-    }
-  },
   component: AppLayoutRoute,
 });
 
 function AppLayoutRoute() {
+  const { isAuthorized } = useAuthGuard();
+
+  if (!isAuthorized) {
+    return null;
+  }
+
   return (
     <AppLayout>
       <Outlet />

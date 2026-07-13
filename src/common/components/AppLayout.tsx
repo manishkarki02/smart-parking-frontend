@@ -1,25 +1,45 @@
+import { useMemo, useState, type ReactNode } from "react";
 import { Link, useLocation } from "@tanstack/react-router";
-import { useAuthStore } from "@/store/auth-store";
-import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
+import { useAuthStore } from "@/stores/auth-store";
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarHeader,
+  SidebarInset,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarProvider,
+  SidebarRail,
+  SidebarSeparator,
+  useSidebar,
+} from "@/components/ui/sidebar";
 import {
   Car,
   MapPin,
   CalendarCheck,
+  CalendarClock,
+  CreditCard,
   LayoutDashboard,
   Users,
-  Building2,
   LogOut,
-  ParkingCircle,
-  Menu,
-  X,
+  Settings as SettingsIcon,
+  Wallet,
+  type LucideIcon,
 } from "lucide-react";
-import { useState } from "react";
+import {
+  PageHeaderContext,
+  type PageHeaderState,
+} from "@/common/components/page-header-context";
+import { cn } from "@/lib/utils";
 
 interface NavItem {
   label: string;
   to: string;
-  icon: React.ReactNode;
+  icon: LucideIcon;
   roles: string[];
 }
 
@@ -27,59 +47,187 @@ const navItems: NavItem[] = [
   {
     label: "Dashboard",
     to: "/dashboard",
-    icon: <LayoutDashboard className="h-4 w-4" />,
+    icon: LayoutDashboard,
     roles: ["ADMIN"],
   },
   {
+    label: "Dashboard",
+    to: "/dashboard",
+    icon: LayoutDashboard,
+    roles: ["DRIVER"],
+  },
+  {
     label: "Find Parking",
-    to: "/parking",
-    icon: <MapPin className="h-4 w-4" />,
+    to: "/parkings/map",
+    icon: MapPin,
     roles: ["DRIVER"],
   },
   {
     label: "My Bookings",
     to: "/bookings",
-    icon: <CalendarCheck className="h-4 w-4" />,
+    icon: CalendarCheck,
+    roles: ["DRIVER"],
+  },
+  {
+    label: "Payment History",
+    to: "/payments",
+    icon: CreditCard,
+    roles: ["DRIVER"],
+  },
+  {
+    label: "Profile / Settings",
+    to: "/profile",
+    icon: SettingsIcon,
     roles: ["DRIVER"],
   },
   {
     label: "Dashboard",
     to: "/vendor/dashboard",
-    icon: <LayoutDashboard className="h-4 w-4" />,
+    icon: LayoutDashboard,
     roles: ["VENDOR"],
   },
   {
-    label: "My Parking Locations",
-    to: "/vendor/parking",
-    icon: <ParkingCircle className="h-4 w-4" />,
+    label: "My Locations",
+    to: "/vendor/parkings",
+    icon: MapPin,
     roles: ["VENDOR"],
   },
   {
-    label: "All Bookings",
+    label: "Bookings",
+    to: "/vendor/bookings",
+    icon: CalendarClock,
+    roles: ["VENDOR"],
+  },
+  {
+    label: "Revenue",
+    to: "/vendor/earnings",
+    icon: Wallet,
+    roles: ["VENDOR"],
+  },
+  {
+    label: "Settings",
+    to: "/vendor/settings",
+    icon: SettingsIcon,
+    roles: ["VENDOR"],
+  },
+  {
+    label: "Bookings",
     to: "/admin/bookings",
-    icon: <CalendarCheck className="h-4 w-4" />,
+    icon: CalendarCheck,
     roles: ["ADMIN"],
   },
   {
-    label: "Vendors",
-    to: "/admin/vendors",
-    icon: <Building2 className="h-4 w-4" />,
+    label: "Users",
+    to: "/admin/users",
+    icon: Users,
     roles: ["ADMIN"],
   },
   {
-    label: "Drivers",
-    to: "/admin/drivers",
-    icon: <Users className="h-4 w-4" />,
+    label: "Payments",
+    to: "/admin/payments",
+    icon: CreditCard,
     roles: ["ADMIN"],
   },
 ];
 
-export function AppLayout({ children }: { children: React.ReactNode }) {
+export function AppLayout({
+  children,
+  showHeader = true,
+  mainClassName,
+}: {
+  children: ReactNode;
+  showHeader?: boolean;
+  mainClassName?: string;
+}) {
+  const [pageHeader, setPageHeader] = useState<PageHeaderState | null>(null);
+  const location = useLocation();
+  const routeMainClassName = getRouteMainClassName(location.pathname);
+
+  const pageHeaderValue = useMemo(
+    () => ({ pageHeader, setPageHeader }),
+    [pageHeader],
+  );
+
+  return (
+    <SidebarProvider>
+      <PageHeaderContext.Provider value={pageHeaderValue}>
+        <AppSidebar />
+
+        <SidebarInset className="min-w-0 overflow-x-hidden">
+          {showHeader ? (
+            <header className="sticky top-0 z-30 flex min-h-16 shrink-0 items-center border-b bg-white px-4 backdrop-blur supports-backdrop-filter:bg-white/90 md:px-6">
+              <div className="flex min-w-0 flex-1 items-center gap-3">
+                <div className="flex min-w-0 items-center gap-2 md:hidden">
+                  <Car className="size-5 shrink-0 text-primary" />
+                  <span className="truncate text-sm font-semibold">
+                    Smart
+                    <span className="text-blue-500">Parking</span>
+                  </span>
+                </div>
+
+                <div className="flex min-w-0 flex-1 items-center justify-between gap-3">
+                  <div className="min-w-0 py-2">
+                    {pageHeader?.content ? (
+                      pageHeader.content
+                    ) : pageHeader ? (
+                      <p className="truncate text-lg font-semibold tracking-tight text-foreground">
+                        {pageHeader.title}
+                      </p>
+                    ) : (
+                      <p className="truncate text-lg font-semibold tracking-tight text-foreground">
+                        Overview
+                      </p>
+                    )}
+                  </div>
+
+                  {pageHeader?.action ? (
+                    <div className="flex shrink-0 items-center">
+                      {pageHeader.action}
+                    </div>
+                  ) : null}
+                </div>
+              </div>
+            </header>
+          ) : null}
+
+          <main
+            className={cn(
+              "min-w-0 flex-1 overflow-x-hidden overflow-y-auto p-4 md:p-6",
+              routeMainClassName,
+              mainClassName,
+            )}
+          >
+            {children}
+          </main>
+        </SidebarInset>
+      </PageHeaderContext.Provider>
+    </SidebarProvider>
+  );
+}
+
+function getRouteMainClassName(pathname: string): string | undefined {
+  if (pathname === "/parkings/map") {
+    return "overflow-hidden bg-slate-50 p-0 md:p-0";
+  }
+
+  if (
+    pathname === "/bookings" ||
+    pathname === "/payments" ||
+    pathname === "/profile" ||
+    pathname.startsWith("/parkings/")
+  ) {
+    return "bg-slate-50";
+  }
+
+  return undefined;
+}
+
+function AppSidebar() {
   const { user, logout } = useAuthStore();
   const location = useLocation();
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { setOpenMobile } = useSidebar();
 
-  const filteredNavItems = user 
+  const filteredNavItems = user
     ? navItems.filter((item) => item.roles.includes(user.role))
     : [];
 
@@ -89,98 +237,100 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <div className="flex h-screen bg-background">
-      {/* Mobile overlay */}
-      {sidebarOpen && (
-        <div
-          className="fixed inset-0 z-40 bg-black/50 lg:hidden"
-          onClick={() => setSidebarOpen(false)}
-        />
-      )}
+    <Sidebar collapsible="icon">
+      <SidebarHeader>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              size="lg"
+              className="cursor-default hover:bg-transparent hover:text-sidebar-foreground"
+            >
+              <span className="flex size-8 shrink-0 items-center justify-center rounded-md bg-primary text-primary-foreground">
+                <Car className="size-4" />
+              </span>
+              <span className="flex min-w-0 flex-col">
+                <span className="truncate text-sm font-semibold">
+                  Smart Parking
+                </span>
+                <span className="truncate text-xs text-sidebar-foreground/60">
+                  {user?.role
+                    ? `${user.role.toLowerCase()} panel`
+                    : "Parking panel"}
+                </span>
+              </span>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarHeader>
 
-      {/* Sidebar */}
-      <aside
-        className={`fixed inset-y-0 left-0 z-50 flex w-64 flex-col border-r bg-card transition-transform lg:static lg:translate-x-0 ${
-          sidebarOpen ? "translate-x-0" : "-translate-x-full"
-        }`}
-      >
-        {/* Logo */}
-        <div className="flex h-16 items-center gap-2 px-6">
-          <Car className="h-6 w-6 text-primary" />
-          <span className="text-lg font-semibold">Smart Parking</span>
-        </div>
+      <SidebarSeparator />
 
-        <Separator />
+      <SidebarContent>
+        <SidebarGroup>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {filteredNavItems.map((item) => {
+                const isActive = location.pathname === item.to;
+                const Icon = item.icon;
 
-        {/* Nav links */}
-        <nav className="flex-1 space-y-1 px-3 py-4">
-          {filteredNavItems.map((item) => {
-            const isActive = location.pathname === item.to;
-            return (
-              <Link
-                key={item.to}
-                to={item.to}
-                onClick={() => setSidebarOpen(false)}
-                className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors ${
-                  isActive
-                    ? "bg-primary text-primary-foreground"
-                    : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
-                }`}
-              >
-                {item.icon}
-                {item.label}
-              </Link>
-            );
-          })}
-        </nav>
+                return (
+                  <SidebarMenuItem key={`${item.label}-${item.to}`}>
+                    <SidebarMenuButton
+                      asChild
+                      isActive={isActive}
+                      tooltip={item.label}
+                      className={cn(
+                        "text-slate-600 hover:bg-slate-50 hover:text-slate-950",
+                        isActive &&
+                          "bg-blue-50 text-blue-600 hover:bg-blue-50 hover:text-blue-600",
+                      )}
+                    >
+                      <Link to={item.to} onClick={() => setOpenMobile(false)}>
+                        <Icon />
+                        <span>{item.label}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                );
+              })}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+      </SidebarContent>
 
-        <Separator />
+      <SidebarSeparator />
 
-        {/* User info + logout */}
-        <div className="p-4">
-          <div className="mb-2">
-            <p className="text-sm font-medium">{user?.name}</p>
-            <p className="text-xs text-muted-foreground">{user?.email}</p>
-            <p className="text-xs text-muted-foreground capitalize">
-              {user?.role?.toLowerCase()}
-            </p>
-          </div>
-          <Button
-            variant="outline"
-            size="sm"
-            className="w-full"
-            onClick={handleLogout}
-          >
-            <LogOut className="mr-2 h-4 w-4" />
-            Logout
-          </Button>
-        </div>
-      </aside>
+      <SidebarFooter>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              size="lg"
+              tooltip={user?.name || "Account"}
+              className="cursor-default hover:bg-transparent hover:text-sidebar-foreground"
+            >
+              <span className="flex size-8 shrink-0 items-center justify-center rounded-md bg-sidebar-accent text-xs font-semibold text-sidebar-accent-foreground">
+                {user?.name?.slice(0, 1).toUpperCase() || "U"}
+              </span>
+              <span className="flex min-w-0 flex-col">
+                <span className="truncate text-sm font-medium">
+                  {user?.name}
+                </span>
+                <span className="truncate text-xs text-sidebar-foreground/60">
+                  {user?.email}
+                </span>
+              </span>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+          <SidebarMenuItem>
+            <SidebarMenuButton tooltip="Logout" onClick={handleLogout}>
+              <LogOut />
+              <span>Logout</span>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarFooter>
 
-      {/* Main content */}
-      <div className="flex flex-1 flex-col overflow-hidden">
-        {/* Mobile header */}
-        <header className="flex h-16 items-center border-b border-border bg-card px-4 lg:hidden shadow-sm">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setSidebarOpen(!sidebarOpen)}
-          >
-            {sidebarOpen ? (
-              <X className="h-5 w-5 text-muted-foreground" />
-            ) : (
-              <Menu className="h-5 w-5 text-muted-foreground" />
-            )}
-          </Button>
-          <div className="ml-3 flex items-center gap-2">
-            <Car className="h-6 w-6 text-primary" />
-            <span className="text-lg font-semibold text-foreground">Smart Parking</span>
-          </div>
-        </header>
-
-        {/* Page content */}
-        <main className="flex-1 overflow-y-auto p-6">{children}</main>
-      </div>
-    </div>
+      <SidebarRail />
+    </Sidebar>
   );
 }

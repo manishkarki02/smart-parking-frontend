@@ -11,8 +11,13 @@ function useUpdateSlotsMutation({
   const queryClient = useQueryClient();
 
   const { mutateAsync, isPending } = useCustomMutation({
-    api: ({ parkingId, newSlots }: { parkingId: number; newSlots: number }) =>
-      updateAvailableSlots(parkingId, newSlots),
+    api: ({
+      parkingId,
+      newSlots,
+    }: {
+      parkingId: number | string;
+      newSlots: number;
+    }) => updateAvailableSlots(parkingId, newSlots),
     success: "Slots updated successfully!",
     error: "Failed to update slots",
     onSuccess: () => {

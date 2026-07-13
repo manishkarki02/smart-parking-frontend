@@ -3,6 +3,7 @@ import { toast } from "sonner";
 import useCustomMutation from "@/common/hooks/useCustomMutation";
 import { addParkingLocation } from "../services/vendor.service";
 import { queryKeys } from "@/config/query-keys";
+import { getApiErrorMessage } from "@/common/utils/get-api-error-message";
 
 function useAddParkingMutation(onSuccess?: () => void) {
   const queryClient = useQueryClient();
@@ -17,7 +18,10 @@ function useAddParkingMutation(onSuccess?: () => void) {
       onSuccess?.();
     },
     onError: (error) => {
-      toast.error(error.message);
+      const message = getApiErrorMessage(error);
+      if (typeof message === "string") {
+        toast.error(message);
+      }
     },
   });
 
