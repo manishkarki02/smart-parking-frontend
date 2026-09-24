@@ -2,6 +2,9 @@
 
 React client for Sajilo Parking. It uses TypeScript, Vite, TanStack Router and Query, Zustand, Tailwind CSS, shadcn-style components, and Google Maps.
 
+Production planning: [frontend implementation](FRONTEND_IMPLEMENTATION.md) and
+[product requirements](../PRODUCT_REQUIREMENTS.md).
+
 ## Docker Development
 
 Start the frontend dev server with Docker:
